@@ -1,12 +1,14 @@
 import * as signalR from '@microsoft/signalr';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ChatService, ChatUserModel, chatMessage, chatMessageFromClient } from '../service/ChatService/chat.service';
+import { ChatService, UserInfoModel, chatMessage } from '../service/ChatService/chat.service';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../environments/environment';
 import { Observable, Observer } from 'rxjs';
-import { ChatMessage } from 'src/model/chatMessage';
-import { OptionActions, OptionModel } from 'src/model/optionModel';
+import { ChatMessage, ChatRule } from 'src/model/chatMessage';
+import {  ActionType, OptionModel, RuleMeta } from 'src/model/optionModel';
+import { ChatEngineService } from 'src/service/ChatService/chatEngine.service';
+import { ChatState } from 'src/model/chatState';
 
 @Component({
   selector: 'app-root',
@@ -40,12 +42,13 @@ export class AppComponent implements OnInit, OnDestroy {
   isLoading = false;
   private hubConnection: signalR.HubConnection;
 
-  chatRoomId = '';
   userId = null;
   departmentId = '';
   errorSummary = ""
   constructor(private fb: FormBuilder,
-    private chatService: ChatService) {
+    private chatService: ChatService,
+    private chatEngine: ChatEngineService
+  ) {
   }
   ngOnInit() {
     //comment when used for prod 
@@ -97,11 +100,10 @@ export class AppComponent implements OnInit, OnDestroy {
     // Log the raw form value for debugging/UI-only flow
     console.log('Form value on Next:', this.chatForm.value);
     if (this.chatForm.valid) {
-      let chatData: ChatUserModel = {
+      let chatData: UserInfoModel = {
         name: this.chatForm.get('name').value,
         email: this.chatForm.get('email').value,
         phoneNumber: parseInt(this.chatForm.get('phoneNumber').value),
-        companyId: parseInt(this.companyId),
         state: this.chatForm.get('state')?.value,
         country: this.chatForm.get('country')?.value,
         isCurrentCustomer: !!this.chatForm.get('isCurrentCustomer')?.value,
@@ -110,31 +112,20 @@ export class AppComponent implements OnInit, OnDestroy {
           : undefined,
       }
 
-      // Log the constructed payload
-      console.log('Chat data payload:', chatData);
 
       // UI-only behavior: determine if existing customer based on customerId presence
       this.isExistingCustomer = !!(chatData.isCurrentCustomer && chatData.customerId && chatData.customerId !== '');
 
-      // Push initial bot greeting into messages and scroll to it
-       this.chatMessages.push({ isIncoming: true, message: "Hi, we're here to help you.", time: new Date() });
-    this.chatMessages.push({
-      isIncoming: true,
-      message: "Select one of the options below or type your query",
-      options: this.chatService.mainMenu,
-      time: new Date()
-    });
-    //   // The select prompt is now rendered by the options block above the options list
-      // so we don't push it into chatMessages here.
+      //call the api to stre the data in backend and then push the greeting and options to user
+      //------------------------------------------ do it later 
 
-      // After a short delay show options bubble (so greeting appears first)
-      setTimeout(() => {
+      this.handleUserResponse(RuleMeta.MainMenuOption.intent,null);
+      
         this.IsUserDataSubmited = true;
         this.optionsShownTime = new Date();
         // ensure options visible and scroll to bottom so options and later selected messages are visible
         setTimeout(() => this.scrollToBottom(), 80);
-      }, 300);
-
+      
     } else {
       this.chatForm.markAllAsTouched();
       this.TimerErrorSummary("Please enter valid data")
@@ -143,27 +134,53 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  TimerErrorSummary(message) {
-    this.errorSummary = message;
-    setTimeout(() => {
-      this.errorSummary = '';
-    }, 3000)
+  
+  handleUserResponse(ruleIntent: string, state: ChatState ): any {
 
+  //check if the if have the ruleIntenet and find the chatbotrule
+   const intent: ChatRule = this.chatEngine.detectIntent(ruleIntent);
+  
+  if(intent){
+    //handle the response based on the action type of the rule
+    switch(intent.action){
+      case ActionType.DisplayMenu:
+        this.AddMessageMenuToChat(intent.response, true, intent.actionPayload as OptionModel[]);
+        break;  
+      case ActionType.DisplayMessage:
+        this.AddMessageToChat(intent.response, true);
+        break;
+     default:
+      this.chatMessages.push({
+        isIncoming: true,
+        message: `Sorry, I am not able to process your request at the moment.`,
+        time: new Date()
+      });
+    }
   }
 
-  SendMessage(): void {
-    if (this.messageToSend != null && this.messageToSend != undefined && this.messageToSend.trim() != '') {
-      let chatmessage: chatMessageFromClient = {
-        chatRoomId: this.chatRoomId,
-        message: this.messageToSend,
-        userId: this.userId,
-        companyId: this.companyId,
-        departmentId: this.departmentId
-
-      }
+}
 
 
-      this.chatMessages.push({ isIncoming: false, message: this.messageToSend });
+
+AddMessageMenuToChat(message: string, isIncoming: boolean = true, options?: OptionModel[]) {
+  this.chatMessages.push({ isIncoming, message, options, time: new Date() });
+  setTimeout(() => this.scrollToBottom(), 50);
+}
+
+AddMessageToChat(message: string, isIncoming: boolean = true) {
+  this.chatMessages.push({ isIncoming, message, time: new Date() });
+  setTimeout(() => this.scrollToBottom(), 50);
+}
+  
+
+
+
+SendMessage(): void {
+    if (this.messageToSend?.trim()) {
+     
+      //call handle user message to get the response from bot based on the message and current state of conversation
+      //const botResponse = this.handleUserMessage(this.messageToSend, { currentRuleId: '', context: {} }, null);
+       this.chatMessages.push({ isIncoming: false, message: this.messageToSend });
       this.scrollToBottom();
       this.messageToSend = '';
       console.log(this.chatMessages)
@@ -174,36 +191,16 @@ export class AppComponent implements OnInit, OnDestroy {
     }
   }
 
-  onOptionSelected(option: OptionModel) {
-    switch (option.action) {
-      case OptionActions.REQUEST_PRODUCT_INFO:
-        this.chatMessages.push({
-          isIncoming: true,
-          message: `I will help you with that. 
 
-          Please enter the product name or type of product you're interested in.
-          `,
-          time: new Date() });
-        break;
-      case OptionActions.VIEW_ORDER_STATUS:
-        this.chatMessages.push({ isIncoming: true, message: "I want to view my order status", time: new Date() });
-        break;
-      case OptionActions.PLACE_ORDER:
-        this.chatMessages.push({ isIncoming: true  , message: "I want to place an order", time: new Date() });
-        break;
-      case OptionActions.REQUEST_REP_INFO:
-        this.chatMessages.push({ isIncoming: true, message: "I want to request contact information for my rep", time: new Date() });
-        break;
-      case OptionActions.LEAVE_MESSAGE:
-        this.chatMessages.push({ isIncoming: true, message: `Thats great
-           
-          Please write your message in text and we will appricate your message `, time: new Date() });
-        break;
-      default:
-        this.chatMessages.push({ isIncoming: true, message: `Please write your question in the text box below`, time: new Date() });
-    }
+
+
+  onOptionSelected(option: OptionModel) {
+   
+    //find the rule based on the option selected and then call the handle user response to get the response from bot based on the message and current state of conversation
+    this.handleUserResponse(option.rule, null);
     setTimeout(() => this.scrollToBottom(), 50);
   }
+ 
 
   //Animation methods below
   //----------------------------------------------------
@@ -236,6 +233,14 @@ export class AppComponent implements OnInit, OnDestroy {
       requestAnimationFrame(animateScroll);
     });
   }
+  TimerErrorSummary(message) {
+    this.errorSummary = message;
+    setTimeout(() => {
+      this.errorSummary = '';
+    }, 3000)
+
+  }
+
   ngOnDestroy(): void {
 
   }

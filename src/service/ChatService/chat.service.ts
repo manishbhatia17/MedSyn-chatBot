@@ -2,21 +2,13 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { environment } from '../../environments/environment';
-import { OptionActions, OptionModel } from 'src/model/optionModel';
+import {  OptionModel } from 'src/model/optionModel';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
 
-  mainMenu: OptionModel[] = [
-    { label: 'Provide product information', action: OptionActions.REQUEST_PRODUCT_INFO, isOptionForExistingCustomer: true },
-    { label: 'Attach brochure / provide product link', action: OptionActions.REQUEST_PRODUCT_INFO, isOptionForExistingCustomer: true },
-    { label: 'Place an order online or speak to your rep', action: OptionActions.PLACE_ORDER, isOptionForExistingCustomer: false },
-    { label: 'Provide contact information for your rep', action: OptionActions.REQUEST_REP_INFO, isOptionForExistingCustomer: true },
-    { label: 'Leave a message for MedGyn', action: OptionActions.LEAVE_MESSAGE, isOptionForExistingCustomer: true }
-  ];
-  
 
   constructor(private http: HttpClient) {
   
@@ -25,7 +17,7 @@ export class ChatService {
   apiUrl = environment.apiBaseUrl;
 
  
-  SaveChatUserData(chatUserdata: ChatUserModel) {
+  SaveChatUserData(chatUserdata: UserInfoModel) {
     let url = `${this.apiUrl}Chat/RegisterChatUser`;
     return this.http.post(url, chatUserdata);
   }
@@ -54,21 +46,13 @@ export interface chatMessage {
   chatRoomId: string;
   userId: string;
 }
-export interface chatMessageFromClient {
-  message: string;
-  chatRoomId: string;
-  userId: string;
-  companyId: string;
-  departmentId?: string;
-}
-export interface ChatUserModel {
+
+export interface UserInfoModel {
   name: string;
   phoneNumber: number;
   email: string;
-  departmentId?: string;
-  companyId: number;
-  state?: string;
-  country?: string;
+  state: string;
+  country: string;
   isCurrentCustomer?: boolean;
   customerId?: string;
 }

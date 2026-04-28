@@ -1,0 +1,66 @@
+[
+    {
+        "rules": [
+            {
+                "id": "main_menu",
+                "intent": "start_chat",
+                "response": "Welcome! Please choose an option:",
+                "priority": 0,
+                "actionType":"DisplayMessage",
+                "actions": [
+                    {
+                        "label": "Provide product information",
+                        "value": "REQUEST_PRODUCT_INFO",
+                        "optionalData": {
+                            "isOptionForNewCustomer": true
+                        },
+                        "rule": "request_product_info"
+                    },
+                    {
+                        "label": "Contact information for your rep",
+                        "value": "REQUEST_REP_INFO",
+                        "optionalData": {
+                            "isOptionForNewCustomer": true
+                        },
+                        "rule": "request_rep_info"
+                    },
+                   
+                    {
+                        "label": "Order status",
+                        "value": "ORDER_Status",
+                        "optionalData": {
+                            "isOptionForNewCustomer": false
+                        },
+                        "rule": "request_order_status"
+                    },
+                    {
+                        "label": "Order invoice",
+                        "value": "ORDER_Invoice",
+                        "optionalData": {
+                            "isOptionForNewCustomer": false
+                        },
+                        "rule": "request_order_invoice"
+                    },
+                    {
+                        "label": "Order tracking number",
+                        "value": "ORDER_Tracking",
+                        "optionalData": {
+                            "isOptionForNewCustomer": false
+                        },
+                        "rule": "request_order_tracking"
+                    },
+                    {
+                        "label": "Leave a message",
+                        "value": "LEAVE_MESSAGE", 
+                        "optionalData": {
+                            "isOptionForNewCustomer": true
+                        },
+                        "rule": "leave_message"
+                    }
+                    
+                    
+                ]
+            }
+        ]
+    }
+]
