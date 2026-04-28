@@ -1,0 +1,205 @@
+<div class="chatbot-main" [class.open]="IsChatBot">
+  <div *ngIf="IsChatBot" class="chat-form">
+    <div class="chat-row">
+      <div class="chat-title">
+        <div class="icon-circle">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z"
+              stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#000000"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M9 8.01953V8" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M15 8.01953V8" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <h4>Welcome To MedGyn</h4>
+          <p>Let's get you the help you need</p>
+        </div>
+        <!-- <p>Please Fill in details to start</p> -->
+        <!-- <p *ngIf="errorSummary!=''" class="errorSummary">{{errorSummary}}</p> -->
+      </div>
+
+      <div class="chat-col">
+        <div class="chat-card">
+          <div class="card-inner">
+
+            <!-- form shown until submitted -->
+            <form *ngIf="!IsUserDataSubmited" [formGroup]="chatForm" (ngSubmit)="submitchatForm()">
+              <div class="chat-input">
+                <input type="text" placeholder="Enter Name" formControlName="name"
+                  [ngClass]="(chatForm.get('name')?.invalid && (chatForm.get('name')?.dirty || chatForm.get('name')?.touched)) ? 'invalid form-control' : 'form-control'"
+                  required />
+                <span
+                  *ngIf="chatForm.get('name')?.invalid && (chatForm.get('name')?.dirty || chatForm.get('name')?.touched)"
+                  class="invalid-message">User Name is required </span>
+              </div>
+
+              <div class="chat-input">
+                <input type="email" placeholder="Enter Email" formControlName="email"
+                  [ngClass]="(chatForm.get('email')?.invalid && (chatForm.get('email')?.dirty || chatForm.get('email')?.touched)) ? 'invalid form-control' : 'form-control'"
+                  required />
+                <span
+                  *ngIf="chatForm.get('email')?.invalid && (chatForm.get('email')?.dirty || chatForm.get('email')?.touched)"
+                  class="invalid-message">Email is required </span>
+              </div>
+
+              <div class="chat-input">
+                <input type="text" placeholder="Enter Phonenumber" required formControlName="phoneNumber" maxlength="10"
+                  [ngClass]="(chatForm.get('phoneNumber')?.invalid && (chatForm.get('phoneNumber')?.dirty || chatForm.get('phoneNumber')?.touched)) ? 'invalid form-control' : 'form-control'" />
+                <span
+                  *ngIf="chatForm.get('phoneNumber')?.invalid && (chatForm.get('phoneNumber')?.dirty || chatForm.get('phoneNumber')?.touched)"
+                  class="invalid-message">PhoneNumber is Invalid</span>
+              </div>
+
+              <div class="chat-input">
+                <input type="text" placeholder="Enter State" formControlName="state" required
+                  [ngClass]="(chatForm.get('state')?.invalid && (chatForm.get('state')?.dirty || chatForm.get('state')?.touched)) ? 'invalid form-control' : 'form-control'" />
+                <span
+                  *ngIf="chatForm.get('state')?.invalid && (chatForm.get('state')?.dirty || chatForm.get('state')?.touched)"
+                  class="invalid-message">State is required</span>
+              </div>
+
+              <div class="chat-input">
+                <input type="text" placeholder="Enter Country" formControlName="country" required
+                  [ngClass]="(chatForm.get('country')?.invalid && (chatForm.get('country')?.dirty || chatForm.get('country')?.touched)) ? 'invalid form-control' : 'form-control'" />
+                <span
+                  *ngIf="chatForm.get('country')?.invalid && (chatForm.get('country')?.dirty || chatForm.get('country')?.touched)"
+                  class="invalid-message">Country is required</span>
+              </div>
+
+              <div class="chat-input">
+                <label class="chat-checkbox">
+                  <input type="checkbox" formControlName="isCurrentCustomer" />
+                  Are you an existing customer?
+                </label>
+              </div>
+
+              <div *ngIf="chatForm.get('isCurrentCustomer')?.value" class="chat-input">
+                <input type="text" placeholder="Enter Customer ID" formControlName="customerId" required
+                  [ngClass]="(chatForm.get('customerId')?.invalid && (chatForm.get('customerId')?.dirty || chatForm.get('customerId')?.touched)) ? 'invalid form-control' : 'form-control'" />
+                <span
+                  *ngIf="chatForm.get('customerId')?.invalid && (chatForm.get('customerId')?.dirty || chatForm.get('customerId')?.touched)"
+                  class="invalid-message">Customer ID is required</span>
+              </div>
+
+              <button type="submit" class="start-chat">Next</button>
+            </form>
+
+            <!-- form end -->
+
+
+            @if(IsUserDataSubmited){
+            <!-- messages area: fixed height, scrollable -->
+            <div class="chat-messages" #scrollContainerMessage>
+              <div class="chat-inner">
+
+
+                @for(m of chatMessages; track $index){
+                @if (!m.options){
+                @if(m.isIncoming){
+                <div class="incoming-wrap">
+                  <div class="icon-circle-2 icon-circle "><svg xmlns="http://www.w3.org/2000/svg" width="26px"
+                      height="26px" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z"
+                        stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#fff"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="M9 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                      <path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                    </svg></div>
+                  <div class="chat-receiver">{{m.message}}<div class="msg-time">{{ m.time ? (m.time
+                      | date:'h:mm a') : '' }}</div>
+                  </div>
+                </div>
+                }@else{
+
+
+                <div class="outgoing-wrap">
+
+                  <div class="icon-circle-2 icon-circle "><svg xmlns="http://www.w3.org/2000/svg" width="26px"
+                      height="26px" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z"
+                        stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#fff"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="M9 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                      <path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round"></path>
+                    </svg></div>
+                  <div class="chat-receiver" >{{m.message}}<div class="msg-time">{{ m.time ? (m.time
+                      | date:'h:mm a') : '' }}</div>
+                  </div>
+                </div>
+                }
+                }
+                @else {
+                <div class="options-row">
+                  <div class="options-right">
+                    <app-customer-options [message]="m.message" [options]="m.options"
+                      (optionSelected)="onOptionSelected($event)"></app-customer-options>
+                  </div>
+                </div>
+
+                }
+                }
+
+
+
+                <!-- options aligned to the right of the bubble -->
+
+
+                <!-- messages that appear below the options (selected options / user messages) -->
+
+
+
+
+                <!-- other outgoing messages (kept below) -->
+                <!-- <div class="chat-history">
+                  <ng-container *ngFor="let m of chatMessages">
+                    <div *ngIf="!m.isIncoming" [ngClass]="m.isIncoming ? 'chat-receiver' : 'chat-sender'">
+                      {{ m.message }}
+                      <div class="msg-time">{{ m.time ? (m.time | date:'h:mm a') : '' }}</div>
+                    </div>
+                  </ng-container>
+                </div> -->
+
+              </div>
+            </div>
+            <div class="chat-input-bar">
+              <input type="text" placeholder="Type your message..." [(ngModel)]="messageToSend" />
+
+              <button class="send-btn" (click)="SendMessage()">
+                <svg viewBox="0 0 24 24">
+                  <path d="M2 21l21-9L2 3v7l15 2-15 2z" />
+                </svg>
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="chat-fab" (click)="ChatBotToggle()"
+    [attr.aria-label]="IsChatBot ? 'Close' : 'Open chat'">
+    <ng-container *ngIf="!IsChatBot">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M12 3C6.477 3 2 6.806 2 11.5c0 2.28 1.06 4.36 2.8 5.94V21l3.6-2.06c1.1.33 2.32.56 3.6.56 5.523 0 10-3.806 10-8.5S17.523 3 12 3zm-4 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+      </svg>
+    </ng-container>
+    <ng-container *ngIf="IsChatBot">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
+      </svg>
+    </ng-container>
+  </button>
+</div>

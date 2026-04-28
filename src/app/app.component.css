@@ -1,0 +1,491 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: arial;
+}
+
+.chatbot-main {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  /* move closer to the corner */
+  margin: 10px 12px;
+  z-index: 91;
+  text-align: right;
+}
+
+.chat-form {
+  width: min(420px, 92vw);
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.chat-fab {
+  position: fixed;
+  /* bring FAB closer to the corner */
+  right: 12px;
+  bottom: 24px;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  background: #a86a86;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  z-index: 92;
+  transition:
+    bottom 220ms ease,
+    transform 220ms ease;
+}
+
+.chat-fab svg {
+  width: 26px;
+  height: 26px;
+  fill: #ffffff;
+}
+
+.chat-fab:hover {
+  background: #915c74;
+}
+
+/* Keep FAB at the viewport bottom. When chatbot is open, add extra space below the form so FAB sits in the gap */
+.chatbot-main.open .chat-form {
+  margin-bottom: 92px; /* gap between card bottom and viewport bottom */
+  transition: margin-bottom 220ms ease;
+}
+
+.chat-form {
+  box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.18);
+  background: #a86a86;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+  .chat-form .chat-title h4 {
+    color: #fff;
+    background-color: transparent;
+    padding: 22px 18px 14px;
+    border-radius: 0;
+    margin-bottom: 0;
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 0.2px;
+  }
+
+  .chat-form .chat-title p {
+    font-size: 14px;
+    padding: 0 16px;
+  }
+
+  .chat-form .chat-col {
+    padding: 16px 18px 20px;
+  }
+
+  .chat-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 0; /* move internal padding into .card-inner so scrollbar can sit flush */
+    display: flex;
+    flex-direction: column;
+    /* allow the card to be at most 480px and scroll internally so content (form) isn't clipped */
+    max-height: 480px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+    min-height: 0;
+  }
+
+  .card-inner {
+  padding: 25px 20px; /* original padding now inside to keep content away from edges */
+  }
+
+  /* messages container fixed height and scrollable inside fixed card */
+  .chat-messages {
+    /* use remaining space inside card */
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px 0;
+    scroll-behavior: smooth;
+    min-height: 0; /* allow flex child to shrink properly */
+    /* pull the scrollbar flush to the right edge of the white card (offset card padding) */
+    margin-right: -16px;
+    padding-right: 16px; /* keep content away from the scrollbar */
+  }
+
+  .chat-messages .chat-inner {
+    /* padding-right: 12px; keep inner content away from scrollbar */
+    /* padding-left: 12px; keep left padding for bubble offset */
+    box-sizing: border-box;
+    padding-bottom: 16px; /* extra space at bottom */
+  }
+
+  .chat-inner .chat-history {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* space between messages */
+  }
+
+  /* tweak incoming bubble shade and left offset */
+  .chat-inner .chat-receiver {
+    background-color: #efeef6; /* slightly different subtle shade */
+    padding: 12px 18px;
+    border-radius: 12px 12px 12px 6px;
+    max-width: 86%;
+    margin-left: 6px; /* small offset from left edge */
+    white-space: pre-line;
+  }
+
+  /* style for assistant avatar row */
+  .assistant-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .assistant-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ffeef0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #c43d63;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  /* center title bubble */
+  .title-bubble {
+    background: #f6f8ff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin: 8px auto;
+    /* width: calc(100% - 20px); */
+    color: #333;
+    text-align: left;
+  }
+
+  /* Outgoing bubble (right) */
+  .chat-sender {
+    background-color: #e9e1f1;
+    padding: 12px 18px;
+    border-radius: 16px 16px 4px 16px;
+    /* margin: 8px 0; */
+    max-width: 90%;
+    margin-left: auto;
+  }
+
+  .msg-time {
+    font-size: 11px;
+    color: #777;
+    margin-top: 6px;
+  }
+
+  /* Place options message styling */
+  .options-message {
+    padding: 12px;
+    background: transparent;
+    border-radius: 12px;
+    display: block;
+  }
+
+  /* Ensure app-customer-options size fits inside bubble */
+  app-customer-options {
+    display: block;
+  }
+
+  /* prevent options-component from expanding layout; limit its height */
+  .options-message app-customer-options .options-card {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* ensure the options bubble area uses full width for options and no internal scrollbar */
+  .options-wrapper .options-box {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end; /* options area on right */
+  }
+
+  /* make options-card expand to its container width but not scroll */
+  .options-wrapper .options-card {
+    width: 320px; /* keep narrow column on right */
+    max-height: none;
+    overflow: visible; /* do not show internal scrollbar */
+  }
+
+  /* ensure overall scroll stays on chat-messages only */
+  .chat-card, .chat-messages, .options-wrapper {
+    box-sizing: border-box;
+  }
+
+  /* small fade-in for new messages */
+  .chat-messages > div {
+    transition: transform 160ms ease, opacity 160ms ease;
+    /* add a bit more spacing between individual messages */
+    margin: 10px 0;
+  }
+
+  .chat-messages > div.ng-enter {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+.chat-input {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.chat-input .chat-checkbox {
+  display: inline-flex; /* keeps label inline with other content if needed */
+  align-items: center;
+  justify-content: flex-start; /* left align text next to checkbox */
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.chat-input .chat-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0; /* remove default margins */
+  flex: 0 0 auto;
+}
+
+.chat-form .chat-input input
+{
+    padding: 15px 12px;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ebebeb;
+    width: 100%;
+    max-width:calc(100% - 28px);
+}
+.chat-form .chat-input select
+{
+    padding: 15px 12px;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ebebeb;
+    width: 100%;
+}
+button.start-chat {
+  color: #fff;
+  background: linear-gradient(135deg, #a86a86, #6e3f5d);
+  border: 1px solid #a86a86;
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+  button.start-chat:hover {
+    background-color: #915c74;
+  }
+
+.send-msg {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  float: right;
+  margin-top: 14px;
+}
+
+  .send-msg svg {
+    max-width: 24px;
+    max-height: 24px;
+    fill: #0d6efd;
+  }
+
+  .send-msg:hover svg {
+    fill: #0457d2;
+  }
+
+.with-btn-input {
+  width: calc(100% - 36px) !important;
+  display: inline-block
+}
+
+.dis-none {
+  display: none !important;
+}
+
+.invalid {
+    border: 1px solid red !important;
+    margin-bottom: 0px !important;
+}
+
+.invalid-message {
+    font-size: 11px;
+    margin-left: 15px;
+    color: red;
+    font-weight: 500;
+}
+.errorSummary {
+    font-size: 11px;
+    color: red;
+    font-weight: 500;
+}
+
+.chat-message-container {
+    overflow-y: scroll;
+    max-height: 250px;
+  }
+
+  /* ensure scrollbar sits fully at right edge of card */
+  .chat-card::-webkit-scrollbar {
+    width: 10px;
+  }
+  .chat-card::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.25);
+    border-radius: 6px;
+  }
+
+.incoming-wrap {
+   margin-bottom: 8px; 
+   display: flex;
+  }
+
+.options-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 12px 0;
+}
+
+.options-left {
+  flex: 1 1 40%;
+}
+
+.options-right {
+  flex: 1 1 60%;
+  display: flex;
+  /* justify-content: flex-end; */
+}
+
+.post-options {
+  /* margin-top: 12px; */
+  display: flex;
+  flex-direction: column; 
+  gap: 10px;
+}
+
+.d-flex{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.chat-form .chat-col {
+    padding: 0px;
+
+    .chat-card{
+        border-radius:0px;
+    }
+}
+
+.chat-form .chat-title{
+    color: #fff;
+    background: linear-gradient(135deg, #a86a86, #6e3f5d);
+    padding: 22px 18px 20px;
+    border-radius: 0;
+    margin-bottom: 0;
+    text-align: left;
+    font-size: 18px;
+    letter-spacing: 0.2px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    p{
+      padding: 0px;
+      margin-top: 5px
+    };
+}
+
+.chat-form .chat-title h4 {
+    padding: 0px;
+    text-align: left;
+}
+
+.icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-circle-2{
+    background: linear-gradient(135deg, #a86a86, #6e3f5d);
+}
+
+.chat-input-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #eee;
+}
+
+/* INPUT */
+.chat-input-bar input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.chat-input-bar input:focus {
+  border-color: #a86a86;
+  box-shadow: 0 0 0 2px rgba(168,106,134,0.1);
+}
+
+/* SEND BUTTON */
+.send-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: linear-gradient(135deg, #a86a86, #8f5b77);
+  transition: 0.2s;
+}
+
+/* ICON */
+.send-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: white;
+}
+
+/* HOVER EFFECT */
+.send-btn:hover {
+  transform: scale(1.05);
+}
+
+/* DISABLED STATE */
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.outgoing-wrap{
+  margin-bottom: 8px; 
+  display: flex;
+  justify-content: flex-end;
+}

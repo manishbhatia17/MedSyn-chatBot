@@ -1,0 +1,7 @@
+<div class="title-bubble">
+  Select one of the options below or type your query
+</div>
+<div class="options-card">
+  <button class="opt" *ngFor="let opt of options" (click)="select(opt)"
+    [class.selected]="selectedOption===opt">{{opt.label}}</button>
+</div>

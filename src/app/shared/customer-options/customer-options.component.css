@@ -1,0 +1,111 @@
+.options-container {
+  display: flex;
+  justify-content: flex-end; /* place to right side inside card */
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 16px;
+  align-items: start;
+}
+
+.options-left {
+  padding-left: 8px;
+}
+
+.options-title {
+  width: 100%;
+  background: transparent;
+  color: #333;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.options-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.options-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* left align the title */
+  width: 100%;
+  padding-right: 8px; /* leave a bit of space from the right edge */
+}
+
+.title-bubble {
+  background: #f1f4fb; /* slightly different shade for the title */
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin: 0px 0 10px 0px; /* shift a bit right and space below */
+  width: calc(100% - 36px); /* leave left padding */
+  color: #333;
+  text-align: left;
+}
+
+.options-box {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start; /* place options slightly to right within bubble */
+}
+
+.options-card {
+  background: #f7f8ff; /* different shade from left message */
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%; /* take full available width */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  text-align: center;
+  border: 1px solid rgba(10,102,255,0.06);
+  max-height: none; /* allow full list without internal scroll */
+  overflow: visible;
+  margin-left: 0; /* align under the title bubble */
+}
+
+/* hide scrollbar but keep scrolling */
+.options-card {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.options-card::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+.opt {
+  background: transparent;
+  border: none;
+  color: #0a66ff;
+  font-weight: 600;
+  padding: 14px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  background: #fff; /* make buttons like bubbles */
+  box-shadow: inset 0 0 0 1px rgba(10,102,255,0.03);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.opt:hover {
+  transform: translateY(-2px);
+}
+
+.opt.selected {
+  background: #eaf2ff;
+  border: 1px solid rgba(10,102,255,0.2);
+  box-shadow: 0 6px 18px rgba(10,102,255,0.06);
+  color: #0a66ff;
+  margin-left: 12px; /* keep gap when selected to visually separate */
+}
+
+/* make sure the outer container uses no extra height */
+:host {
+  display: block;
+}
