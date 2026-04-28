@@ -132,8 +132,8 @@
     background-color: #efeef6; /* slightly different subtle shade */
     padding: 12px 18px;
     border-radius: 12px 12px 12px 6px;
-    max-width: 86%;
-    margin-left: 6px; /* small offset from left edge */
+    max-width: 73%;
+    margin-right: 6px; /* small offset from left edge */
     white-space: pre-line;
   }
 
@@ -348,6 +348,7 @@ button.start-chat {
 
 .incoming-wrap {
    margin-bottom: 8px; 
+   gap:10px;
    display: flex;
   }
 
@@ -433,7 +434,7 @@ button.start-chat {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 0px;
   background: #fff;
   border-top: 1px solid #eee;
 }
@@ -488,4 +489,8 @@ button.start-chat {
   margin-bottom: 8px; 
   display: flex;
   justify-content: flex-end;
+}
+
+.options-card{
+  width: auto !important;
 }
