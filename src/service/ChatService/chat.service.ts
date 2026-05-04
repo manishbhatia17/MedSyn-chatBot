@@ -53,7 +53,7 @@ export interface UserInfoModel {
   email: string;
   state: string;
   country: string;
-  isCurrentCustomer?: boolean;
+  isExistingCustomer?: boolean;
   customerId?: string;
 }
 export interface ChatUser {

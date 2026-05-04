@@ -32,7 +32,6 @@ export const chatRules:ChatRule[] = [
             {
                 label: "Order status",
                 action: RuleMeta.REQUEST_ORDER_STATUS.intent,
-                isOptionForExistingCustomer: true,
                 value: RuleMeta.REQUEST_ORDER_STATUS.id,
                 optionalData: {
                     isOptionForNewCustomer: false
@@ -42,7 +41,6 @@ export const chatRules:ChatRule[] = [
             {
                 label: "Order invoice",
                 action: RuleMeta.REQUEST_ORDER_INVOICE.intent,
-                isOptionForExistingCustomer: true,
                 value: RuleMeta.REQUEST_ORDER_INVOICE.id,
                 optionalData: {
                     isOptionForNewCustomer: false
@@ -52,7 +50,6 @@ export const chatRules:ChatRule[] = [
             {
                 label: "Order tracking number",
                 action: RuleMeta.REQUEST_ORDER_TRACKING.intent,
-                isOptionForExistingCustomer: true,
                 value: RuleMeta.REQUEST_ORDER_TRACKING.id,
                 optionalData: {
                     isOptionForNewCustomer: false
@@ -72,12 +69,47 @@ export const chatRules:ChatRule[] = [
         ] as OptionModel[]
     },
     {
+        id: RuleMeta.REQUEST_PRODUCT_INFO.id,
+        intent: RuleMeta.REQUEST_PRODUCT_INFO.intent,
+        response: `Please enter your product information or details.`,
+        priority: Priority.High,
+        action: ActionType.DisplayMessage
+    },
+    {
+        id: RuleMeta.REQUEST_REP_INFO.id,
+        intent: RuleMeta.REQUEST_REP_INFO.intent,
+        response: `Below is the detail of your area representative contact information. Please reach out to them for further assistance.`,
+        priority: Priority.High,
+        action: ActionType.DisplayMessage
+    },
+    {
+        id: RuleMeta.REQUEST_ORDER_STATUS.id,
+        intent: RuleMeta.REQUEST_ORDER_STATUS.intent,
+        response: `Please provide your order ID or details.`,
+        priority: Priority.High,
+        action: ActionType.DisplayMessage
+    },
+    {
+        id: RuleMeta.REQUEST_ORDER_INVOICE.id,
+        intent: RuleMeta.REQUEST_ORDER_INVOICE.intent,
+        response: `Please provide your order ID or details.`,
+        priority: Priority.High,
+        action: ActionType.DisplayMessage
+    },
+    {
+        id: RuleMeta.REQUEST_ORDER_TRACKING.id,
+        intent: RuleMeta.REQUEST_ORDER_TRACKING.intent,
+        response: `Please provide your order ID or details.`,
+        priority: Priority.High,
+        action: ActionType.DisplayMessage
+    },
+    {
         id: RuleMeta.LEAVE_MESSAGE.id,
         intent: RuleMeta.LEAVE_MESSAGE.intent,
         response: `Please provide your message and contact information, and our team will get back to you as soon as possible.`,
         priority: Priority.High,
         action: ActionType.DisplayMessage
-    }
+    },
 ]
 
 

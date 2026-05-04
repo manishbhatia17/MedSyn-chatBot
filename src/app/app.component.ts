@@ -2,6 +2,9 @@ import * as signalR from '@microsoft/signalr';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ChatService, UserInfoModel, chatMessage } from '../service/ChatService/chat.service';
+import { UserStateService } from '../service/user-state.service';
+import { LocationService } from '../service/location.service';
+import { Country, State } from 'country-state-city';
 import { ToastrService } from 'ngx-toastr';
 import { environment } from '../environments/environment';
 import { Observable, Observer } from 'rxjs';
@@ -23,10 +26,13 @@ export class AppComponent implements OnInit, OnDestroy {
   @Input() companyId: string;
   IsChatBot = false;
   IsUserDataSubmited = false;
-  isExistingCustomer = false; // UI-only flag
   optionsShownTime: Date | null = null;
-
+  isExistingCustomer: boolean = false;
   chatMessages: ChatMessage[] = [];
+
+  countries: any[] = [];
+  states: any[] = [];
+  selectedCountry: string = '';
 
 
   chatForm = this.fb.group({
@@ -35,7 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
     email: ['', [Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
     state: ['', [Validators.required]],
     country: ['', [Validators.required]],
-    isCurrentCustomer: [false],
+    isExistingCustomer: [false],
     customerId: [''],
   });
   messageToSend: string = '';
@@ -45,12 +51,20 @@ export class AppComponent implements OnInit, OnDestroy {
   userId = null;
   departmentId = '';
   errorSummary = ""
-  constructor(private fb: FormBuilder,
+  constructor(
+    private fb: FormBuilder,
     private chatService: ChatService,
-    private chatEngine: ChatEngineService
-  ) {
-  }
+    private chatEngine: ChatEngineService,
+    private locationService: LocationService,
+    private userStateService: UserStateService
+  ) {}
   ngOnInit() {
+    this.countries = this.locationService.getCountries();
+    // Set US as default country
+    this.selectedCountry = 'US';
+    this.chatForm.get('country')?.setValue('US');
+    this.states = this.locationService.getStates('US');
+    // ...existing code...
     //comment when used for prod 
     // this.companyId = '1004';
     // this.IsChatBot = true;
@@ -63,9 +77,12 @@ export class AppComponent implements OnInit, OnDestroy {
     //   time: new Date()
     // });
     //this.chatMessages.push({ isIncoming: false, message: "I have following query", time: new Date() });
+  }
 
-
-
+  onCountryChange(event: any) {
+    this.selectedCountry = event.target.value;
+    this.states = this.locationService.getStates(this.selectedCountry);
+    this.chatForm.get('state')?.setValue('');
   }
 
   OnResponseFromAdmin = (message: string) => {
@@ -75,9 +92,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
   private normalizeCustomerId() {
-    const isCurrentCustomer = !!this.chatForm.get('isCurrentCustomer')?.value;
+    const isExistingCustomer = !!this.chatForm.get('isExistingCustomer')?.value;
     const customerIdControl = this.chatForm.get('customerId');
-    if (!isCurrentCustomer) {
+    if (!isExistingCustomer) {
       customerIdControl?.setValue('');
       customerIdControl?.setErrors(null);
       return;
@@ -106,16 +123,15 @@ export class AppComponent implements OnInit, OnDestroy {
         phoneNumber: parseInt(this.chatForm.get('phoneNumber').value),
         state: this.chatForm.get('state')?.value,
         country: this.chatForm.get('country')?.value,
-        isCurrentCustomer: !!this.chatForm.get('isCurrentCustomer')?.value,
-        customerId: this.chatForm.get('isCurrentCustomer')?.value
+        isExistingCustomer: !!this.chatForm.get('isExistingCustomer')?.value,
+        customerId: this.chatForm.get('isExistingCustomer')?.value
           ? (this.chatForm.get('customerId')?.value ?? '').toString().trim()
           : undefined,
       }
 
-
-      // UI-only behavior: determine if existing customer based on customerId presence
-      this.isExistingCustomer = !!(chatData.isCurrentCustomer && chatData.customerId && chatData.customerId !== '');
-
+      // Save user state
+      this.userStateService.setUserState(chatData);
+      this.isExistingCustomer = chatData.isExistingCustomer;
       //call the api to stre the data in backend and then push the greeting and options to user
       //------------------------------------------ do it later 
 
@@ -163,6 +179,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
 AddMessageMenuToChat(message: string, isIncoming: boolean = true, options?: OptionModel[]) {
+  
+  //filter the option that are for existing customer if user is existing customer and filter the option that are for new customer if user is not existing customer
+    if(options && options.length > 0){
+      if(this.isExistingCustomer){
+        // Show all options for existing customers
+        // No filtering
+      } else {
+        // Only show options where isOptionForNewCustomer is true
+        options = options.filter(option => option.optionalData?.isOptionForNewCustomer === true);
+      }
+    }
   this.chatMessages.push({ isIncoming, message, options, time: new Date() });
   setTimeout(() => this.scrollToBottom(), 50);
 }

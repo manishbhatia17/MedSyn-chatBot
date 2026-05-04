@@ -54,29 +54,35 @@
               </div>
 
               <div class="chat-input">
-                <input type="text" placeholder="Enter State" formControlName="state" required
-                  [ngClass]="(chatForm.get('state')?.invalid && (chatForm.get('state')?.dirty || chatForm.get('state')?.touched)) ? 'invalid form-control' : 'form-control'" />
-                <span
-                  *ngIf="chatForm.get('state')?.invalid && (chatForm.get('state')?.dirty || chatForm.get('state')?.touched)"
-                  class="invalid-message">State is required</span>
-              </div>
-
-              <div class="chat-input">
-                <input type="text" placeholder="Enter Country" formControlName="country" required
-                  [ngClass]="(chatForm.get('country')?.invalid && (chatForm.get('country')?.dirty || chatForm.get('country')?.touched)) ? 'invalid form-control' : 'form-control'" />
+                <select formControlName="country" (change)="onCountryChange($event)" required
+                  [ngClass]="(chatForm.get('country')?.invalid && (chatForm.get('country')?.dirty || chatForm.get('country')?.touched)) ? 'invalid form-control' : 'form-control'">
+                  <option value="">Select Country</option>
+                  <option *ngFor="let country of countries" [value]="country.isoCode">{{country.name}}</option>
+                </select>
                 <span
                   *ngIf="chatForm.get('country')?.invalid && (chatForm.get('country')?.dirty || chatForm.get('country')?.touched)"
                   class="invalid-message">Country is required</span>
               </div>
 
               <div class="chat-input">
+                <select formControlName="state" required
+                  [ngClass]="(chatForm.get('state')?.invalid && (chatForm.get('state')?.dirty || chatForm.get('state')?.touched)) ? 'invalid form-control' : 'form-control'">
+                  <option value="">Select State</option>
+                  <option *ngFor="let state of states" [value]="state.name">{{state.name}}</option>
+                </select>
+                <span
+                  *ngIf="chatForm.get('state')?.invalid && (chatForm.get('state')?.dirty || chatForm.get('state')?.touched)"
+                  class="invalid-message">State is required</span>
+              </div>
+
+              <div class="chat-input">
                 <label class="chat-checkbox">
-                  <input type="checkbox" formControlName="isCurrentCustomer" />
+                  <input type="checkbox" formControlName="isExistingCustomer" />
                   Are you an existing customer?
                 </label>
               </div>
 
-              <div *ngIf="chatForm.get('isCurrentCustomer')?.value" class="chat-input">
+              <div *ngIf="chatForm.get('isExistingCustomer')?.value" class="chat-input">
                 <input type="text" placeholder="Enter Customer ID" formControlName="customerId" required
                   [ngClass]="(chatForm.get('customerId')?.invalid && (chatForm.get('customerId')?.dirty || chatForm.get('customerId')?.touched)) ? 'invalid form-control' : 'form-control'" />
                 <span

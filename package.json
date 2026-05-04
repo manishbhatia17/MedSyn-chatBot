@@ -25,6 +25,7 @@
     "@angular/router": "^21.2.9",
     "@microsoft/signalr": "^7.0.10",
     "concat": "^1.0.3",
+    "country-state-city": "^3.2.1",
     "jest-editor-support": "*",
     "ngx-toastr": "^17.0.2",
     "rxjs": "~7.8.0",
