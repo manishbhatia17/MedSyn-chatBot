@@ -1,0 +1,94 @@
+﻿@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Products";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/productListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/productService.js"></script>
+}
+
+<div ng-controller="productListController" ng-cloak>
+	<h1>
+		Product List
+	</h1>
+	<list-table
+		table="table"
+		service="productService"
+		fetch-func="fetchProducts"
+		details-route="/product/details/"
+	></list-table>
+</div>
+
+
+<script type="text/ng-template" id="ProductAdjustInventoryModal.html">
+	<div class="modal-header">
+		<h4>
+			Adjust Inventory <br />
+			Product Name: {{ productName }}
+		</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<form name="form">
+			<div class="row form-group">
+				<label class="col-sm-4">{{ productCustomID }}</label>
+			</div>
+			<div class="row form-group">
+				<label class="col-sm-4"> Current Inventory </label>
+				<label class="col-sm-8"> {{ onHand }} </label>
+			</div>
+			<div class="row form-group equal">
+				<label class="col-sm-4 required align-center"> Adjustment </label>
+				<div class="col-sm-8">
+					<input class="form-control" type="number" required name="quantity" maxlength="50" ng-model="adjustment.quantity" />
+					<error-messages></error-messages>
+				</div>
+			</div>
+			<div class="row form-group">
+				<label class="col-sm-4"> New Amount </label>
+				<label class="col-sm-8"> {{ onHand + adjustment.quantity }} </label>
+			</div>
+			<div class="row form-group equal">
+				<label class="col-sm-4 required align-center">Reason</label>
+				<div class="col-sm-8">
+					<select class="form-control" required name="reasonCodeID" ng-model="adjustment.reasonCodeID" ng-options="a.value as a.text for a in reasonCodes"></select>
+					<error-messages></error-messages>
+				</div>
+			</div>
+			<div class="row form-group" ng-if="adjustment.reasonCodeID === -1">
+				<label class="col-sm-4 required">Other</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" rows="6" required name="reasonCodeOther" ng-model="adjustment.reasonCodeOther"></textarea>
+					<error-messages></error-messages>
+				</div>
+			</div>
+
+			<hr />
+
+			<div class="text-center">
+				<button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+				<button type="button" class="btn btn-primary" ng-click="cancel()">Cancel</button>
+			</div>
+		</form>
+
+		<hr />
+
+		<div class="row">
+			<h4 class="col-sm-12">Adjustment History</h4>
+		</div>
+		<div style="max-height: 60px; overflow: hidden auto;">
+			<div class="row" ng-repeat="history in historylist">
+				<div class="col-sm-4"> {{ history.adjustedBy }} </div>
+				<div class="col-sm-2"> {{ history.adjustmentDate | localTime:'MM/dd/yyyy HH:mm:ss' }} </div>
+				<div class="col-sm-2">
+					<span ng-if="history.quantity > 0"> + </span>
+					<span ng-if="history.quantity < 0"> - </span>
+					{{ history.quantity | absValue }}
+				</div>
+				<div class="col-sm-4">
+					{{ reasonCodesDict[history.reasonCodeID] }} {{ history.reasonCodeOther }}
+				</div>
+			</div>
+		</div>
+	</div>
+</script>

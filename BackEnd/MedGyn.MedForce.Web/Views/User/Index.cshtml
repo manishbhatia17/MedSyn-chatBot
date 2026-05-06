@@ -1,0 +1,89 @@
+﻿@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "User";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/usersListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/userEditController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/userService.js"></script>
+}
+
+<div ng-controller="usersListController" ng-init="getRoles()">
+	<h1>
+		Users
+	</h1>
+	<div class="body-wrapper">
+		<list-table
+			table="table"
+			service="userService"
+			fetch-func="fetchUsers"
+			save-func="save"
+			add-func="addUser"
+			details-func="editClicked"
+		></list-table>
+	</div>
+</div>
+
+<script type="text/ng-template" id="UserEdit.html" >
+	<form class="form-horizontal" name="form">
+		<div class="modal-header" style="display: flex; align-items: center;">
+			<h4 class="modal-title" style="flex-grow: 1">User Details</h4>
+			<label style="margin: 0">
+				Deactivate User
+				<input type="checkbox" ng-model="user.isDeleted" />
+			</label>
+		</div>
+		<div class="modal-body">
+			<div class="form-group">
+				<label class="col-sm-4 control-label">First Name:</label>
+				<div class="col-sm-8">
+					<input ng-model="user.firstName" required name="firstName" type="text" class="form-control" />
+					<error-messages></error-messages>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-4 control-label">Last Name:</label>
+				<div class="col-sm-8">
+					<input ng-model="user.lastName" required name="lastName" class="form-control" />
+					<error-messages></error-messages>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-4 control-label">Email Address:</label>
+				<div class="col-sm-8">
+					<input ng-model="user.email" type="email" required name="email" class="form-control" ng-change="clearInvalid()" />
+					<error-messages unique-msg="Email already exists"></error-messages>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-4 control-label">Rep ID:</label>
+				<div class="col-sm-8">
+					<input ng-model="user.salesRepId" name="salesRepId" class="form-control" maxlength="100" pattern="^[a-zA-Z0-9]*$" />
+					<error-messages pattern-msg="Only alphanumeric characters are allowed"></error-messages>
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-4 control-label">Role:</label>
+				<div class="col-sm-8">
+					<select class="form-control" required name="roleId" ng-options="role.roleId as role.roleName for role in roles" ng-model="user.roleId"></select>
+					<error-messages></error-messages>
+				</div>
+			</div>
+		</div>
+	</form>
+	<div class="modal-footer">
+		<div class="row">
+			<div class="col-md-4 text-left">
+				<button type="button" class="btn btn-danger" id="deletebtn" ng-disabled="disableBtn" ng-click="delete()">Delete</button>
+				<br/>
+				<em style="font-size:8pt">User Must be Deactivated to Delete</em>
+			</div>
+			<div class="col-md-8">
+				<button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="cancel()">Cancel</button>
+			</div>
+		</div>
+	</div
+	
+</script>

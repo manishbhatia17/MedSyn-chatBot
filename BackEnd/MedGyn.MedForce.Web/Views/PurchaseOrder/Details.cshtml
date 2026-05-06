@@ -1,0 +1,258 @@
+@model int
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Purchase Order Details";
+}
+
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Services/purchaseOrderService.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/vendorService.js"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/purchaseOrder/purchaseOrderDetailsController.js"></script>
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/components/order-product-list.css" />
+}
+
+<div ng-controller="purchaseOrderDetailsController" ng-init="init(@Model)" ng-cloak>
+	<div class="details-header">
+		<div class="details-alert" ng-show="purchaseOrder.isDoNotReceive">
+			<h4>Do Not Receive Order: </h4>
+			<input ng-model="purchaseOrder.doNotReceiveReason" ng-disabled="!isDoNotReceiveEnabled()" maxlength="200"/>
+		</div>
+		<div class="details-header-content">
+			<h1>Purchase Order</h1>
+			<h1>{{ purchaseOrder.purchaseOrderCustomID }}</h1>
+			<h1 ng-if="purchaseOrder.submitDate"> Placed: {{ purchaseOrder.submitDate | localTime:"MM/dd/yyyy" }} </h1>
+
+			<div class="form-actions">
+				<div>
+					<label>
+						Do Not Receive
+						<input type="checkbox" ng-disabled="!isDoNotReceiveEnabled()" ng-model="purchaseOrder.isDoNotReceive" ng-change="doNotReceiveChanged()"/>
+					</label>
+				</div>
+				<div class="buttons">
+					<button type="button" class="btn btn-primary" ng-disabled="!purchaseOrder.purchaseOrderID" ng-click="export()">Export</button>
+					<button type="button" class="btn btn-primary"
+						ng-if="purchaseOrder && !purchaseOrder.submitDate"
+						ng-disabled="isSaving"
+						ng-show="!viewOnly()"
+						ng-click="save(true)">
+							Save & Submit
+							<span ng-if="isSaving"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+					</button>
+					<button type="button" class="btn btn-primary"
+						ng-if="purchaseOrder.submitDate && !purchaseOrder.approvedBy"
+						ng-disabled="form.$dirty"
+						ng-show="isVP"
+						ng-click="approve()">
+							VP Approved
+					</button>
+					<button type="button" ng-disabled="isSaving" ng-show="!viewOnly()" ng-click="save(false)" class="btn btn-primary">
+						Save
+						<span ng-if="isSaving"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+					</button>
+					<cancel-button page="/purchaseOrder" form="form" save="save()"></cancel-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<form name="form" prompt-before-leave>
+		<fieldset class="section" ng-disabled="purchaseOrder.approvedBy || viewOnly()">
+			<div class="section-content">
+				<div class="row">
+					<div class="col-sm-4 form-group">
+						<label class="required">Vendor</label>
+						<select class="form-control" name="vendorID" required
+							ng-model="purchaseOrder.vendorID"
+							ng-options="v.value as v.text for v in vendors | codeFilter:purchaseOrder.vendorID"
+							ng-change="changeVendor()">
+						</select>
+						<error-messages></error-messages>
+					</div>
+					<div class="col-sm-4 form-group">
+						<label>Vendor Order #</label>
+						<input class="form-control" name="vendorOrderNumber" maxlength="100" ng-model="purchaseOrder.vendorOrderNumber" />
+						<error-messages></error-messages>
+					</div>
+					<div class="col-sm-4 form-group">
+						<label>Expected Date</label>
+						<input class="form-control" type="date" name="expectedDate" ng-model="purchaseOrder.expectedDate" min="{{ today | date:'yyyy-MM-dd' }}" />
+						<error-messages min-msg="Date must be a valid future date"></error-messages>
+					</div>
+				</div>
+
+				<div class="row equal">
+						<label class="col-sm-5 align-center required"> Product </label>
+						<label class="col-sm-1 align-center required justify-flex-end"> Quantity </label>
+						<label class="col-sm-1 align-center"> U/M </label>
+						<label class="col-sm-1 align-center required justify-flex-end"> Price </label>
+						<label class="col-sm-2 align-center justify-flex-end"> Ext Price </label>
+						<div class="col-sm-2 align-center justify-flex-end">
+							<button type="button" class="btn btn-primary" ng-click="addProduct()">
+								+ Product
+							</button>
+						</div>
+					</div>
+				<div class="row">
+					<div class="products-wrapper">
+						<div ng-repeat="product in purchaseOrder.products" ng-cloak ng-if="!product.markedForDelete">
+							<div class="row equal">
+								<div class="col-sm-5">
+									<select class="form-control" name="product{{$index}}_productID" required
+										ng-model="product.productID"
+										ng-change="changeProduct($index)"
+										ng-options="c.value as c.text for c in products | codeFilter:product.productID">
+									</select>
+									<error-messages></error-messages>
+								</div>
+								<div class="col-sm-1" style="padding-left:0;">
+									<input class="form-control text-right" name="product{{$index}}_quantity" required pattern="^[1-9][0-9]*$" ng-model="product.quantity" numeric-value />
+									<error-messages></error-messages>
+								</div>
+								<div class="col-sm-1">
+									{{ umCodes[product.unitOfMeasureCodeID] }}
+								</div>
+								<div class="col-sm-1" style="padding-left:0;">
+									<input class="form-control text-right" name="product{{$index}}_price" required pattern="^\d+(\.\d{1,2})?$" ng-model="product.price" numeric-value />
+									<error-messages></error-messages>
+								</div>
+								<div class="col-sm-2 text-right">
+									<span ng-if="product.price && product.quantity">{{ product.price * product.quantity | currency : '$'}}</span>
+								</div>
+								<div class="col-sm-2 justify-flex-end">
+									<span ng-if="!purchaseOrder.approvedBy">
+										<i class="fa fa-trash-o" style="font-size:1.8em" ng-click="deleteProduct($index)"></i>
+									</span>
+								</div>
+							</div>
+							<div ng-show="product.productID">
+								<div class="row">
+									<div class="col-sm-6" style="padding-left: 25px">
+										On Hand <span class="p-l-10">{{ product.meta.stockInfo.onHand }}</span> <span class="p-l-10 p-r-10">-</span>
+										Committed <span class="p-l-10">{{ product.meta.stockInfo.unfilledCOs }}</span> <span class="p-l-10 p-r-10">+</span>
+										PO <span class="p-l-10">{{ product.meta.stockInfo.pendingPOs }}</span>
+										<span style="white-space:nowrap;"><span class="p-l-10 p-r-10">=</span>Net Quantity<span class="p-l-10">{{ product.meta.stockInfo.netQuantity }}</span></span>
+									</div>
+									<div class="col-sm-1 container-no-padding" style="text-align: right;">List Price:</div>
+									<div class="col-sm-1 text-right">{{ (product.meta.poHistory[0].price | currency:'$') || "N/A" }}</div>
+								</div>
+								<div class="row" ng-if="product.meta.lowestPrice">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-2">
+										Lowest price in last year:
+										<span class="p-l-10">{{ product.meta.lowestPrice.date }}</span>
+									</div>
+									<div class="col-sm-1">{{ vendorDict[product.meta.lowestPrice.vendorID] }}</div>
+									<div class="col-sm-1 text-right">{{ product.meta.lowestPrice.price | currency : '$' }}</div>
+								</div>
+								<div class="row" ng-if="!product.meta.lowestPrice">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-3">Lowest price in last year: none</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-4"></div>
+									<div class="col-sm-1">History:</div>
+									<div class="col-sm-1" ng-if="!product.meta.poHistory.length">none</div>
+								</div>
+								<div class="row" ng-repeat="history in product.meta.poHistory">
+									<div class="col-sm-4"></div>
+									<label class="col-sm-1">{{ history.date }}</label>
+									<label class="col-sm-1 text-right">{{ history.quantity }}</label>
+									<label class="col-sm-1">{{ umCodes[history.umCodeID] }}</label>
+									<label class="col-sm-1 text-right">{{ history.price | currency : '$' }}</label>
+									<label class="col-sm-2 text-right">{{ history.extPrice | currency : '$' }}</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label>Ship Company</label>
+								<select class="form-control" name="shipCompanyType"
+									ng-model="purchaseOrder.shipCompanyType"
+									ng-options="c.value as c.text for c in shipCompanies | codeFilter:purchaseOrder.shipCompanyType">
+									<option value=""></option>
+								</select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>Ship Choice</label>
+								<select class="form-control" name="shipChoiceCodeID"
+									ng-model="purchaseOrder.shipChoiceCodeID"
+									ng-options="c.value as c.text for c in shipMethodCodes[purchaseOrder.shipCompanyType] | codeFilter:purchaseOrder.shipChoiceCodeID">
+									<option value=""></option>
+								</select>
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row equal">
+							<label class="col-sm-3 align-center form-group">Account #</label>
+							<label class="col-sm-3 align-center form-group">{{ shippingAccounts[purchaseOrder.shipCompanyType] }}</label>
+							<div class="col-sm-6 align-center form-group justify-flex-end">
+								<label class="align-center no-wrap">
+									Partial Ship Acceptable
+									<input type="checkbox" class="large" name="isPartialShipAcceptable" ng-model="purchaseOrder.isPartialShipAcceptable" />
+								</label>
+							</div>
+						</div>
+						<div class="row form-group">
+							<label>Ship/Hd/Ins</label>
+							<input class="form-control" name="shippingCharge" pattern="^\d+(\.\d{2})?$" ng-model="purchaseOrder.shippingCharge" numeric-value />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label>Notes</label>
+							<textarea class="form-control" rows="6" ng-model="purchaseOrder.notes"></textarea>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row">
+							<label class="col-sm-3">Totals:</label>
+							<label class="col-sm-3"> {{ totalProducts()}} product(s) </label>
+							<label class="col-sm-3"> {{ totalItems()}} item(s) </label>
+							<label class="col-sm-3 text-right"> {{ totalPrice() | currency : '$'}} </label>
+						</div>
+						<div class="row" ng-if="purchaseOrder.shippingCharge">
+							<label class="col-sm-3">Sh/HD/In:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right">{{ purchaseOrder.shippingCharge | currency : '$'}}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-3">Tax:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right">{{ tax() | currency : '$'}}</label>
+
+						</div>
+						<div class="row">
+							<label class="col-sm-3">Total:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right"> {{ totalPrice() + purchaseOrder.shippingCharge + tax() | currency : '$'}}</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</fieldset >
+		<div class="last-updated-section" ng-show="purchaseOrder.receivedBy">
+			<span>Received On:</span>
+			<span>{{ purchaseOrder.receivedBy }} {{ purchaseOrder.receivedOn | localTime }}</span>
+		</div>
+		<div class="last-updated-section" ng-show="purchaseOrderID">
+			<span>VP Approved:</span>
+			<span>{{ purchaseOrder.approvedBy }} {{ purchaseOrder.approvalDate | localTime }}</span>
+		</div>
+		<div class="last-updated-section" ng-show="purchaseOrder.updatedBy">
+			<span>Last Updated:</span>
+			<span>{{ purchaseOrder.updatedBy }} {{ purchaseOrder.updatedOn | localTime }}</span>
+		</div>
+	</form>
+</div>
+
+<script type="text/ng-template" id="SendingPOEmail.html">
+	<div class="modal-body container-fluid">
+		Sending PO to Vendor primary contact.
+	</div>
+</script>

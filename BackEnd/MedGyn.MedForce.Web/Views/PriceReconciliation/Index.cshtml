@@ -1,0 +1,25 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Price Reconciliation Report";
+}
+@section Scripts {
+    <script type="text/javascript" src="~/js/App/Controllers/priceReconciliation/priceReconciliationController.js"></script>
+    <script type="text/javascript" src="~/js/App/Services/customerOrderService.js"></script>
+}
+<div ng-controller="priceReconciliationController" ng-cloak>
+    <div style="display: flex; justify-content: space-between;">
+        <h1>
+            Price Reconciliation
+        </h1>
+    </div>
+    <div class="body-wrapper">
+        <list-table 
+            table="table"
+            service="customerOrderService"
+            fetch-func="fetchFilledOrders"
+        >
+        </list-table>
+    </div>
+</div>
+
+

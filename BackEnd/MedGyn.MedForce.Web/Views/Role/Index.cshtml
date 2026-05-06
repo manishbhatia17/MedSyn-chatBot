@@ -1,0 +1,63 @@
+﻿@using Newtonsoft.Json;
+@using MedGyn.MedForce.Common.Configurations;
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Role";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/rolesListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/roleService.js"></script>
+}
+
+<div ng-controller="rolesListController">
+	<h1>
+		Roles
+	</h1>
+	<div class="body-wrapper">
+		<list-table
+			table="table"
+			service="roleService"
+			fetch-func="fetchRoles"
+			save-func="save"
+			add-func="addRole"
+		></list-table>
+	</div>
+</div>
+
+<script type="text/ng-template" id="RolePermissionsModal.html">
+	<div class="modal-header">
+		<h4 class="modal-title" id="myModalLabel">User Permission Keys</h4>
+		<h4 class="modal-title" id="myModalLabel">{{roleName}}</h4>
+	</div>
+	<div class="modal-body">
+		<form name="form">
+			<div class="table-wrapper">
+				<table class="dataTable stripe">
+					<tbody>
+						<tr>
+							<span style="margin-left: 11px;">
+								<input type="checkbox" ng-model="allSelected" ng-change="selectAll()">
+								<label>Select All</label>
+							</span>
+						</tr>
+						<tr ng-repeat="key in securityKeys" ng-class="{ even: $even, odd: $odd }">
+							<td>
+								<span >
+									<input type="checkbox" ng-model="key.isSelected">
+									<label>{{key.securityKeyName}}</label>
+								</span>
+								<br/>
+								<i>{{key.securityKeyDescription}}</i>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+		<button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="cancel()">Cancel</button>
+	</div>
+</script>

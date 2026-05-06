@@ -1,0 +1,27 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Product Price Adjustments";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/productPriceAdjustmentController.js?3-8-2023T10:02Z"></script>
+	<script type="text/javascript" src="~/js/App/Services/productPriceAdjustmentService.js?3-9-2023T10:02Z"></script>
+}
+
+
+<div ng-controller="productPriceAdjustmentController" ng-cloak>
+	<h1>
+		Product Price Adjustments:
+	</h1>
+	<div class="body-wrapper">
+		<list-table table="table"
+					service="productPriceAdjustmentService"
+					fetch-func="fetchProductPricingInformation"
+					save-func="save"></list-table>
+	</div>
+</div>
+
+
+
+
+

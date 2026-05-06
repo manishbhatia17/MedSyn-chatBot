@@ -1,0 +1,222 @@
+﻿@inject MedGyn.MedForce.Service.Interfaces.IAuthenticationService authenticationService;
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+@inject Microsoft.ApplicationInsights.AspNetCore.JavaScriptSnippet JavaScriptSnippet
+
+@using Newtonsoft.Json;
+@using MedGyn.MedForce.Common.Configurations;
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<environment exclude="PROD-TM">
+	<title>@ViewData["Title"] - MedGyn</title>
+	</environment>
+	<environment exclude="PROD-MEDGYN,QA,Development">
+	<title>@ViewData["Title"] - Thomas Medical</title>
+	</environment>
+
+	<link href="~/css/bootstrap.min.css" rel="stylesheet">
+	<link href="~/css/bootstrap-datepicker.min.css" rel="stylesheet">
+	<link href="~/css/animate.css" rel="stylesheet">
+	<link href="~/css/font-awesome.min.css" rel="stylesheet">
+	<link href="~/css/style.css?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")" rel="stylesheet">
+	<link href="~/css/datatables.css" rel="stylesheet">
+	<link href="~/css/site.css?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")" rel="stylesheet">
+	<link href="~/css/navigation.css" rel="stylesheet">
+	<link href="~/css/footer.css" rel="stylesheet">
+	<link href="~/css/forms.css" rel="stylesheet">
+	<link href="~/css/layout.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link href="https://fk.github.io/select2-bootstrap-css/css/select2-bootstrap.css" rel="stylesheet" />
+
+	@RenderSection("Styles", required: false)
+
+	@Html.Partial("_JavascriptEnums.cshtml")
+	<script src="~/js/jquery/jquery.min.js"></script>
+	<script src="~/js/Datatables/jquery.dataTables.min.js"></script>
+	<script src="~/js/bootstrap/bootstrap.min.js"></script>
+	<script src="~/js/angular/angular.js"></script>
+	<script src="~/js/angular/angular-messages.min.js"></script>
+	<script src="~/js/angular/ngMask.min.js"></script>
+	<script src="~/js/angular-local-storage/angular-local-storage.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular-sanitize.js"></script>
+	<script src="~/js/bootstrap/ui-bootstrap-tpls-2.5.0.min.js"></script>
+
+	<script src="~/js/site.js"></script>
+	<script src="~/js/App/Controllers/appController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Controllers/navController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Directives/errorMessages.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Directives/promptBeforeLeave.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Directives/cancelButton.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Directives/inputModifiers.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Directives/listTable.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="~/js/App/Services/peachTreeService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+	@RenderSection("Scripts", required: false)
+	@Html.Raw(JavaScriptSnippet.FullScript)
+
+	<style>
+
+		.select2-container .select2-selection.select2-selection--single {
+				height: 38px;
+				width:100%;
+			border: 1px solid #e4e7ea;
+			border-radius: 0px;
+			box-shadow: none;
+			max-width: 100%;
+			padding: 7px 12px;
+			transition: all 300ms linear 0s;
+			color:#2b2b2b;
+			}
+
+			span [aria-disabled="true"] {
+				background-color: #eee;
+			}
+
+	</style>
+</head>
+
+<body ng-app="app">
+	<nav class="navbar navbar-default navbar-fixed-top" ng-controller= "navController" ng-init="init(@JsonConvert.SerializeObject(@authenticationService.GetClaims(), CamelCaseSerializerSettings.Settings), @authenticationService.GetUserID())">
+		<div class="navbar-header main-nav">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+				<i class="fa fa-bars fa-2x"></i>
+			</button>
+			<environment exclude="PROD-TM">
+			<img class="brand-logo" src="~/images/logo.png" />
+			</environment>
+			<environment exclude="PROD-MEDGYN,QA,Development">
+			<img class="brand-logo" src="~/images/TM_Logo.png" />
+			</environment>			
+		</div>
+		<div class="collapse navbar-collapse navbar-flex" id="navbar-collapse">
+            <ul class="nav navbar-nav navbar-main navbar-end">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        REPORTS <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" ng-show="{{canViewCustomerOrders}}">
+						<li ng-show="{{canViewBackOrders}}"><a href="/BackOrder">Back Orders</a></li>
+						<li ng-show="{{canViewArchive}}"><a href="/ArchivedInvoice">Invoices - Archived</a></li>
+@* 						<li ng-show="{{canViewProductActivity}}"><a href="/invoiceactivity">Invoice Activity Report</a></li> *@
+						<li ng-show="{{canAdjustPrice}}"><a href="/PriceReconciliation">Price Reconciliation</a></li>
+						<li ng-show="{{canViewProductShipped}}"><a href="/ProductShipped">Product - Shipped</a></li>
+						<li ng-show="{{canViewProductActivity}}"><a href="/onhandactivity">Product Activity Report</a></li>
+                    </ul>
+                </li>
+                <li ng-show="{{canViewCustomerOrders}}"><a href="/CustomerOrder">ORDERS</a></li>
+                <li ng-show="{{canViewCustomers}}"><a href="/Customer">CUSTOMERS</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+						PRODUCTS <span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu" ng-show="{{canViewProducts}}">
+						<li ><a href="/Product">Products</a></li>
+						<li ng-show="{{canAdjustPrice}}"><a href="/Product/PriceAdjustments">Price Adjustments</a></li>
+					</ul>
+				</li>
+                <li ng-show="{{canViewVendors}}"><a href="/Vendor">VENDORS</a></li>
+                <li ng-show="{{canViewPurchaseOrders}}"><a href="/PurchaseOrder">POs</a></li>
+            </ul>
+			<ul class="nav navbar-nav" style="min-width:200px;">
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+						Welcome, @authenticationService.GetName() <span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li ng-show="canViewUsers"><a href="/User">Users</a></li>
+						<li ng-show="canViewCodeTypes"><a href="/CodeType">Code Types</a></li>
+						<li ng-show="canViewRoles"><a href="/Role">Roles</a></li>
+						<li ng-show="canExportInvoices"><a href="/api/peachtree/export/invoice" target="_blank">PeachTree Invoice</a></li>
+						<li ng-show="canExportInvoices"><a href="#" ng-click="callPreviousPeachTreeInvoicesFunc()">Previous PeachTree Invoice</a></li>
+						<li ng-show="canExportReceipts"><a href="/api/peachtree/export/receipts" target="_blank">PeachTree Receipts</a></li>
+						@* <li><a href="#">Change Password</a></li> *@
+						<li><a href="/Account/Logout" onclick="sessionStorage.clear()">Logout</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<script type="text/ng-template" id="PreviousPeachTreeInvoices.html">
+			<div ng-show="modalLoading" class="modal-spinner-wrapper">
+				<div class="modal-spinner-wrapper-loader">
+					<div class="lds-heart">
+						<div>
+							<img src="/images/MedGyn Simbol -01.png" alt="loading..." style="width:128px;height:128px"/>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-header">
+				<h4>Previous PeachTree Invoice Exports</h4>
+			</div>
+			<div class="modal-body container-fluid">
+							<div class="row">
+								<div class="col-xs-3">
+									<label>Get by Export Date Range</label>
+								</div>
+							</div>
+							<div class="row m-b-5">
+								<div class="col-xs-4">
+												<input type="date" name="start_date" id="start_date" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched">
+								</div>
+											<div class="col-xs-4 text-center">
+															<label style="font-size:large">to</label>
+											</div>
+														<div class="col-xs-4 text-left">
+															<input type="date" name="end_date" id="end_date" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched">
+											</div>
+							</div>
+							<div class="row">
+
+<div class="col-xs-3">
+                                    <button type="button" class="btn btn-primary m-b-15" ng-click="getPreviousInvoicesByDate()">Submit</button>
+                                </div>
+							</div>	
+							<hr/>
+				<div class="row m-t-15 m-b-10">
+					<div class="col-xs-3">
+                        <label>Get by Export Date (Last 30)</label>
+                    </div>
+								@* <div class="col-xs-3">
+												<select ng-model="text" ng-change="GetPreviouseInvoiceList">
+                                        <option value="7">Last 7 Days</option>
+                                        <option value="30" selected>Last 30 Days</option>
+                                        <option value="90">Last 90 Days</option>
+									</select>
+								</div> *@
+							</div>
+				<div class="row">
+					<div ng-repeat="item in previousInvoices" class="col-xs-3">
+						<a ng-href="/api/peachtree/export/invoice/{{item.exportId}}">{{item.invoiceDate}}</a>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<div class="row">
+					<div class="col-md-4 text-left">
+						<button type="button" class="btn btn-danger" ng-click="close()">Close</button>
+					</div>
+@* 					<div class="col-md-8">
+						<button type="button" class="btn btn-primary" ng-click="uploadPrices()">Upload</button>
+					</div> *@
+				</div>
+			</div>
+		</script>
+	</nav>
+
+	<div ng-controller="appController"  class="content-wrapper">
+		@RenderBody()
+	</div>
+
+	<footer class="footer navbar-fixed-bottom">
+		<div>Medgyn Copyright @DateTime.UtcNow.Year. All Rights Reserved.</div>
+	</footer>
+
+	@Html.Partial("_ListTableTemplate.cshtml")
+
+
+</body>
+</html>

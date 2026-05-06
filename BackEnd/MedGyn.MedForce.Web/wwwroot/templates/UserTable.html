@@ -1,0 +1,41 @@
+﻿<div ng-controller="userEditController">
+    <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">User Details</h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-horizontal">
+            <div ng-if="!user.success" class="alert alert-danger">
+                <div ng-repeat="error in user.errors">{{error}}</div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">First Name:</label>
+                <div class="col-sm-8">
+                    <input ng-model="user.firstName" type="text" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Last Name:</label>
+                <div class="col-sm-8">
+                    <input ng-model="user.lastName" type="text" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Email Address:</label>
+                <div class="col-sm-8">
+                    <input ng-model="user.email" type="text" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label">Role:</label>
+                <div class="col-sm-8">
+                    <select ng-model="user.roleId" type="text" class="form-control"><option ng-repeat="option in model.roles" value="{{option.value}}">{{option.text}}</option></select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button ng-show="user.userId == 0" ng-disabled="isLoading || isSaving" type="button" class="btn btn-primary" ng-click="saveUser()">Add</button>
+        <button ng-show="user.userId > 0" ng-disabled="isLoading || isSaving" type="button" class="btn btn-primary" ng-click="saveUser()">Update</button>
+        <button ng-disabled="isLoading || isSaving" type="button" class="btn btn-default" data-dismiss="modal">Undo</button>
+    </div>
+</div>

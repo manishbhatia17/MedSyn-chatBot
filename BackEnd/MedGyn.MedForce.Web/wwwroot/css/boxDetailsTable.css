@@ -1,0 +1,13 @@
+﻿.boxDetailsTableTd, .boxDetailsTableTdActive, .boxDetailsTableHeader th {
+    padding: 2px 5px;
+}
+
+.boxDetailsTableTdActive{
+    color:blue;
+    font-style:italic;
+    font-weight:bold;
+}
+
+.boxDetailsTable{
+    background-color:white;
+}

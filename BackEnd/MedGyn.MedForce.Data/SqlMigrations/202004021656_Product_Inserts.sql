@@ -1,0 +1,113 @@
+-- Template for Product INSERTS generation.
+-- Version 0.1, generated at 202004020741  
+-- Expects 2 insert lines
+INSERT INTO [dbo].[Product]
+(
+  [ProductName] ,
+  [ProductIdentityText] ,
+  [UnitOfMeasureCode] ,
+  [NetQuantity] ,
+  [ReorderPoint] ,
+  [ReorderQuantity] ,
+  [PrimaryVendorID] ,
+  [Cost] ,
+  [InternationalOnly] ,
+  [SpecialOrderOnly] ,
+  [Color] ,
+  [ShipWeight] ,
+  [Length] ,
+  [Width] ,
+  [Depth] ,
+  [UMCode] ,
+  [Description] ,
+  [Manufacturer] ,
+  [PriceDomesticList] ,
+  [PriceDomesticDistribution] ,
+  [PriceInternationalDistribution] ,
+  [Notes] ,
+  [IsDeleted] ,
+  [UpdatedBy] 
+)
+VALUES
+(    
+ 'First Product',
+ 'Product 1',
+ '1',
+ '20',
+ '1',
+ '1',
+ '1',
+ '100',
+ '0',
+ '0',
+ 'Blue',
+ '100',
+ '10.12345',
+ '10.12345',
+ '10.12345',
+ '1',
+ 'First Product Description',
+ 'Sony',
+ '10',
+ '10.12345',
+ '10.12345',
+ 'Some notes for 1',
+ '0',
+ 'GeneCode'
+)
+
+INSERT INTO [dbo].[Product]
+(
+  [ProductName] ,
+  [ProductIdentityText] ,
+  [UnitOfMeasureCode] ,
+  [NetQuantity] ,
+  [ReorderPoint] ,
+  [ReorderQuantity] ,
+  [PrimaryVendorID] ,
+  [Cost] ,
+  [InternationalOnly] ,
+  [SpecialOrderOnly] ,
+  [Color] ,
+  [ShipWeight] ,
+  [Length] ,
+  [Width] ,
+  [Depth] ,
+  [UMCode] ,
+  [Description] ,
+  [Manufacturer] ,
+  [PriceDomesticList] ,
+  [PriceDomesticDistribution] ,
+  [PriceInternationalDistribution] ,
+  [Notes] ,
+  [IsDeleted] ,
+  [UpdatedBy] 
+)
+VALUES
+(    
+ 'Second Product',
+ 'Product 2',
+ '2',
+ '20',
+ '20',
+ '2',
+ '2',
+ '200',
+ '0',
+ '0',
+ 'Blue',
+ '200',
+ '20.12345',
+ '20.12345',
+ '20.12345',
+ '2',
+ 'Second Product Description',
+ 'Ford',
+ '20',
+ '20.12345',
+ '20.12345',
+ 'Some notes for 2',
+ '0',
+ 'GeneCode'
+)
+-- Select * from Product

@@ -1,0 +1,61 @@
+﻿
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<environment exclude="PROD-TM">
+	<title>@ViewData["Title"] - MedGyn</title>
+	</environment>
+	<environment exclude="PROD-MEDGYN,QA,Development">
+	<title>@ViewData["Title"] - Thomas Medical</title>
+	</environment>
+
+	<link href="~/css/bootstrap.min.css" rel="stylesheet">
+	<link href="~/css/animate.css" rel="stylesheet">
+	<link href="~/css/style.css" rel="stylesheet">
+	<link href="~/css/site.css" rel="stylesheet">
+	<link href="~/css/navigation.css" rel="stylesheet">
+	<link href="~/css/forms.css" rel="stylesheet">
+	<link href="~/css/footer.css" rel="stylesheet">
+
+	<script src="~/js/jquery/jquery.min.js"></script>
+	<script src="~/js/bootstrap/bootstrap.min.js"></script>
+	<script src="~/js/angular/angular.js"></script>
+</head>
+
+<body>
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="navbar-header main-nav">
+			<environment exclude="PROD-TM">
+			<img class="brand-logo" src="~/images/logo.png" />
+			</environment>
+			<environment exclude="PROD-MEDGYN,QA,Development">
+			<img class="brand-logo" src="~/images/TM_Logo.png" />
+			<!-- css for thomas to override background-->
+			<style>
+			.login-register {
+				background: url("../images/TM_loginpicture.jpg");
+				background-size: cover;
+				background-position-x: center;
+				height: 100%;
+			}
+			</style>
+			</environment>
+		</div>
+	</nav>
+
+	<div class="content-wrapper login-register">
+		<div class="login-box">
+			@RenderBody()
+		</div>
+	</div>
+
+	<footer class="footer navbar-fixed-bottom">
+		<div>MedGyn Copyright @DateTime.UtcNow.Year. All Rights Reserved.</div>
+	</footer>
+</body>
+</html>

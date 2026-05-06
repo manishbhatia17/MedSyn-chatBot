@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <PreserveCompilationReferences>true</PreserveCompilationReferences>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
+    <PackageReference Include="FreeSpire.Doc" Version="7.11.0" />
+    <PackageReference Include="FreeSpire.PDF" Version="8.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Azure.Storage.Common" Version="11.1.3" />
+    <PackageReference Include="Microsoft.Azure.Storage.File" Version="11.1.3" />
+    <PackageReference Include="OpenHtmlToPdf" Version="1.12.0" />
+    <PackageReference Include="PdfSharpCore" Version="1.1.20" />
+    <PackageReference Include="RazorLight" Version="2.0.0-beta4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Medforce.Graph.Services\Medforce.Graph.Services.csproj" />
+    <ProjectReference Include="..\MedGyn.MedForce.Common\MedGyn.MedForce.Common.csproj" />
+    <ProjectReference Include="..\MedGyn.MedForce.Service\MedGyn.MedForce.Service.csproj" />
+    <ProjectReference Include="..\Medgyn.Meforce.LLMAgent\Medgyn.Meforce.LLMAgent.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ViewModels\Reports\NewFolder\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Views\CustomerOrder\ApprovalRequestEmail.cshtml" />
+    <EmbeddedResource Include="Views\CustomerOrder\CustomerOrderReport.cshtml" />
+    <EmbeddedResource Include="Views\CustomerOrder\Invoice.cshtml" />
+    <EmbeddedResource Include="Views\CustomerOrder\InvoiceEmail.cshtml" />
+    <EmbeddedResource Include="Views\CustomerOrder\PackingSlip.cshtml" />
+    <EmbeddedResource Include="Views\PurchaseOrder\ApprovalRequestEmail.cshtml" />
+    <EmbeddedResource Include="Views\PurchaseOrder\PurchaseOrderReport.cshtml" />
+    <EmbeddedResource Include="Views\PurchaseOrder\PurchaseOrderReportEmail.cshtml" />
+    <EmbeddedResource Include="Views\Shared\_EmailLayout.cshtml" />
+    <EmbeddedResource Include="Views\Shared\_ReportLayout.cshtml" />
+  </ItemGroup>
+</Project>

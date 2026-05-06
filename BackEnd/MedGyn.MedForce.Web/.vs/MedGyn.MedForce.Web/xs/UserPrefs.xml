@@ -1,0 +1,25 @@
+﻿<Properties StartupConfiguration="{AA9FCA32-AB98-446D-9C04-E9A3375EA3A7}|CLIC.InsurancePortal.Web">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Startup.cs">
+    <Files>
+      <File FileName="appsettings.PROD-MEDGYN.json" Line="1" Column="1" />
+      <File FileName="appsettings.json" />
+      <File FileName="Startup.cs" Line="95" Column="23" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="MedGyn.MedForce.Web" expanded="True">
+            <Node name="MedGyn.MedForce.Web" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.MedGyn.MedForce.Web PreferredExecutionTarget="/Applications/Safari.app" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>

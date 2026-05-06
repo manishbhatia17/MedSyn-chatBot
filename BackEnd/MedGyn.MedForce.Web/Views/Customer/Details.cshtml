@@ -1,0 +1,525 @@
+﻿@using MedGyn.MedForce.Common.Configurations;
+
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+
+@model int
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Customer Details";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Services/customerService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/customerDetailsController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+}
+
+	<style>
+		#save-success{
+			position:absolute;
+			width:30%;
+			top:100px;
+			left:69%;
+			z-index:100;
+			display:none;
+		}
+
+		#save-fail{
+			position:absolute;
+			width:30%;
+			top:100px;
+			left:69%;
+			z-index:100;
+			display:none;
+		}
+	</style>
+
+<div ng-controller="customerDetailsController" ng-init="init(@Model)" ng-cloak>
+	<div id="save-success">
+		<div class="alert alert-success" role="alert">
+		  Address Saved Successfully!
+		</div>
+	</div>
+	<div id="save-fail">
+	<div class="row">
+		<div class="col">
+			<div class="alert alert-danger" role="alert">
+		  Address did not save.
+		  <br/>
+		  <div>{{saveError}}</div>
+		</div>
+	</div>
+		</div>
+	</div>
+		
+	<div class="details-header">
+		<div class="details-header-content">
+			<h1>Customer Details</h1>
+
+			<div class="form-actions">
+				<div class="details-additional-actions">
+					<label>
+						Status
+						<select ng-disabled="viewOnly()" ng-model="customer.customerStatusCodeID" ng-options="c.value as c.text for c in customerStatusCodes | codeFilter:customer.customerStatusCodeID"></select>
+					</label>
+				</div>
+				<div class="buttons">
+					<button type="button" ng-hide="viewOnly()" ng-click="save()" class="btn btn-primary">Save</button>
+					<cancel-button page="/customer" form="form" save="save()"></cancel-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<form name="form" prompt-before-leave>
+		<fieldset>
+			<div class="section">
+				<h4 class="section-title">Customer Information</h4>
+				<div class="section-content row">
+					<div class="col-sm-12 p-0">
+					</div>
+					<div class="col-sm-6">
+						<div class="row form-group">
+							<label class="required">Name</label>
+							<input ng-disabled="viewOnly()" class="form-control" required name="customerName" maxlength="100" ng-model="customer.customerName" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label class="required">Billing Address</label>
+							<input ng-disabled="viewOnly()"  class="form-control" required name="address1" maxlength="100" ng-model="customer.address1" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label>Address 2</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="address2" maxlength="100" ng-model="customer.address2" />
+						</div>
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label class="required">City</label>
+								<input  ng-disabled="viewOnly()" class="form-control" required name="city" maxlength="100" ng-model="customer.city" />
+								<error-messages></error-messages>
+							</div>
+
+							<div class="col-sm-3 form-group">
+								<label>State</label>
+								<select ng-disabled="viewOnly()"  class="form-control" name="stateCodeID" ng-model="customer.stateCodeID" ng-options="c.value as c.text for c in stateCodes | codeFilter:customer.stateCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+
+							<div class="col-sm-3 form-group">
+								<label >Zip</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="zipCode" maxlength="50" ng-model="customer.zipCode" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-4 form-group">
+								<label class="required">Country</label>
+								<select ng-disabled="viewOnly()"  class="form-control" required name="countryCodeID" ng-model="customer.countryCodeID" ng-options="c.value as c.text for c in countryCodes | codeFilter:customer.countryCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-8 form-group">
+								<label>Website</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="website" maxlength="100" ng-model="customer.website" />
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row form-group">
+							<label class="required">Customer ID</label>
+							<input ng-disabled="viewOnly()"  class="form-control" required name="customerCustomID" maxlength="100" ng-model="customer.customerCustomID" ng-change="clearInvalid()" />
+							<error-messages unique-msg="Customer ID must be unique"></error-messages>
+						</div>
+						<div class="row form-group">
+							<label>Primary Contact</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="primaryContact" maxlength="100" ng-model="customer.primaryContact" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label class="required">Primary Email</label>
+							<input ng-disabled="viewOnly()"  class="form-control" type="email" name="primaryEmail" maxlength="100" ng-model="customer.primaryEmail" required />
+							<error-messages></error-messages>
+						</div>
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label class="required">Primary Phone</label>
+								<input ng-disabled="viewOnly()"  class="form-control" required name="primaryPhone" ng-model="customer.primaryPhone"maxlength="50" clean="true" />
+								<i>US phone number must be 10 digits</i>
+								<error-messages mask-msg="Invalid phone number"></error-messages>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>Primary Fax</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="primaryFax" ng-model="customer.primaryFax" maxlength="50" clean="true" />
+								<error-messages mask-msg="Invalid fax number"></error-messages>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label class="required">Practice Type</label>
+								<select ng-disabled="viewOnly()"  class="form-control" required name="practiceTypeCodeID" ng-model="customer.practiceTypeCodeID" ng-options="c.value as c.text for c in practiceTypeCodes | codeFilter:customer.practiceTypeCodeID"></select>
+								<error-messages mask-msg="Invalid phone number"></error-messages>
+							</div>
+							<div class="col-sm-6 form-group" ng-if="customer.practiceTypeCodeID === -1">
+								<label class="required">Other</label>
+								<input ng-disabled="viewOnly()"  class="form-control" required name="practiceTypeOther" maxlength="100" ng-model="customer.practiceTypeOther" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Additional Contacts</h4>
+				<div class="section-content row">
+					<div class="row form-group">
+						<div class="col-sm-4">
+							<label>Name</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact1Name" maxlength="100" ng-model="customer.additionalContact1Name" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Email</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact1Email" type="email" maxlength="100" ng-model="customer.additionalContact1Email" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Phone</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact1Phone" ng-model="customer.additionalContact1Phone" maxlength="50" clean="true" />
+							<error-messages mask-msg="Invalid phone number"></error-messages>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-sm-4">
+							<label>Name</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact2Name" maxlength="100" ng-model="customer.additionalContact2Name" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Email</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact2Email" type="email" maxlength="100" ng-model="customer.additionalContact2Email" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Phone</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact2Phone" ng-model="customer.additionalContact2Phone" maxlength="50" clean="true" />
+							<error-messages mask-msg="Invalid phone number"></error-messages>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-sm-4">
+							<label>Name</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact3Name" maxlength="100" ng-model="customer.additionalContact3Name" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Email</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact3Email" type="email" maxlength="100" ng-model="customer.additionalContact3Email" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Phone</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="additionalContact3Phone" ng-model="customer.additionalContact3Phone" maxlength="50" clean="true" />
+							<error-messages mask-msg="Invalid phone number"></error-messages>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Pricing and GL Accounts</h4>
+				<div class="section-content row">
+					<div class="col-sm-3 form-group">
+						<div class="form-group">
+							<label>
+								<input ng-disabled="viewOnly()"  required type="radio" name="customerType" ng-model="customer.customerType" ng-value="1" />
+								Domestic
+							</label><br/>
+						</div>
+						<div class="form-group">
+							<label>
+								<input ng-disabled="viewOnly()"  required type="radio" name="customerType" ng-model="customer.customerType" ng-value="2" />
+								Domestic Afaxys
+							</label><br/>
+						</div>
+						<div class="form-group">
+							<label>
+								<input ng-disabled="viewOnly()"  required type="radio" name="customerType" ng-model="customer.customerType" ng-value="3" />
+								Domestic Distributor
+							</label><br/>
+						</div>
+						<div class="form-group">
+							<label>
+								<input ng-disabled="viewOnly()"  required type="radio" name="customerType" ng-model="customer.customerType" ng-value="4" />
+								International
+							</label><br/>
+						</div>
+						<error-messages field="customerType"></error-messages>
+					</div>
+					<div class="col-sm-3 form-group">
+						<div class="form-group">
+							<label class="required">Sales</label>
+							<select ng-disabled="viewOnly()"  class="form-control" required
+								name="glSalesCodeID" ng-model="customer.glSalesCodeID"
+								ng-options="c.value as c.text for c in glSalesNumberCodes">
+							</select>
+							<error-messages></error-messages>
+						</div>
+						<div class="form-group">
+							<label class="required">Shipping</label>
+							<select ng-disabled="viewOnly()"  class="form-control" required
+								name="glShippingChargeCodeID" ng-model="customer.glShippingChargeCodeID"
+								ng-options="c.value as c.text for c in glShippingChargeNumberCodes">
+							</select>
+							<error-messages></error-messages>
+						</div>
+						<div class="form-group">
+							<label class="required">Accounts Receivable</label>
+							<select ng-disabled="viewOnly()"  class="form-control" required
+								name="glAccountsReceivableCodeID" ng-model="customer.glAccountsReceivableCodeID"
+								ng-options="c.value as c.text for c in glReceivableNumberCodes">
+							</select>
+							<error-messages></error-messages>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Financial Information</h4>
+				<div class="section-content row">
+					<div class="col-sm-6">
+						<div>
+							<label class="required">Payment Terms</label>
+							<div class="row equal fill-space align-center no-wrap form-group">
+								<div>
+									<label>
+										<input ng-disabled="viewOnly()"  required type="radio" class="m-r-5" name="paymentTermsType" ng-model="customer.paymentTermsType" ng-value="1" />COD
+									</label>
+								</div>
+								<div>
+									<label>
+										<input ng-disabled="viewOnly()"  required type="radio" class="m-r-5" name="paymentTermsType" ng-model="customer.paymentTermsType" ng-value="2" />Prepay
+									</label>
+								</div>
+								<div>
+									<label>
+										<input ng-disabled="viewOnly()"  required type="radio" class="m-r-5" name="paymentTermsType" ng-model="customer.paymentTermsType" ng-value="3" />
+										Net Due in
+									</label>
+									<select ng-disabled="viewOnly()"  class="form-control" name="paymentTermsNetDueDays" style="display:inline-block; width:auto;"
+										ng-model="customer.paymentTermsNetDueDays"
+										ng-required="customer.paymentTermsType === 3"
+										ng-disabled="customer.paymentTermsType !== 3"
+										ng-options="c as c for c in [30, 45, 60, 90]">
+										<option value="" ng-selected="customer.paymentTermsType !== 3" ng-show="customer.paymentTermsType !== 3"></option>
+									</select>
+									Days
+								</div>
+							</div>
+							<error-messages field="paymentTermsType"></error-messages>
+							<error-messages field="paymentTermsNetDueDays" ng-if="customer.paymentTermsType === 3"></error-messages>
+						</div>
+						<div class="row align-baseline">
+							<div class="col-sm-6 form-group">
+								<label>SWIFT/ABA Routing Number</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="bankRoutingNumber" maxlength="100" ng-model="customer.bankRoutingNumber" pattern="\d+" numbers-only />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>Bank Account Number</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="bankAccountNumber" maxlength="100" ng-model="customer.bankAccountNumber" pattern="\d+" numbers-only />
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row align-baseline form-group">
+							<label>Bank Address</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="bankAddress" maxlength="100" ng-model="customer.bankAddress" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row align-baseline">
+							<div class="col-sm-6 form-group">
+								<label>City</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="bankCity" maxlength="100" ng-model="customer.bankCity" />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-3 form-group">
+								<label>State</label>
+								<select ng-disabled="viewOnly()"  class="form-control" name="bankStateCodeID" ng-model="customer.bankStateCodeID" ng-options="c.value as c.text for c in stateCodes | codeFilter:customer.bankStateCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-3 form-group">
+								<label>Zip</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="bankZipCode" maxlength="50" ng-model="customer.bankZipCode" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row equal align-baseline">
+							<div class="col-sm-4 form-group">
+								<label>Payment Type</label>
+								<select ng-disabled="viewOnly()"  class="form-control" name="paymentType" ng-model="customer.paymentTypeCodeID" ng-options="c.value as c.text for c in paymentTypes | codeFilter:customer.paymentTypeCodeID">
+								</select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-4 form-group">
+								<label class="required">Sales Tax</label>
+								<select ng-disabled="viewOnly()"  class="form-control" required name="salesTaxCodeID" ng-model="customer.salesTaxCodeID" ng-options="c.value as c.text for c in salesTaxCodes | codeFilter:customer.salesTaxCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row align-baseline">
+							<div class="col-sm-4 form-group">
+								<label>Min Order Amount</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="minOrderAmount" ng-model="customer.minOrderAmount" pattern="^\d+(\.\d{2})?$" numeric-value />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-4 form-group">
+								<label>Credit Limit</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="creditLimit" maxlength="100" ng-model="customer.creditLimit" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row align-baseline form-group">
+							<label>Credit Card Name</label>
+							<input ng-disabled="viewOnly()"  class="form-control" name="creditCardName" maxlength="100" ng-model="customer.creditCardName" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row align-baseline">
+							<div class="col-sm-6 form-group">
+								<label>Credit Card Number</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="creditCardNumber" maxlength="20" ng-model="customer.creditCardNumber" numbers-only />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-2 form-group">
+								<label>CVV</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="cvv" maxlength="4" ng-model="customer.cvv" numbers-only />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-4 form-group">
+								<label>Expiration Date</label>
+								<input ng-disabled="viewOnly()"  class="form-control" name="expirationDate" ng-model="customer.expirationDate" mask="99/99" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<div class="section-content row">
+			<div class="form-group">
+				<label class="control-label">Notes</label>
+				<textarea ng-disabled="viewOnly()" class="form-control" rows="6" ng-model="customer.notes"></textarea>
+			</div>
+				</div>
+			</div>
+		</fieldset>
+	</form>
+	<div class="section">
+		<h4 class="section-title">Shipping Information</h4>
+		<div class="section-content row">
+			<div>
+				<button type="button" ng-hide="viewOnly()" class="btn btn-primary pull-right m-b-5" ng-click="addShippingInfo(0)">Add Row</button>
+				<list-table table="table"
+							details-func="editShippingInfo"
+							add-func="addShippingInfo"></list-table>
+			</div>
+			
+		</div>
+	</div>
+</div>
+
+<script type="text/ng-template" id="ShippingInfoModal.html">
+	<div class="modal-header">
+		<h4>Customer Shipping Info</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<form name="form">
+			<fieldset ng-disabled="viewOnly()">
+				<div class="row form-group">
+					<label class="required">Sales Rep</label>
+					<select class="form-control" required name="repUserID" ng-model="shippingInfo.repUserID" ng-options="c.value as c.text for c in repUserIDs | codeFilter:shippingInfo.repUserID"></select>
+					<error-messages></error-messages>
+				</div>
+				<div class="row form-group">
+					<label class="required">Name</label>
+					<input class="form-control" required name="name" maxlength="100" ng-model="shippingInfo.name" />
+					<error-messages></error-messages>
+				</div>
+				<div class="row form-group">
+					<label class="required">Address1</label>
+					<input class="form-control" required name="address" maxlength="100" ng-model="shippingInfo.address" />
+					<error-messages></error-messages>
+				</div>
+				<div class="row form-group">
+					<label>Address2</label>
+					<input class="form-control" name="address2" maxlength="100" ng-model="shippingInfo.address2" />
+					<error-messages></error-messages>
+				</div>
+				<div class="row form-group">
+					<label class="required">City</label>
+					<input class="form-control" required name="city" maxlength="100" ng-model="shippingInfo.city" />
+					<error-messages></error-messages>
+				</div>
+				<div class="row">
+					<div class="col-sm-4 form-group">
+						<label>State</label>
+						<select class="form-control" name="stateCodeID" ng-model="shippingInfo.stateCodeID" ng-options="c.value as c.text for c in stateCodes | codeFilter:shippingInfo.stateCodeID"></select>
+						<error-messages></error-messages>
+					</div>
+					<div class="col-sm-4 form-group">
+						<label>Zip</label>
+						<input class="form-control" name="zipCode" maxlength="50" ng-model="shippingInfo.zipCode" />
+						<error-messages></error-messages>
+					</div>
+					<div class="col-sm-4 form-group">
+						<label class="required">Country</label>
+						<select class="form-control" required name="countryCodeID" ng-model="shippingInfo.countryCodeID" ng-options="c.value as c.text for c in countryCodes | codeFilter:shippingInfo.countryCodeID"></select>
+						<error-messages></error-messages>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6 form-group">
+						<label>Ship Co # 1</label>
+						<select class="form-control" name="shipCompany1CodeID" ng-model="shippingInfo.shipCompany1CodeID" ng-options="c.value as c.text for c in shipCompanyCodes | codeFilter:shippingInfo.shipCompany1CodeID"></select>
+						<error-messages></error-messages>
+					</div>
+					<div class="col-sm-6 form-group">
+						<label>Account Info</label>
+						<input class="form-control" name="shipCompany1AccountNumber" maxlength="9" ng-model="shippingInfo.shipCompany1AccountNumber" pattern="^[a-zA-Z0-9]+"  />
+						<error-messages></error-messages>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6 form-group">
+						<label>Ship Co # 2</label>
+						<select class="form-control" name="shipCompany2CodeID" ng-model="shippingInfo.shipCompany2CodeID" ng-options="c.value as c.text for c in shipCompanyCodes | codeFilter:shippingInfo.shipCompany1CodeID"></select>
+						<error-messages></error-messages>
+					</div>
+					<div class="col-sm-6 form-group">
+						<label>Account Info</label>
+						<input class="form-control" name="shipCompany2AccountNumber" maxlength="9" ng-model="shippingInfo.shipCompany2AccountNumber" pattern="^[a-zA-Z0-9]+" />
+						<error-messages></error-messages>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-1 form-group">
+						<input type="checkbox" name="isDisabled" ng-model="shippingInfo.isDisabled" />
+					</div>
+					<div class="col-sm-11 form-group">
+						<label>Disabled</label>
+					</div>
+				</div>
+			</fieldSet>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<div class="row">
+			<div class="col-md-4 text-left">
+				<button type="button" class="btn btn-danger" ng-click="delete()">Delete</button>
+			</div>
+			<div class="col-md-8">
+				<button type="button" class="btn btn-primary" ng-click="close()">Close</button>
+				<button type="button" class="btn btn-primary" ng-click="add()">{{AddEditShippingText}}</button>
+			</div>
+		</div>		
+	</div>
+
+</script>

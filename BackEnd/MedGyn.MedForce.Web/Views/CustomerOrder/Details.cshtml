@@ -1,0 +1,468 @@
+@using MedGyn.MedForce.Common.Configurations;
+
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+
+@model int
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Customer Order Details";
+}
+
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Services/customerOrderService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/App/Services/customerService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/customerOrder/customerOrderDetailsController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/components/order-product-list.css" />
+}
+
+<div ng-controller="customerOrderDetailsController" ng-init="init(@Model)" ng-cloak>
+
+	<div class="details-header">
+		<div class="details-alert" ng-if="customer.onCreditHold"><h3>Alert: On Credit Hold</h3></div>
+		<div class="details-alert" ng-if="customer.customerInactive"><h3>Alert: Customer Inactive</h3></div>
+		<div class="details-alert" ng-show="customerOrder.isDoNotFill">
+			<h4>Do Not Fill Order: </h4>
+			<input ng-model="customerOrder.doNotFillReason" ng-disabled="!isDoNotFillEnabled()" maxlength="200"/>
+		</div>
+		<div class="details-header-content">
+			<h1>Customer Order</h1>
+			<h1>{{ customerOrder.customerOrderCustomID }}</h1>
+			<h1 ng-if="customerOrder.submitDate"> Placed: {{ customerOrder.submitDate | localTime:"MM/dd/yyyy" }} </h1>
+
+			<div class="form-actions">
+				<div class="details-additional-actions">
+					<label>
+						Do Not Fill
+						<input type="checkbox" ng-disabled="!isDoNotFillEnabled()" ng-model="customerOrder.isDoNotFill" ng-change="doNotFillClick()" />
+					</label>
+				</div>
+				<div class="buttons">
+					<button type="button" ng-show="canExport" class="btn btn-primary" ng-click="export()">Export</button>
+					<button type="button" class="btn btn-primary"
+						ng-if="customerOrder && !customerOrder.submitDate"
+						ng-disabled="customer.onCreditHold || isSaving || customer.customerInactive"
+						ng-click="save(true)"
+						ng-hide="viewOnly()">
+							Save & Submit
+							<span ng-if="isSaving"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+					</button>
+					<button type="button" class="btn btn-primary"
+						ng-if="customerOrder.submitDate && !customerOrder.mgApprovedBy"
+						ng-disabled="form.$dirty"
+						ng-click="approve(false)"
+						ng-show="isManager">
+							MG Approved
+					</button>
+					<button type="button" class="btn btn-primary"
+						ng-if="customerOrder.submitDate && customerOrder.mgApprovedBy && !customerOrder.vpApprovedBy"
+						ng-disabled="form.$dirty"
+						ng-click="approve(true)"
+						ng-show="isVP">
+							VP Approved
+					</button>
+					<button type="button" ng-hide="viewOnly()" ng-disabled="isSaving" ng-click="save(false)" class="btn btn-primary">
+						Save
+						<span ng-if="isSaving"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+					</button>
+					<cancel-button page="/customerOrder" form="form" save="save()"></cancel-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<form name="form" prompt-before-leave>
+		<fieldset class="section" ng-disabled="viewOnly() || customerOrder.vpApprovedBy">
+			<div class="section-content">
+				<div class="row">
+                    <div class="col-sm-6">
+                        <div class="row equal form-group">
+                            <label class="col-sm-3 required align-center">Bill to customer</label>
+                            <div class="col-sm-9 align-center">
+                                <select id="customer-select" class="form-control" name="customerID" required
+                                        ng-model="customerOrder.customerID"
+                                        ng-options="c.value as c.text for c in customers | codeFilter:customerOrder.customerID"
+                                        ng-change="changeCustomer()">
+                                </select
+                                <error-messages></error-messages>
+                            </div>
+                        </div>
+                        <div class="row equal form-group">
+                            <label class="col-sm-3 required align-center">Ship to customer</label>
+                            <div class="col-sm-9 align-center">
+                                <input class="form-control" name="shippingCustomerName" required
+                                        ng-model="customerOrder.shippingCustomerName"/>
+                                <error-messages></error-messages>
+                            </div>
+                        </div>
+                        <div class="row equal form-group">
+                            <label class="col-sm-3 required align-center">Ship Location</label>
+                            <div class="col-sm-9 align-center">
+                                <select class="form-control" name="customerShippingInfoID" required
+                                        ng-model="customerOrder.customerShippingInfoID"
+                                        ng-options="c.customerShippingInfoID as c.name for c in customer.shippingInfo"
+                                        ng-change="changeShipLocation()">
+                                </select>
+                                <error-messages></error-messages>
+                            </div>
+                        </div>
+                        <div class="row equal form-group">
+                            <label style="margin-bottom:5px" class="col-sm-3 align-center">PO #</label>
+                            <div class="col-sm-9 align-center" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex-grow: 2; margin-bottom:5px">
+                                    <input class="form-control" name="poNumber" ng-model="customerOrder.poNumber" maxlength="100" />
+                                    <error-messages></error-messages>
+                                </div>
+                                <div style="flex-grow:1; display: flex; justify-content: flex-end; align-items: center;margin-bottom:5px">
+                                    <label ng-if="customerOrder.attachmentURI" style="margin-right: 1.25rem;">
+                                        <span ng-if="isAttachmentChanged" title="{{customerOrder.attachmentFileName}}">Uploaded</span>
+                                        <a ng-if="!isAttachmentChanged" title="{{customerOrder.attachmentFileName}}" href="{{customerOrder.attachmentURI}}" target="_blank">View File</a>
+                                    </label>
+                                    <button type="button" class="btn btn-primary" name="coFileUpload" onclick="$('#co-file-upload').click()">Upload</button>
+                                    <input id="co-file-upload" name="coFileUpload" type="file" accept="application/pdf" style="display: none;" />
+                                    <input type="hidden" name="coFileUpload" ng-model="customerOrder.attachmentURI" required />
+                                    <error-messages></error-messages>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row equal form-group">
+                            <label class="col-sm-3 align-center">Contact</label>
+                            <div class="col-sm-9 align-center">
+                                <input class="form-control" name="contact" ng-model="customerOrder.contact" maxlength="100" />
+                                <error-messages></error-messages>
+                            </div>
+                        </div>
+                    </div>
+					<div class="col-sm-6">
+						<div class="row">
+							<label class="col-sm-2">Practice</label>
+							<label class="col-sm-10">
+								{{ practiceTypesDict[customer.practiceTypeCodeID] }}
+								{{ customer.practiceTypeOther }}
+							</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-2">Type</label>
+							<label class="col-sm-10">{{ customer._type }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-2">Terms</label>
+							<label class="col-sm-10">{{ customer._terms }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-2">Rep</label>
+							<label class="col-sm-10">
+								{{ repDict[shippingInfoDict[customerOrder.customerShippingInfoID].repUserID] }}
+							</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-2">Notes</label>
+							<label class="col-sm-10">{{ customer.notes }}</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row equal">
+						<label class="col-sm-5 align-center required"> Product </label>
+						<label class="col-sm-1 align-center required justify-flex-end"> Quantity </label>
+						<label class="col-sm-1 align-center"> U/M </label>
+						<label class="col-sm-1 align-center required justify-flex-end"> Price </label>
+						<label class="col-sm-2 align-center justify-flex-end"><span> Ext Price</span> </label>
+						<div class="col-sm-2 align-center justify-flex-end">
+							<button type="button" class="btn btn-primary" ng-click="addProduct()" ng-hide="customerOrder.vpApprovedBy || viewOnly()">
+								+ Product
+							</button>
+						</div>
+					</div>
+				<div class="row">
+					<div class="products-wrapper">
+						<div ng-repeat="product in customerOrder.products" ng-cloak ng-if="!product.markedForDelete">
+							<div class="row equal">
+								<div class="col-sm-5">
+									<select class="form-control" name="product{{$index}}_productID" required
+										ng-disabled="!customerOrder.customerID"
+										ng-model="product.productID"
+										ng-change="changeProduct($index)"
+										ng-options="c.value as c.text for c in customerProducts | codeFilter:product.productID">
+									</select>
+									<error-messages></error-messages>
+								</div>
+								<div class="col-sm-1" style="padding-right:0;">
+									<input class="form-control text-right" name="product{{$index}}_quantity" required pattern="^[1-9][0-9]*$" ng-model="product.quantity" numeric-value />
+									<error-messages></error-messages>
+								</div>
+								<div class="col-sm-1">
+									{{ umCodes[product.unitOfMeasureCodeID] }}
+								</div>
+								<div class="col-sm-1" style="padding-right:0;">
+									<input class="form-control text-right" name="product{{$index}}_price" required pattern="^[+-]?[0-9]{1,9}(?:\.[0-9]{0,4})?$" ng-model="product.price" numeric-value />
+									<error-messages></error-messages>
+								</div>
+								<div class="col-sm-2 text-right">
+									<span ng-if="product.price && product.quantity">{{ product.price * product.quantity | currency : '$'}}</span>
+								</div>
+								<div class="col-sm-2 justify-flex-end">
+									<span ng-hide="customerOrder.vpApprovedBy || viewOnly()">
+										<i class="fa fa-trash-o" style="font-size:1.8em" ng-click="deleteProduct($index)"></i>
+									</span>
+								</div>
+							</div>
+							<div ng-show="product.productID">
+								<div class="row">
+									<div class="col-sm-6" style="padding-left: 25px">
+										On Hand <span class="p-l-10">{{ product.meta.stockInfo.onHand }}</span> <span class="p-l-10 p-r-10">-</span>
+										Committed <span class="p-l-10">{{ product.meta.stockInfo.unfilledCOs }}</span> <span class="p-l-10 p-r-10">+</span>
+										PO <span class="p-l-10">{{ product.meta.stockInfo.pendingPOs }}</span>
+										<span style="white-space:nowrap;"><span class="p-l-10 p-r-10">=</span>Net Quantity<span class="p-l-10">{{ product.meta.stockInfo.netQuantity }}</span></span>
+									</div>
+									<div class="col-sm-1 container-no-padding" style="text-align: right;">List Price:</div>
+									<div class="col-sm-1 text-right">{{ (product.meta.listPrice | currency:'$') || "N/A" }}</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-2 text-center"><label></label></div>
+							<div class="col-sm-1 text-center" ng-if="product.poExpectedDates.length > 0"><div ng-repeat="expectedDate in product.poExpectedDates"><label>{{ expectedDate }}</label></div></div>
+							<div class="col-sm-1 text-center" ng-if="product.poExpectedDates.length <= 0"><label>No Open POs</label></div>
+							<div class="col-sm-2 text-center"><label></label></div>
+							<div class="col-sm-1 text-center"><label></label></div>
+							<div class="col-sm-2 text-center"><label></label></div>
+							<div class="col-sm-1 text-center"><label></label></div>
+							<div class="col-sm-2 text-center"><label></label></div>
+					
+								</div>
+								<br>
+								<div class="row">
+									<div class="col-sm-3"></div>
+									<div class="col-sm-1" ng-if="!product.meta.coHistory.length">History:</div>
+									<div class="col-sm-1" ng-if="!product.meta.coHistory.length">none</div>
+								</div>
+								<div class="row" ng-repeat="history in product.meta.coHistory">
+									<div class="col-sm-3"></div>
+									<div class="col-sm-1">{{$index == 0 ? 'History:': ''}}</div>
+									<div class="col-sm-1">{{ history.date }}</div>
+									<div class="col-sm-1 text-right">{{ history.quantity }}</div>
+									<div class="col-sm-1">{{ umCodes[history.umCodeID] }}</div>
+									<div class="col-sm-1 text-right">{{ history.price | currency : '$' }}</div>
+									<div class="col-sm-2 text-right">{{ history.extPrice | currency : '$' }}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="row form-group">
+							<div class="col-sm-6">
+								<label>Ship Company</label>
+								<select class="form-control" name="shipCompanyType"
+									ng-change="changeShipCompany()"
+									ng-model="customerOrder.shipCompanyType"
+									ng-options="c.value as c.text for c in shipCompanies | codeFilter:customerOrder.shipCompanyType">
+									<option value=""></option>
+								</select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-6">
+								<label>Ship Choice</label>
+								<select class="form-control" name="shipChoiceCodeID"
+									ng-model="customerOrder.shipChoiceCodeID"
+									ng-options="c.value as c.text for c in shipChoiceCodes | codeFilter:customerOrder.shipChoiceCodeID">
+									<option value=""></option>
+								</select>
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row equal form-group">
+							<label class="col-sm-3 align-center">Account #</label>
+							<label class="col-sm-3 align-center">{{ shippingAccounts[customerOrder.shipCompanyType] }}</label>
+							<div class="col-sm-6 align-center justify-flex-end">
+								<label class="align-center no-wrap">
+									Partial Ship Acceptable <input type="checkbox" class="large" name="isPartialShipAcceptable" ng-model="customerOrder.isPartialShipAcceptable" />
+								</label>
+							</div>
+						</div>
+						<div class="row equal form-group">
+							<div class="col-sm-4 align-center no-wrap">
+								<label>Sh</label>
+								<input class="form-control" name="shippingCharge" pattern="^\d+(\.\d{2})?$" ng-model="customerOrder.shippingCharge" numeric-value />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-4 align-center no-wrap">
+								<label>Hd</label>
+								<input class="form-control" name="handlingCharge" pattern="^\d+(\.\d{2})?$" ng-model="customerOrder.handlingCharge" numeric-value />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-4 align-center no-wrap">
+								<label>Ins</label>
+								<input class="form-control" name="insuranceCharge" pattern="^\d+(\.\d{2})?$" ng-model="customerOrder.insuranceCharge" numeric-value />
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row">
+							<label class="col-sm-3">Totals:</label>
+							<label class="col-sm-3"> {{ totalProducts()}} product(s) </label>
+							<label class="col-sm-3"> {{ totalItems()}} item(s) </label>
+							<label class="col-sm-3 text-right"> {{ totalPrice() | currency : '$'}} </label>
+						</div>
+						<div class="row">
+							<label class="col-sm-3">Sh/HD/In:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right">
+								{{ totalShippingCharge() | currency : '$'}}
+							</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-3">Tax:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right">{{ tax() | currency : '$'}}</label>
+
+						</div>
+						<div class="row">
+							<label class="col-sm-3">CC Processing Fee:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right">{{ creditCardFee() | currency : '$'}}</label>
+
+						</div>
+						<div class="row">
+							<label class="col-sm-3">Total:</label>
+							<label class="col-sm-3 col-sm-offset-6 text-right">
+								{{ totalPrice() + totalShippingCharge() + tax() + creditCardFee() | currency : '$'}}
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="row" ng-if="customer.customerType === 4">
+					<div class="col-sm-12">
+						<div class="row equal form-group">
+							<label class="col-sm-12 align-center">Intermediary Shipping</label>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div>
+							<div class="row equal form-group">
+								<label class="col-sm-3 align-center wrap-text">Name</label>
+								<div class="col-sm-9 align-center">
+									<input class="form-control" name="intermediaryShippingName" ng-model="customerOrder.intermediaryShippingName" />
+									<error-messages></error-messages>
+								</div>
+							</div>
+							<div class="row equal form-group">
+								<label class="col-sm-3 align-center wrap-text">Address</label>
+								<div class="col-sm-9 align-center">
+									<input class="form-control" name="intermediaryShippingAddress" ng-model="customerOrder.intermediaryShippingAddress" />
+									<error-messages></error-messages>
+								</div>
+							</div>
+							<div class="row equal form-group">
+								<label class="col-sm-3 align-center wrap-text">Contact Email</label>
+								<div class="col-sm-9 align-center">
+									<input type="email" class="form-control" name="intermediaryShippingContactEmail" ng-model="customerOrder.intermediaryShippingContactEmail" />
+									<error-messages></error-messages>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div ng-if="customer.customerType === 4">
+							<div class="row equal form-group">
+								<label class="col-sm-3 align-center wrap-text">Contact Name</label>
+								<div class="col-sm-9 align-center">
+									<input class="form-control" name="intermediaryShippingContactName" ng-model="customerOrder.intermediaryShippingContactName" />
+									<error-messages></error-messages>
+								</div>
+							</div>
+							<div class="row equal form-group">
+								<label class="col-sm-3 align-center wrap-text">Contact Number</label>
+								<div class="col-sm-9 align-center">
+									<input class="form-control" name="intermediaryShippingContactNumber" ng-model="customerOrder.intermediaryShippingContactNumber" />
+									<error-messages></error-messages>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-6">
+						<div class="row equal form-group">
+							<label class="col-sm-3 align-center">Instructions</label>
+							<div class="col-sm-9 align-center">
+								<textarea class="form-control" name="instructions" ng-model="customerOrder.instructions"></textarea>
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row equal form-group">
+							<label class="col-sm-3 align-center">Internal Notes</label>
+							<div class="col-sm-9 align-center">
+								<textarea class="form-control" name="notes" ng-model="customerOrder.notes"></textarea>
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</fieldset >
+		<div class="last-updated-section" ng-show="customerOrder.shippedBy">
+			<span class="text-right">Shipped By:</span>
+			<span>{{ customerOrder.shippedBy }} {{ customerOrder.shippedOn | localTime }}</span>
+		</div>
+		<div class="last-updated-section" ng-show="customerOrder.filledBy">
+			<span>Filled By:</span>
+			<span>{{ customerOrder.filledBy }} {{ customerOrder.filledOn | localTime }}</span>
+		</div>
+		<div class="last-updated-section" ng-show="customerOrderID">
+			<span>MG Approved:</span>
+			<span>{{ customerOrder.mgApprovedBy }} {{ customerOrder.mgApprovedOn | localTime }}</span>
+		</div>
+		<div class="last-updated-section" ng-show="customerOrderID">
+			<span>VP Approved:</span>
+			<span>{{ customerOrder.vpApprovedBy }} {{ customerOrder.vpApprovedOn | localTime }}</span>
+		</div>
+		<div class="last-updated-section" ng-show="customerOrder.updatedBy">
+			<span>Last Updated:</span>
+			<span>{{ customerOrder.updatedBy }} {{ customerOrder.updatedOn | localTime }}</span>
+		</div>
+	</form>
+</div>
+<script type="text/ng-template" id="ExportPopup.html">
+	<div class="modal-header">
+		<h4>Export Customer Order</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<form name="form">
+			<fieldset>
+				<div class="row form-group">
+					<label class="required">Document Title</label>
+					<input class="form-control" type="text" name="documentTitle" required maxlength="100" ng-model="documentTitle">
+					<error-messages></error-messages>
+				</div>
+			</fieldSet>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-primary" ng-click="close()">Cancel</button>
+		<button type="button" class="btn btn-primary" ng-click="export()">Export</button>
+	</div>
+</script>
+<script type="text/ng-template" id="DoNotFillPopup.html">
+	<div class="modal-header">
+		<h4>Update Do not Fill Status</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<form name="form">
+			<fieldset>
+				<div class="row form-group">
+					<label class="required">Do Not Fill Reason</label>
+					<br/>
+					<input ng-model="doNotFillReason"  maxlength="200"/>
+				</div>
+			</fieldSet>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-primary" ng-click="close()">Cancel</button>
+		<button type="button" class="btn btn-primary" ng-click="saveFill()">Update</button>
+	</div>
+</script>

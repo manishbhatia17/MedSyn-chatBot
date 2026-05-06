@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"terminal.integrated.cwd": "MedGyn.MedForce.Web",
+		"files.exclude": {
+			"**/bin/": true,
+			"**/obj/": true,
+			"**/.vs/": true,
+			"**/.vscode/": true,
+		},
+		"editor.renderWhitespace": "all",
+		"editor.insertSpaces": false,
+		"editor.detectIndentation": false,
+		"javascript.preferences.importModuleSpecifier": "non-relative",
+		"javascript.preferences.quoteStyle": "double",
+		"javascript.format.insertSpaceAfterKeywordsInControlFlowStatements": false,
+		"javascript.format.insertSpaceBeforeFunctionParenthesis": false,
+		"javascript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+		"files.eol": "\r\n"
+	}
+}

@@ -1,0 +1,76 @@
+﻿@using MedGyn.MedForce.Common.Configurations;
+
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Back Orders";
+}
+@section Scripts {
+    <script type="text/javascript" src="~/js/App/Controllers/backOrderController.js?cachebust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+    <script type="text/javascript" src="~/js/App/Services/backOrderService.js?cachebust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+}
+
+<style>
+    input[type=search] {
+        display: none;
+    }
+</style>
+
+<div ng-controller="backOrderController" ng-cloak>
+    <div class="row">
+        <div class="col-md-3">
+            <h1>
+                Back Order List
+            </h1>
+            <h1 ng-show="table.grandTotal">
+                Grand Total: {{ table.grandTotal | currency:'$' }}
+            </h1>
+
+        </div>
+        <div class="col-md-4 col-md-offset-5 text-right">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <label>Search All Fields</label>
+                    <br />
+                    <input type="text" name="product_search" id="product_search" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched" ng-model="searchValue" />
+                </div>
+                <div class="col-md-4 text-center">
+                    <label>Search Product ID</label>
+                    <br />
+                    <input type="text" name="product_id" id="product_id" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched" ng-model="productId" />
+
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                            <br />
+                        <div class="input-group-btn" style="">
+                            <button type="button" ng-click="search()" class="btn btn-primary">Search</button>
+                        </div>
+                        <div class="input-group-btn" style="">                          
+                            <button type="button" ng-click="clear()" class="btn btn-primary">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="row">
+            <div class=" col-md-2 col-md-offset-10 text-right">
+                <label id="total_quantity"></label>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col">
+            <list-table table="table"
+                        service="backOrderService"
+                        fetch-func="fetchBackOrders" ,
+                        search-Criteria="searchCriteria",
+                        show-All-Pages="true">
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,40 @@
+.image-upload-wrapper {
+	font-size: 12px;
+	display: flex;
+}
+
+.image-upload-wrapper .header button {
+	margin-left: 20px;
+}
+
+.image-upload-wrapper .image-area {
+	max-height: 180px;
+}
+
+.image-upload-wrapper .image-area img {
+	background-color: #8d9f9f;
+	margin: 2px;
+	object-fit: cover;
+}
+
+.image-upload-wrapper .main-image {
+	margin-right: 10px;
+}
+.image-upload-wrapper .extra-images {
+	flex-grow: 1;
+}
+.image-upload-wrapper .extra-images .image-area {
+	display: inline-flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+}
+
+.image-upload-wrapper .main-image img {
+	height: 135px;
+	width: 180px;
+}
+
+.image-upload-wrapper .extra-images img {
+	height: 65px;
+	width: 85px;
+}

@@ -1,0 +1,21 @@
+﻿
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Purchase Orders";
+}
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/purchaseOrder/purchaseOrderListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/purchaseOrderService.js"></script>
+}
+<div ng-controller="purchaseOrderListController" ng-cloak>
+	<h1>
+		Purchase Order List
+	</h1>
+	<list-table
+		table="table"
+		service="purchaseOrderService"
+		fetch-func="fetchPurchaseOrders"
+		details-route="/purchaseOrder/details/"
+	></list-table>
+</div>
+

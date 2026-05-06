@@ -1,0 +1,217 @@
+@using System.Linq;
+@{
+	Layout = "Views.Shared._ReportLayout.cshtml";
+	static string join(params string[] args)
+	{
+		return string.Join(", ", args.Where(s => !string.IsNullOrWhiteSpace(s)));
+	}
+}
+
+<div class="flex">
+	<div class="half-children medgyn-info">
+			<div>
+				<img src="data:image/png;base64,@Model.LogoString" style="height: 90px">
+			</div>
+			<div>
+				<div>@Model.MedGynAddress @Model.MedGynCity, @Model.MedGynStateOrProvinceCode @Model.MedGynPostalCode</div>
+				<div>Fax: @Model.MedGynFax</div>
+				<div>Toll-Free: @Model.MedGynTollFreePhone Email: @Model.MedGynEmail</div>
+				<br />
+				<div>Remittance to: @Model.InvoiceRemittanceAddress</div>
+				<div>@Model.InvoiceRemittanceMessage</div>
+			</div>
+		</div>
+
+	<div class="half-children">
+		<div class="flex">
+			<div class="side-label">
+				Bill To:
+			</div>
+			<div class="address-label">
+				<div>@Model.CustomerName</div>
+				<div>@Model.CustomerAddress</div>
+				<div>@Model.CustomerAddress2</div>
+				<div>@join(Model.CustomerCity, Model.CustomerState, Model.CustomerZip)</div>
+				<div>@Model.CustomerCountry</div>
+			</div>
+		</div>
+		<div class="flex">
+			<div class="side-label">
+				Ship To:
+			</div>
+            <div class="address-label">
+                <div>@Model.ShippingCustomerName</div>
+                <div>@Model.CustomerShipName</div>
+                <div>@Model.CustomerShipAddress</div>
+                <div>@Model.CustomerShipAddress2</div>
+                <div>@join(Model.CustomerShipCity, Model.CustomerShipState, Model.CustomerShipZip)</div>
+                <div>@Model.CustomerShipCountry</div>
+            </div>
+		</div>
+	</div>
+	@if(Model.IsInternational)
+	{
+		<div class="half-children" style="margin-top: 20px">
+			<div></div>
+			<div class="flex">
+				<div class="side-label" style="margin-left: -30px; width: 90px; padding-right: 10px; text-align: right;">
+					Intermediary Shipping:
+				</div>
+				<div class="address-label">
+					<div> @Model.ISName </div>
+					<div> @Model.ISAddress </div>
+					<div> @Model.ISContactName </div>
+					<div> @Model.ISContactNumber </div>
+					<div> @Model.ISContactEmail </div>
+				</div>
+			</div>
+		</div>
+	}
+</div>
+<div style="clear:both;">
+	<div style="font-size: 20px">Invoice</div>
+	<br />
+	<table>
+		<tr>
+			<td class="box">
+				<div>
+					<table>
+						<tr>
+							<td>Invoice</td>
+							<td>@Model.InvoiceNumber</td>
+						</tr>
+						<tr>
+							<td>Invoice Date</td>
+							<td>@Model.InvoiceDate</td>
+						</tr>
+						<tr>
+							<td>Order</td>
+							<td>@Model.CustomerOrderNumber</td>
+						</tr>
+						<tr>
+							<td>Order Date</td>
+							<td>@Model.CustomerOrderDate</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td class="box">
+				<div>
+					<table>
+						<tr>
+							<td>Ship Company</td>
+							<td>@Model.ShipCompany</td>
+						</tr>
+						<tr>
+							<td>Ship Method</td>
+							<td style="word-wrap: break-word;">@Model.ShipMethod</td>
+						</tr>
+						<tr>
+							<td>Ship Date</td>
+							<td>@Model.ShipDate</td>
+						</tr>
+						<tr>
+							<td>Partial Ship</td>
+							<td>@Model.IsPartialShip</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td class="box">
+				<div>
+					<table>
+						<tr>
+							<td>Customer ID</td>
+							<td>@Model.CustomerID</td>
+						</tr>
+						<tr>
+							<td>Customer PO</td>
+							<td>@Model.CustomerPONumber</td>
+						</tr>
+						<tr>
+							<td>Sales Rep</td>
+							<td>@Model.SalesRep</td>
+						</tr>
+						<tr>
+							<td>Payment Terms</td>
+							<td>@Model.PaymentTerms</td>
+						</tr>
+						<tr>
+							<td>Payment Date</td>
+							<td>@Model.PaymentDate</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+<div>
+	<table style="width: 100%" class="stripe">
+		<thead>
+			<tr>
+				<th>Prod ID</th>
+				<th>Name</th>
+				<th>Lot Numbers</th>
+				<th class="align-right">Ord</th>
+				<th class="align-right">B/O</th>
+				<th class="align-right">Pkd</th>
+				<th class="align-right">Price</th>
+				<th class="align-right">Ext</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var product in Model.Products)
+			{
+				<tr>
+					<td>@product.ProductCustomID</td>
+					<td>@product.ProductName</td>
+					<td>@product.SerialNumbers</td>
+					<td class="align-right">@product.Quantity</td>
+					<td class="align-right">@product.BackorderQuantity</td>
+					<td class="align-right">@product.QuantityPacked</td>
+					<td class="align-right">$@product.Price</td>
+					<td class="align-right">$@Math.Round(product.Ext,2)</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+<div>
+	<div>Master Tracking # @Model.TrackingNumber</div>
+</div>
+<div class="flex half-children">
+	<div style="margin-top: 1.5em">
+		<table>
+			<tr>
+				<td style="padding-right: 20px; vertical-align: top;">Instructions</td>
+				<td style="padding-right: 10px">@Model.Instructions</td>
+			</tr>
+		</table>
+	</div>
+	<div>
+		<div class="half-children">
+			<span>Subtotal</span>
+			<span class="align-right">$@Model.Subtotal</span>
+		</div>
+		<div class="half-children">
+			<span>Taxes</span>
+			<span class="align-right">$@Model.Taxes.ToString("0.00")</span>
+		</div>
+		<div class="half-children">
+			<span>Sh/Hd/In</span>
+			<span class="align-right">$@Model.ShippingCharge</span>
+		</div>
+		<div class="half-children">
+			<span>CC Processing Fee</span>
+			<span class="align-right">$@Model.CreditCardFee</span>
+		</div>
+		<div class="half-children">
+			<span>Total Invoice Amount</span>
+			<span class="align-right">$@Model.TotalAmount</span>
+		</div>
+	</div>
+</div>
+<div class="footer">
+	@Model.InvoiceFooter
+</div>

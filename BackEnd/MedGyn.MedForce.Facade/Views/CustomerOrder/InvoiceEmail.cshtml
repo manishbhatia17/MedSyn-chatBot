@@ -1,0 +1,8 @@
+@{
+	Layout = "Views.Shared._EmailLayout.cshtml";
+}
+
+<span>Hello, @Model.Contact</span>
+<p>Your invoice for @Model.OrderNumber is attached.</p>
+<p>If you have any questions please reach out to @Model.SalesRepName at <a href="mailto:@Model.SalesRepEmail">@Model.SalesRepEmail</a></p>
+Thanks,

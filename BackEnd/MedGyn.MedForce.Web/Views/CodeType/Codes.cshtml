@@ -1,0 +1,27 @@
+@model int
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Codes";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/codesAndTypes/codeListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/codeService.js"></script>
+}
+
+<div ng-controller="codeListController" ng-init="init(@Model)" ng-cloak>
+	<h1>
+		Codes: {{ codeType.codeTypeName }}
+	</h1>
+	<div class="body-wrapper">
+		<list-table ng-if="table"
+			table="table"
+			service="codeService"
+			fetch-func="fetchCodes"
+			save-func="save"
+			add-func="add"
+			back-route="/CodeType"
+		></list-table>
+	</div>
+</div>
+

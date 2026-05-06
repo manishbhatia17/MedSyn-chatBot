@@ -1,0 +1,21 @@
+﻿@* Unsaved Data Popup Template *@
+<script type="text/ng-template" id="UnsavedDataPopup.html">
+    <div class="modal-header">
+        @*<button type="button" class="close" ng-click="cancel()" aria-hidden="true">×</button>*@
+        <button type="button" class="close" ng-click="cancel()" aria-hidden="true">x</button>
+        <br />
+        <p>
+            Are you sure you want to leave this page without saving your changes?
+        </p>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-sm-3 col-sm-offset-3">
+                <button ng-click="confirm()" class="btn btn-primary">Yes</button>
+            </div>
+            <div class="col-sm-3">
+                <button ng-click="cancel()" class="btn btn-default">No</button>
+            </div>
+        </div>
+    </div>
+</script>

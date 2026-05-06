@@ -1,0 +1,341 @@
+﻿@model int
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Vendor Details";
+}
+
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Services/vendorService.js"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/vendorDetailsController.js"></script>
+}
+
+<div ng-controller="vendorDetailsController" ng-init="init(@Model)" ng-cloak>
+	<div class="details-header">
+		<div class="details-header-content">
+			<h1>Vendor Details</h1>
+
+			<div class="form-actions">
+				<div class="details-additional-actions">
+					<label>
+						Status
+						<select ng-disabled="viewOnly()" ng-model="vendor.vendorStatusCodeID" ng-options="c.value as c.text for c in vendorStatusCodes | codeFilter:customer.vendorStatusCodeID"></select>
+					</label>
+				</div>
+				<div class="buttons">
+					<button type="button" ng-hide="viewOnly()" ng-click="save()" class="btn btn-primary">Save</button>
+					<cancel-button page="/vendor" form="form" save="save()"></cancel-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<form name="form" prompt-before-leave>
+		<fieldset ng-disabled="viewOnly()">
+			<div class="section">
+				<h4 class="section-title">Vendor Information</h4>
+				<div class="section-content row">
+					<div class="col-sm-6">
+						<div class="row form-group">
+							<label class="required">Name</label>
+							<input class="form-control" required name="vendorName" maxlength="100" ng-model="vendor.vendorName" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label class="required">Address</label>
+							<input class="form-control" required name="address1" maxlength="100" ng-model="vendor.address1" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label>Address 2</label>
+							<input class="form-control" name="address2" maxlength="100" ng-model="vendor.address2" />
+						</div>
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label class="required">City</label>
+								<input class="form-control" required name="city" maxlength="100" ng-model="vendor.city" />
+								<error-messages></error-messages>
+							</div>
+
+							<div class="col-sm-3 form-group">
+								<label>State</label>
+								<select class="form-control" name="stateCodeID" ng-model="vendor.stateCodeID" ng-options="c.value as c.text for c in stateCodes | codeFilter:vendor.stateCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+
+							<div class="col-sm-3 form-group">
+								<label>Zip</label>
+								<input class="form-control" name="zipCode" maxlength="50" ng-model="vendor.zipCode" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-sm-4 form-group">
+								<label class="required">Country</label>
+								<select class="form-control" required name="countryCodeID" ng-model="vendor.countryCodeID" ng-options="c.value as c.text for c in countryCodes | codeFilter:vendor.countryCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-8 form-group">
+								<label>Website</label>
+								<input class="form-control" name="website" maxlength="100" ng-model="vendor.website" />
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row form-group">
+							<label class="required">Vendor ID</label>
+							<input class="form-control" required name="vendorCustomID" maxlength="100" ng-model="vendor.vendorCustomID" ng-change="clearInvalid()" />
+							<error-messages unique-msg="Vendor ID must be unique"></error-messages>
+						</div>
+						<div class="row form-group">
+							<label>Primary Contact</label>
+							<input class="form-control" name="primaryContact" maxlength="100" ng-model="vendor.primaryContact" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row form-group">
+							<label>Primary Email</label>
+							<input class="form-control" type="email" name="primaryEmail" maxlength="100" ng-model="vendor.primaryEmail" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label class="required">Primary Phone</label>
+								<input class="form-control" required name="primaryPhone" ng-model="vendor.primaryPhone" maxlength="50" clean="true" />
+								<error-messages mask-msg="Invalid phone number"></error-messages>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>Primary Fax</label>
+								<input class="form-control" name="primaryFax" ng-model="vendor.primaryFax" maxlength="50" clean="true" />
+								<error-messages mask-msg="Invalid fax number"></error-messages>
+							</div>
+						</div>
+						<div class="row form-group">
+							<label>Tax ID</label>
+							<input class="form-control" name="taxID" maxlength="100" ng-model="vendor.taxID" />
+							<error-messages></error-messages>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Additional Contacts</h4>
+				<div class="section-content row">
+					<div class="row form-group">
+						<div class="col-sm-4">
+							<label>Name</label>
+							<input class="form-control" name="additionalContact1Name" maxlength="100" ng-model="vendor.additionalContact1Name" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Email</label>
+							<input class="form-control" name="additionalContact1Email" type="email" maxlength="100" ng-model="vendor.additionalContact1Email" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Phone</label>
+							<input class="form-control" name="additionalContact1Phone" ng-model="vendor.additionalContact1Phone" maxlength="50" clean="true" />
+							<error-messages mask-msg="Invalid phone number"></error-messages>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-sm-4">
+							<label>Name</label>
+							<input class="form-control" name="additionalContact2Name" maxlength="100" ng-model="vendor.additionalContact2Name" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Email</label>
+							<input class="form-control" name="additionalContact2Email" type="email" maxlength="100" ng-model="vendor.additionalContact2Email" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Phone</label>
+							<input class="form-control" name="additionalContact2Phone" ng-model="vendor.additionalContact2Phone" maxlength="50" clean="true" />
+							<error-messages mask-msg="Invalid phone number"></error-messages>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-sm-4">
+							<label>Name</label>
+							<input class="form-control" name="additionalContact3Name" maxlength="100" ng-model="vendor.additionalContact3Name" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Email</label>
+							<input class="form-control" name="additionalContact3Email" type="email" maxlength="100" ng-model="vendor.additionalContact3Email" />
+							<error-messages></error-messages>
+						</div>
+						<div class="col-sm-4">
+							<label>Phone</label>
+							<input class="form-control" name="additionalContact3Phone" ng-model="vendor.additionalContact3Phone" maxlength="50" clean="true" />
+							<error-messages mask-msg="Invalid phone number"></error-messages>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">GL Accounts</h4>
+				<div class="section-content row">
+					<div class="col-sm-3 form-group">
+						<div class="form-group">
+							<label>
+								<input type="radio" name="vendorType" ng-model="vendor.type" ng-value="1"/>
+								Domestic
+							</label><br/>
+						</div>
+						<div class="form-group">
+							<label>
+								<input type="radio" name="vendorType" ng-model="vendor.type" ng-value="4" />
+								International
+							</label><br/>
+						</div>
+					</div>
+					<div class="col-sm-3 form-group">
+						<div class="form-group">
+							<label>Purchases</label>
+							<select class="form-control"
+								name="glPurchaseCodeID" ng-model="vendor.glPurchaseCodeID"
+								ng-options="c.value as c.text for c in glPurchaseAccountCodes">
+							</select>
+							<error-messages></error-messages>
+						</div>
+						<div class="form-group">
+							<label>Freight Charges</label>
+							<select class="form-control"
+								name="glFreightChargeCodeID" ng-model="vendor.glFreightChargeCodeID"
+								ng-options="c.value as c.text for c in glFreightChargeAccountCodes">
+							</select>
+							<error-messages></error-messages>
+						</div>
+						<div class="form-group">
+							<label>Accounts Payable</label>
+							<select class="form-control"
+								name="glAccountsPayableCodeID" ng-model="vendor.glAccountsPayableCodeID"
+								ng-options="c.value as c.text for c in glAccountsPayableCodes">
+							</select>
+							<error-messages></error-messages>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Financial Information</h4>
+				<div class="section-content row">
+					<div class="col-sm-12 p-0">
+						<div class="form-group col-sm-6">
+							<label class="required">Payment Terms</label>
+							<div>
+								<label class="col-sm-3">
+									<input required type="radio" class="m-r-5" name="paymentTermsType" ng-model="vendor.paymentTermsType" ng-value="1" />COD
+								</label>
+								<label class="col-sm-3">
+									<input required type="radio" class="m-r-5" name="paymentTermsType" ng-model="vendor.paymentTermsType" ng-value="2" />Prepay
+								</label>
+								<label class="col-sm-6">
+									<input required type="radio" class="m-r-5" name="paymentTermsType" ng-model="vendor.paymentTermsType" ng-value="3" />
+									Net Due in
+									<select name="paymentTermsNetDueDays" ng-model="vendor.paymentTermsNetDueDays"
+										ng-required="vendor.paymentTermsType === 3"
+										ng-disabled="vendor.paymentTermsType !== 3"
+										ng-options="c as c for c in [30, 60, 90]">
+										<option value="" ng-selected="vendor.paymentTermsType !== 3" ng-show="vendor.paymentTermsType !== 3"></option>
+									</select>
+									Days
+								</label>
+							</div>
+							<error-messages field="paymentTermsType"></error-messages>
+							<error-messages field="paymentTermsNetDueDays" ng-if="vendor.paymentTermsType === 3"></error-messages>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label>SWIFT/ABA Routing Number</label>
+								<input class="form-control" name="bankRoutingNumber" maxlength="100" ng-model="vendor.bankRoutingNumber" pattern="\d+" numbers-only />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>Bank Account Number</label>
+								<input class="form-control" name="bankAccountNumber" maxlength="100" ng-model="vendor.bankAccountNumber" pattern="\d+" numbers-only />
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="form-group">
+							<label>Bank Address</label>
+							<input class="form-control" name="bankAddress" maxlength="100" ng-model="vendor.bankAddress" />
+							<error-messages></error-messages>
+						</div>
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label>City</label>
+								<input class="form-control" name="bankCity" maxlength="100" ng-model="vendor.bankCity" />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-3 form-group">
+								<label>State</label>
+								<select class="form-control" name="bankStateCodeID" ng-model="vendor.bankStateCodeID" ng-options="c.value as c.text for c in stateCodes | codeFilter:vendor.bankStateCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-3 form-group">
+								<label>Zip</label>
+								<input class="form-control" name="bankZipCode" maxlength="50" ng-model="vendor.bankZipCode" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-4 form-group">
+								<label>Min Order Amount</label>
+								<input class="form-control" name="minOrderAmount" ng-model="vendor.minOrderAmount" pattern="^\d+(\.\d{2})?$" numeric-value />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-4 form-group">
+								<label>Credit Limit</label>
+								<input class="form-control" name="creditLimit" maxlength="100" ng-model="vendor.creditLimit" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label">Notes</label>
+							<textarea class="form-control" rows="6" ng-model="vendor.notes"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Products</h4>
+				<div class="section-content row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label>Certification Status</label>
+							<input class="form-control" name="certificationStatus" maxlength="100" ng-model="vendor.certificationStatus" />
+							<error-messages></error-messages>
+						</div>
+						<div class="form-group">
+							<label>Quality Information</label>
+							<input class="form-control" name="qualityInformation" ng-model="vendor.qualityInformation" />
+							<error-messages></error-messages>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label class="control-label">Components</label>
+							<textarea class="form-control" rows="6" ng-model="vendor.components"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+		<div class="section">
+			<h4 class="section-title">Products Supplied</h4>
+			<div class="section-content row">
+				<label class="col-sm-6" ng-repeat="product in vendor.products track by $index">{{ product }}</label>
+			</div>
+		</div>
+		<div class="last-updated-section" ng-show="vendor.updatedBy">
+			<span>Last Updated:</span>
+			<span>{{ vendor.updatedBy }} {{ vendor.updatedOn | localTime }}</span>
+		</div>
+	</form>
+</div>

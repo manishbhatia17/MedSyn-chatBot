@@ -1,0 +1,114 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RazorCompileOnBuild>false</RazorCompileOnBuild>
+    <RazorCompileOnPublish>false</RazorCompileOnPublish>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'CLIC.InsurancePortal.Web' " />
+  <ItemGroup>
+    <Compile Remove="wwwroot\css\colors\**" />
+    <Compile Remove="wwwroot\css\icons\**" />
+    <Compile Remove="wwwroot\js\App\Views\**" />
+    <Compile Remove="wwwroot\js\InputMask\**" />
+    <Content Remove="wwwroot\css\colors\**" />
+    <Content Remove="wwwroot\css\icons\**" />
+    <Content Remove="wwwroot\js\App\Views\**" />
+    <Content Remove="wwwroot\js\InputMask\**" />
+    <EmbeddedResource Remove="wwwroot\css\colors\**" />
+    <EmbeddedResource Remove="wwwroot\css\icons\**" />
+    <EmbeddedResource Remove="wwwroot\js\App\Views\**" />
+    <EmbeddedResource Remove="wwwroot\js\InputMask\**" />
+    <None Remove="wwwroot\css\colors\**" />
+    <None Remove="wwwroot\css\icons\**" />
+    <None Remove="wwwroot\js\App\Views\**" />
+    <None Remove="wwwroot\js\InputMask\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\User\Edit.cshtml" />
+    <Content Remove="wwwroot\js\App\Services\InvoiceActivityService.js" />
+    <Content Remove="wwwroot\js\app\services\ProductActivityService.js" />
+    <Content Remove="wwwroot\js\App\Services\productPriceAdjustmentService.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\js\app\services\ProductActivityService.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\App\Services\productPriceAdjustmentService.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Controllers\OnHandActivityController.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\.well-known\pki-validation\godaddy.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AngularJS.Core" Version="1.7.8" />
+    <PackageReference Include="AngularJS.Route" Version="1.7.8" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
+    <PackageReference Include="Nhibernate" Version="5.2.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Medforce.Graph.Services\Medforce.Graph.Services.csproj" />
+    <ProjectReference Include="..\MedGyn.MedForce.Common\MedGyn.MedForce.Common.csproj" />
+    <ProjectReference Include="..\MedGyn.MedForce.Data\MedGyn.MedForce.Data.csproj" />
+    <ProjectReference Include="..\MedGyn.MedForce.Facade\MedGyn.MedForce.Facade.csproj" />
+    <ProjectReference Include="..\MedGyn.MedForce.Service\MedGyn.MedForce.Service.csproj" />
+    <ProjectReference Include="..\Medgyn.Meforce.LLMAgent\Medgyn.Meforce.LLMAgent.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\bootstrap.min.css" />
+    <None Include="wwwroot\css\animate.css" />
+    <None Include="wwwroot\css\style.css" />
+    <None Include="wwwroot\js\App\Services\invoiceActivityService.js" />
+    <None Include="wwwroot\js\app\services\ProductActivityService.js" />
+    <None Include="wwwroot\js\App\Services\productPriceAdjustmentService.js" />
+    <None Include="wwwroot\js\bootstrap\bootstrap.min.js" />
+    <None Include="wwwroot\js\jquery\jquery.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\js\App\Controllers\Products\" />
+    <Folder Include="wwwroot\js\App\Factories\" />
+    <Folder Include="wwwroot\templates\modals\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Files\1-Invoice Payment Instructions.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\3- and 4- Invoice Payment Instructions.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Files\Invoice Payment Instructions-Thomas Medical.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1qa_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
+</Project>

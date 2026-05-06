@@ -1,0 +1,318 @@
+@model int
+
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Product Details";
+}
+
+@section Scripts  {
+	<script type="text/javascript" src="~/js/App/Services/productService.js"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/productDetailsController.js"></script>
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/components/image-uploads.css" />
+}
+
+<div ng-controller="productDetailsController" ng-init="init(@Model)" ng-cloak>
+	<div class="details-header">
+		<div class="details-header-content">
+			<h1>Product Details</h1>
+
+			<div class="form-actions">
+				<div class="details-additional-actions">
+					<label>
+						Discontinued
+						<input type="checkbox" ng-model="product.isDiscontinued" ng-disabled="viewOnly()" />
+					</label>
+				</div>
+				<div class="buttons">
+					<button type="button" ng-click="save()" ng-hide="viewOnly()" class="btn btn-primary">Save</button>
+					<cancel-button page="/product" form="form" save="save()"></cancel-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<form name="form" prompt-before-leave>
+		<fieldset ng-disabled="viewOnly()">
+			<div class="section">
+				<h4 class="section-title">Product Information</h4>
+				<div class="section-content row">
+					<div class="col-sm-12 p-0">
+						<div class="col-sm-6 row">
+							<div class="col-sm-6 form-group">
+								<label>
+									Export Only
+									<input type="checkbox" name="internationalOnly" ng-model="product.internationalOnly" ng-change="changeInternationOnly()" />
+								</label>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>
+									Non Stock
+									<input type="checkbox" name="specialOrderOnly" ng-model="product.specialOrderOnly" />
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label class="required">Name</label>
+							<input class="form-control" required name="productName" maxlength="100" ng-model="product.productName" />
+							<error-messages></error-messages>
+						</div>
+						<div class="form-group">
+							<label class="required">Product ID</label>
+							<input class="form-control" required name="productCustomID" maxlength="100" ng-model="product.productCustomID" ng-change="clearInvalid()" />
+							<error-messages unique-msg="ID is already in use"></error-messages>
+						</div>
+						<div class="row">
+							<div class="col-sm-4 form-group">
+								<label class="required">U/M</label>
+								<select class="form-control" required name="unitOfMeasureCodeID" ng-model="product.unitOfMeasureCodeID" ng-options="c.value as c.text for c in umCodes | codeFilter:product.unitOfMeasureCodeID"></select>
+								<error-messages></error-messages>
+							</div>
+
+							<div class="col-sm-4 form-group">
+								<label>Color</label>
+								<input class="form-control" name="product.color" ng-model="product.color" />
+							</div>
+
+							<div class="col-sm-4 form-group">
+								<label>Ship Weight</label>
+								<div class="row">
+									<div class="col-sm-6">
+										<input class="form-control" type="number" step="any" name="shipWeight" ng-model="product.shipWeight" />
+										<error-messages></error-messages>
+									</div>
+									<div class="col-sm-6">
+										<select class="form-control" name="shipWeightUnitsCodeID" ng-model="product.shipWeightUnitsCodeID" ng-options="c.value as c.text for c in shipWeightUnitCodes | codeFilter:product.shipWeightUnitsCodeID"></select>
+									</div>
+								</div>
+							</div>
+						</div>
+						<label>Ship Dimensions</label><br>
+						<div class="row">
+							<div class="col-sm-4 form-group">
+								<label>Length</label>
+								<div class="row equal align-center">
+									<div class="col-sm-6">
+										<input class="form-control" type="number" step="any" name="length" ng-model="product.length" />
+										<error-messages></error-messages>
+									</div>
+									<div class="col-sm-6 text-center"><i class="fa fa-times"></i></div>
+								</div>
+							</div>
+							<div class="col-sm-4 form-group">
+								<label>Width</label>
+								<div class="row equal align-center">
+									<div class="col-sm-6">
+										<input class="form-control" type="number" step="any" name="width" ng-model="product.width" />
+										<error-messages></error-messages>
+									</div>
+									<div class="col-sm-6 text-center"><i class="fa fa-times"></i></div>
+								</div>
+							</div>
+							<div class="col-sm-4 form-group">
+								<label>Depth</label>
+								<div class="row">
+									<div class="col-sm-6">
+										<input class="form-control" type="number" step="any" name="depth" ng-model="product.depth" />
+									</div>
+									<div class="col-sm-6">
+										<select class="form-control" ng-model="product.shipDimensionUnitsCodeID" ng-options="c.value as c.text for c in shipDimensionUnitCodes | codeFilter:product.shipDimensionUnitsCodeID"></select>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="required">Vendor</label>
+							<select class="form-control" required name="primaryVendorID"
+								ng-model="product.primaryVendorID" ng-options="v.value as v.text for v in vendors">
+							</select>
+							<error-messages></error-messages>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<label class="required">Description</label>
+							<textarea class="form-control" style="height: 126px" required name="description" ng-model="product.description"></textarea>
+							<error-messages></error-messages>
+						</div>
+
+						<div class="form-group" style="margin-bottom: 12px">
+							<label>Images</label>
+							<div class="image-upload-wrapper">
+								<div class="main-image">
+									<div class="header">
+										<label>Main Image</label>
+										<button type="button" onclick="$('#main-image-upload').click()">Upload</button>
+										<input id="main-image-upload" name="mainImageUpload" type="file" accept="image/*" style="display: none;" />
+										<input type="hidden" name="mainImageUpload" ng-model="product.primaryImageURI" />
+									</div>
+									<div class="image-area" ng-class="{ 'ng-invalid': form.mainImageUpload.$invalid, 'ng-touched': form.mainImageUpload.$touched }">
+										<img id="primaryImage" ng-src="{{ product.primaryImageURI }}">
+									</div>
+									<error-messages field="mainImageUpload" required-msg="Main Image Required"></error-messages>
+								</div>
+								<div class="extra-images">
+									<div class="header">
+										<label>Extra Images</label>
+										<button type="button" onclick="$('#extra-image-upload').click()">Upload</button>
+										<input id="extra-image-upload" type="file" accept="image/*" style="display: none;" />
+									</div>
+									<div class="image-area">
+										<img id="extraImage1" ng-src="{{ product.extraImage1URI }}">
+										<img id="extraImage2" ng-src="{{ product.extraImage2URI }}">
+										<img id="extraImage3" ng-src="{{ product.extraImage3URI }}">
+										<img id="extraImage4" ng-src="{{ product.extraImage4URI }}">
+										<img id="extraImage5" ng-src="{{ product.extraImage5URI }}">
+										<img id="extraImage6" ng-src="{{ product.extraImage6URI }}">
+										<img id="extraImage7" ng-src="{{ product.extraImage7URI }}">
+										<img id="extraImage8" ng-src="{{ product.extraImage8URI }}">
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label>Manufacturer</label>
+							<input class="form-control" ng-model="product.manufacturer" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Additional Vendors</h4>
+				<div class="section-content row">
+					<div class="col-sm-6">
+						<div class="form-group">
+							<select class="form-control" ng-model="product.additionalVendor1ID" ng-options="v.value as v.text for v in vendors"></select>
+						</div>
+						<div class="form-group">
+							<select class="form-control" ng-model="product.additionalVendor2ID" ng-options="v.value as v.text for v in vendors"></select>
+						</div>
+						<div class="form-group">
+							<select class="form-control" ng-model="product.additionalVendor3ID" ng-options="v.value as v.text for v in vendors"></select>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="form-group">
+							<select class="form-control" ng-model="product.additionalVendor4ID" ng-options="v.value as v.text for v in vendors"></select>
+						</div>
+						<div class="form-group">
+							<select class="form-control" ng-model="product.additionalVendor5ID" ng-options="v.value as v.text for v in vendors"></select>
+						</div>
+						<div class="form-group">
+							<select class="form-control" ng-model="product.additionalVendor6ID" ng-options="v.value as v.text for v in vendors"></select>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="section" ng-show="costVisible">
+				<h4 class="section-title">Price Information</h4>
+				<div class="section-content row">
+					<div class="row equal space-between fill-space gap align-baseline no-wrap form-group">
+						<div>
+							<label class="required">Cost</label>
+							<input class="form-control" required name="cost" type="number" step="any" name="cost" ng-model="product.cost" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label>Domestic List Price</label>
+							<input class="form-control" type="number" step="any" name="priceDomesticList" ng-disabled="product.internationalOnly" ng-model="product.priceDomesticList" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label>Domestic Premier Price</label>
+							<input class="form-control" type="number" step="any" name="priceDomesticPremier" ng-model="product.priceDomesticPremier" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label>Domestic Afaxys Price</label>
+							<input class="form-control" type="number" step="any" name="priceDomesticAfaxys" ng-disabled="product.internationalOnly" ng-model="product.priceDomesticAfaxys" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label>Main Distributor Price</label>
+							<input class="form-control" type="number" step="any" name="priceMainDistributor" ng-model="product.priceMainDistributor" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label>Domestic Distribution Price</label>
+							<input class="form-control" type="number" step="any" name="priceDomesticDistribution" ng-disabled="product.internationalOnly" ng-model="product.priceDomesticDistribution" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label>International Distribution Price</label>
+							<input class="form-control" type="number" step="any" name="priceInternationalDistribution" ng-model="product.priceInternationalDistribution" />
+							<error-messages></error-messages>
+						</div>
+						<div>
+							<label class="required">Cost</label>
+							<input class="form-control" required name="cost" type="number" step="any" name="cost" ng-model="product.cost" />
+							<error-messages></error-messages>
+						</div>
+					</div>
+					<div class="row form-group">
+						<label class="control-label">Notes</label>
+						<textarea class="form-control" rows="2" ng-model="product.notes"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="section">
+				<h4 class="section-title">Stock Information</h4>
+				<div class="section-content row">
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-2 text-center"><label>On Hand</label></div>
+							<div class="col-sm-1 text-center"><label>-</label></div>
+							<div class="col-sm-2 text-center"><label>Committed</label></div>
+							<div class="col-sm-1 text-center"><label>+</label></div>
+							<div class="col-sm-2 text-center"><label>PO</label></div>
+							<div class="col-sm-1 text-center"><label>=</label></div>
+							<div class="col-sm-2 text-center"><label>Net Quantity</label></div>
+						</div>
+						<div class="row">
+							<div class="col-sm-2 text-center"><label>{{ product.onHand }}</label></div>
+							<div class="col-sm-1 text-center"><label>-</label></div>
+							<div class="col-sm-2 text-center"><label>{{ product.committed }}</label></div>
+							<div class="col-sm-1 text-center"><label>+</label></div>
+							<div class="col-sm-2 text-center"><label>{{ product.po }}</label></div>
+							<div class="col-sm-1 text-center"><label>=</label></div>
+							<div class="col-sm-2 text-center"><label>{{ product.netQuantity }}</label></div>
+						</div>
+						<div class="row">
+							<div class="col-sm-2 text-center"><label></label></div>
+							<div class="col-sm-1 text-center"><label></label></div>
+							<div class="col-sm-2 text-center"><label></label></div>
+							<div class="col-sm-1 text-center"><label></label></div>
+							<div class="col-sm-2 text-center" ng-if="product.poExpectedDates.length > 0"><div ng-repeat="expectedDate in product.poExpectedDates"><label>{{ expectedDate }}</label></div></div>
+							<div class="col-sm-2 text-center" ng-if="product.poExpectedDates.length <= 0"><label>No Open POs</label></div>
+							<div class="col-sm-1 text-center"><label></label></div>
+							<div class="col-sm-2 text-center"><label></label></div>
+						</div>
+					</div>
+					<div class="col-sm-6">
+						<div class="row">
+							<div class="col-sm-6 form-group">
+								<label class="control-label">Reorder Point</label>
+								<input class="form-control" type="number" step="any" name="reorderPoint" ng-model="product.reorderPoint" />
+								<error-messages></error-messages>
+							</div>
+							<div class="col-sm-6 form-group">
+								<label>Reorder Quantity</label>
+								<input class="form-control" type="number" step="any" name="reorderQuantity" ng-model="product.reorderQuantity" />
+								<error-messages></error-messages>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+		<div class="last-updated-section" ng-show="product.updatedBy">
+			<span>Last Updated:</span>
+			<span>{{ product.updatedBy }} {{ product.updatedOn | localTime }}</span>
+		</div>
+	</form>
+</div>

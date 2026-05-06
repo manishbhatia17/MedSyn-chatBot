@@ -1,0 +1,23 @@
+﻿
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Customers";
+}
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/customerListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/customerService.js"></script>
+}
+<div ng-controller="customerListController" ng-cloak>
+	<h1>
+		Customer List
+	</h1>
+	<div class="body-wrapper">
+		<list-table
+			table="table"
+			service="customerService"
+			fetch-func="fetchCustomers"
+			details-route="/customer/details/"
+		></list-table>
+	</div>
+</div>
+

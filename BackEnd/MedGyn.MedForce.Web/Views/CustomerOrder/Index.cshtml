@@ -1,0 +1,33 @@
+﻿@using MedGyn.MedForce.Common.Configurations;
+
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Customer Orders";
+}
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/customerOrder/customerOrderListController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/App/Services/customerOrderService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+}
+<div ng-controller="customerOrderListController" ng-cloak>
+	<div style="display: flex; justify-content: space-between;">
+		<h1>
+			Customer Order List
+		</h1>
+		<h1 ng-show="table.grandTotal">
+			Grand Total: {{ table.grandTotal | currency:'$' }}
+		</h1>
+	</div>
+	<list-table
+		table="table",
+		service="customerOrderService"
+		fetch-func="fetchCustomerOrders"
+		details-route="/CustomerOrder/Details/"
+	></list-table>
+</div>
+
+<script type="text/ng-template" id="SendingInvoice.html">
+	<div class="modal-body container-fluid">
+		Sending Invoice to Customer primary contact.
+	</div>
+</script>

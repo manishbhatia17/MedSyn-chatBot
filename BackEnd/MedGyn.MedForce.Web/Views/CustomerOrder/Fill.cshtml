@@ -1,0 +1,187 @@
+@model int
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Fill Order";
+}
+
+
+@section Scripts {
+<script type="text/javascript" src="~/js/App/Services/customerOrderService.js"></script>
+<script type="text/javascript" src="~/js/App/Services/customerService.js"></script>
+<script type="text/javascript" src="~/js/App/Controllers/customerOrder/customerOrderFillController.js"></script>
+}
+
+@section Styles {
+<link rel="stylesheet" href="~/css/components/order-product-list.css" />
+}
+
+<div ng-controller="customerOrderFillController" ng-init="init(@Model)" ng-cloak>
+    <div class="alert alert-info" role="alert" ng-show="!isEditable">
+      This order is currently being filled by: {{customerOrder.filledBy}}
+    </div>
+    <div class="details-header">
+        <div class="details-header-content">
+            <h1>Fill Order</h1>
+        </div>
+    </div>
+
+    <form name="form" prompt-before-leave>
+        <div class="section">
+            <div class="section-content">
+                <fieldset ng-disabled="isVaried">
+                    <div class="row form-group">
+                        <div style="margin-left:-30px;">
+                            <label class="col-sm-6" style="white-space:unset;">
+                                <input type="radio" ng-model="customerOrder.fillOption" ng-value="1" ng-disabled="!isEditable" />
+                                Shipment in
+                                <input type="number" min="0" step="1" style="width: 50px" name="numberOfSameBoxes"
+                                       ng-model="customerOrder.numberOfSameBoxes"
+                                       ng-required="customerOrder.fillOption === 1"
+                                       ng-disabled="customerOrder.fillOption === 2 || !isEditable" />
+                                box(es) of <b>SAME</b> item with
+                                <input type="number" min="0" step="1" style="width: 50px" name="numberOfPackingSlips"
+                                       ng-model="customerOrder.numberOfPackingSlips"
+                                       ng-required="customerOrder.fillOption === 1"
+                                       ng-disabled="customerOrder.fillOption === 2 || !isEditable" />
+                                packing slip(s)
+                            </label>
+                            <div class="col-sm-6 container-no-padding">
+                                <button type="button" class="btn btn-primary"
+                                        ng-click="fillComplete()"
+                                        ng-disabled="customerOrder.fillOption === 2 || (!customerOrder.isPartialShipAcceptable && !isOrderDone() || !isEditable) || processing">
+                                    Fill Complete
+                                </button>
+                            </div>
+                        </div>
+                </fieldset>
+                <div class="row form-group" style="margin-bottom:0px">
+                    <div style="margin-left:-30px;">
+                        <div class="col-sm-6 container-no-padding" style="float:right">
+                            <input type="checkbox" ng-model="customerOrder.generateMultiplePackingSlip" id="chbSinglePackingSlip" name="chbSinglePackingSlip" ng-disabled="customerOrder.fillOption === 1  || !isEditable" />
+                            <label for="chbSinglePackingSlip">Generate multiple packing slips</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div style="margin-left:-30px;">
+                        <label class="col-sm-6">
+                            <input type="radio" ng-model="customerOrder.fillOption" ng-value="2"  ng-disabled="!isEditable"  />
+                            Shipment over multiple boxes, each box is <b>VARIED</b>
+                        </label>
+                        <div class="col-sm-6 container-no-padding">
+                            <button type="button" class="btn btn-primary" ng-click="prevBox()" ng-disabled="customerOrder.fillOption === 1 || isFirstBox  || !isEditable">Previous Box</button>
+                            <button type="button" class="btn btn-primary" ng-click="nextBox()" ng-disabled="customerOrder.fillOption === 1  || !isEditable">Next Box</button>
+                            <button type="button" class="btn btn-primary"
+                                    ng-click="fillComplete()"
+                                    ng-disabled="customerOrder.fillOption === 1 || (!customerOrder.isPartialShipAcceptable && !isOrderDone()  || !isEditable) || processing">
+                                Fill Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-content">
+                <div class="row equal fill-space">
+                    <table>
+                        <tr>
+                            <td><label>Order Number:</label></td>
+                            <td><label>{{ customerOrder.customerOrderCustomID }}</label></td>
+                        </tr>
+                        <tr>
+                            <td><label>Order Date:</label></td>
+                            <td><label>{{ customerOrder.submitDate | localTime:"MM/dd/yyyy" }}</label></td>
+                        </tr>
+                        <tr>
+                            <td><label>Ship Company:</label></td>
+                            <td><label>{{ customerOrder.shipCompany }}</label></td>
+                        </tr>
+                        <tr>
+                            <td><label>Ship Method:</label></td>
+                            <td><label>{{ customerOrder.shipMethod }}</label></td>
+                        </tr>
+                        <tr>
+                            <td><label>Ship Account #:</label></td>
+                            <td><label>{{ customerOrder.shipAccountNumber }}</label></td>
+                        </tr>
+                        <tr>
+                            <td><label>Partial Ship:</label></td>
+                            <td><label>{{ customerOrder.isPartialShipAcceptable ? "Yes" : "No" }}</label></td>
+                        </tr>
+                        <tr>
+                            <td><label>Sales Rep:</label></td>
+                            <td><label>{{ customerOrder.salesRep }}</label></td>
+                        </tr>
+                    </table>
+                    <div>
+                        <div class="row">
+                            <label class="col-sm-12">Ship To:</label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12 m-l-10">{{ customerOrder.customerCustomID }}</label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12 m-l-10">{{ customerOrder.customerName }}</label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12 m-l-10">{{ customerOrder.customerShipName }}</label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12 m-l-10">{{ customerOrder.customerShipAddress }}</label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12 m-l-10">{{ customerOrder.customerShipCityStateZip }}</label>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-12 m-l-10">{{ customerOrder.customerShipCountry }}</label>
+                        </div>
+                        <div ng-if="customerOrder.isInternationalCustomer" class="m-t-5">
+                            <div class="row">
+                                <label class="col-sm-12">Intermediary Shipping:</label>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingName }}</label>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingAddress }}</label>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingContactName }}</label>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingContactNumber }}</label>
+                            </div>
+                            <div class="row">
+                                <label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingContactEmail }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <table style="max-width: 33%;">
+                        <tr style="vertical-align:top;">
+                            <td class="text-top" style="padding-right: 15px;"><label>Last Updated:</label></td>
+                            <td>{{ customerOrder.updatedBy }} <br /> {{ customerOrder.updatedOn | localTime}}</td>
+                        </tr>
+                        <tr style="vertical-align:top;">
+                            <td style="padding-right: 15px;"><label>Internal Notes:</label></td>
+                            <td>{{ customerOrder.notes }}</td>
+                        </tr>
+                        <tr style="vertical-align:top;">
+                            <td style="padding-right: 15px;"><label>Instructions:</label></td>
+                            <td>{{ customerOrder.instructions }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <list-table table="table" isEditable="{{isEditable}}"></list-table>
+    </form>
+    <div>
+        <br/>
+        <label>Filling By: {{customerOrder.filledBy}} | {{customerOrder.filledByOn | localTime}}</label>
+    </div>
+</div>
+

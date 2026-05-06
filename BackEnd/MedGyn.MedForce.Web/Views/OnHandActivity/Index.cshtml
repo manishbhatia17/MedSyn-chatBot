@@ -1,0 +1,32 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "On Hand Activity Report";
+}
+@section Scripts {
+    <script type="text/javascript" src="~/js/App/Controllers/Reports/onHandActivityController.js"></script>
+    <script type="text/javascript" src="~/js/App/Services/ProductActivityService.js"></script>
+    <script type="text/javascript" src="~/js/App/Services/ProductService.js"></script>
+}
+<div ng-controller="onHandActivityController" ng-cloak>
+    <div style="display: flex; justify-content: space-between;">
+        <h1>
+            On Hand Activity Report
+        </h1>
+    </div>
+    <div class="body-wrapper">
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <label style="font-weight:600" id="beginning_qty"></label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-right">
+                <label style="font-weight:600" id="ending_qty"></label>
+            </div>
+        </div>
+        <list-table table="table"
+                    service="productActivityService"
+                    fetch-func="fetchProductActivity">
+        </list-table>
+    </div>
+</div>

@@ -1,0 +1,153 @@
+@using System.Collections.Generic;
+@using System.Linq;
+@{
+	Layout = "Views.Shared._ReportLayout.cshtml";
+	static string join(params string[] args)
+	{
+		return string.Join(", ", args.Where(s => !string.IsNullOrWhiteSpace(s)));
+	}
+}
+
+@foreach(var vm in Model.PackingSlips)
+{
+	<div class="flex">
+		<div class="half-children medgyn-info">
+			<div>
+				<img src="data:image/png;base64,@Model.LogoString" style="height: 90px">
+			</div>
+			<div>
+				<div>@Model.MedGynAddress @Model.MedGynCity, @Model.MedGynStateOrProvinceCode @Model.MedGynPostalCode</div>
+				<div>Fax: @Model.MedGynFax</div>
+				<div>Toll-Free: @Model.MedGynTollFreePhone Email: @Model.MedGynEmail</div>
+				<br />
+				<div>Remittance to: @Model.RemittanceAddress</div>
+				<div>@Model.RemittanceMessage</div>
+			</div>
+		</div>
+
+		<div class="half-children">
+			<div class="flex">
+				<div class="side-label">
+					Bill To:
+				</div>
+				<div class="address-label">
+					<div>@vm.CustomerName</div>
+					<div>@vm.CustomerAddress</div>
+					<div>@vm.CustomerAddress2</div>
+					<div>@join(vm.CustomerCity, vm.CustomerState, vm.CustomerZip)</div>
+					<div>@vm.CustomerCountry</div>
+				</div>
+			</div>
+			<div class="flex">
+				<div class="side-label">
+					Ship To:
+				</div>
+                <div class="address-label">
+                    <div>@vm.ShippingCustomerName</div>
+                    <div>@vm.CustomerShipName</div>
+                    <div>@vm.CustomerShipAddress</div>
+                    <div>@vm.CustomerShipAddress2</div>
+                    <div>@join(vm.CustomerShipCity, vm.CustomerShipState, vm.CustomerShipZip)</div>
+                    <div>@vm.CustomerShipCountry</div>
+                </div>
+			</div>
+		</div>
+	</div>
+	<div style="clear:both;">
+		<div style="font-size: 20px">Packing List</div>
+		<br />
+		<table>
+			<tr>
+				<td class="box">
+					<div>
+						<table>
+							<tr>
+								<td>Order</td>
+								<td>@vm.CustomerOrderNumber</td>
+							</tr>
+							<tr>
+								<td>Order Date</td>
+								<td>@vm.CustomerOrderDate</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+				<td class="box">
+					<div>
+						<table>
+							<tr>
+								<td>Ship Company</td>
+								<td>@vm.ShipCompany</td>
+							</tr>
+							<tr>
+								<td>Ship Method</td>
+								<td>@vm.ShipMethod</td>
+							</tr>
+							<tr>
+								<td>Partial Ship</td>
+								<td>@vm.IsPartialShip</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+				<td class="box">
+					<div>
+						<table>
+							<tr>
+								<td>Customer ID</td>
+								<td>@vm.CustomerID</td>
+							</tr>
+							<tr>
+								<td>Customer PO</td>
+								<td>@vm.CustomerPONumber</td>
+							</tr>
+							<tr>
+								<td>Sales Rep</td>
+								<td>@vm.SalesRep</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div>
+		<table style="width: 100%" class="stripe">
+			<thead>
+				<tr>
+					<th>Prod ID</th>
+					<th>Name</th>
+					<th>Lot Numbers</th>
+					<th class="align-right">Ord</th>
+					<th class="align-right">B/O</th>
+					<th class="align-right">Pkd</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach(var product in vm.Products)
+				{
+					<tr>
+						<td>@product.ProductCustomID</td>
+						<td>@product.ProductName</td>
+						<td>@product.SerialNumbers</td>
+						<td class="align-right">@product.Quantity</td>
+						<td class="align-right">@product.BackorderQuantity</td>
+						<td class="align-right">@product.QuantityPacked</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<table style="max-width: 33%;">
+			<tr style="vertical-align:top;">
+				<td style="padding-right: 15px;"><label style='font-weight:600'>Instructions:</label></td>
+				
+			</tr>
+			<tr>
+				<td>@vm.Instructions</td>
+			</tr>
+		</table>
+	</div>
+	<div style="page-break-after: always;"></div>
+}

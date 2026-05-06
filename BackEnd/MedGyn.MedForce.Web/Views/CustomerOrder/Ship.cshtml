@@ -1,0 +1,289 @@
+@using MedGyn.MedForce.Common.Configurations;
+
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+
+@model int
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Ship Order";
+}
+
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Services/customerOrderService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/App/Services/customerService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/customerOrder/customerOrderShipController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+	<script type="text/javascript" src="~/js/jsBoxDetails.js"></script>
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/components/order-product-list.css" />
+	<link rel="stylesheet" href="~/css/boxDetailsTable.css" />
+}
+
+<div ng-controller="customerOrderShipController" ng-init="init(@Model)" ng-cloak>
+	<div class="details-header">
+		<div class="details-header-content">
+			<h1>Ship Order</h1>
+		</div>
+	</div>
+    <div class="section">
+        <div class="section-content">
+            <div class="row form-group">
+                <div style="margin-left: -15px;">
+                    <div>
+                        <label id="labelBoxDetails" style="display:none"><b>Box details</b></label>
+                    </div>
+                    <div id="divFilledBox" class="table-wrapper">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	<section class="section" style="margin-left: -15px;" ng-show="requiresFinancingApproval">
+		<div class="section-content">
+		<div class="row">
+			<div class="col">
+				<div class="alert alert-info" role="alert" ng-show="!financeApproved">
+					This order cannot be shipped until it is approved for financing.
+				</div>
+			</div>
+		</div>
+		<div class="row form-group">
+			<div class="col">
+				<button type="button" class="btn btn-primary" ng-model="financeApproved" ng-click="approveFinancing()" ng-show="!financeApproved && financeApprover">Approve Financing</button>
+			</div>
+		</div>
+		</div>
+	</section>
+
+	<form name="form" prompt-before-leave>
+		<div class="section">
+			<div class="section-content">
+				<div class="row form-group">
+					<div style="margin-left: -15px;">
+						<label><b>Box Weight:</b></label>
+						<input name="weight" ng-model="shipmentBox.weight" ng-disabled="!financeApproved" ng-change="updateBoxDetails()" style="width: 50px" ng-pattern="/^\d+$/" required numeric-value />
+						<select name="weightUnitCodeID" required  style="width: 50px"
+							ng-model="shipmentBox.weightUnitCodeID" ng-change="updateBoxDetails()" ng-disabled="!financeApproved"
+							ng-options="c.value as c.text for c in weightUnitCodes | codeFilter:shipmentBox.weightUnitCodeID">
+						</select>
+						<label><b>Box Dim:</b></label>
+
+						<label>Length</label>
+						<input name="length" ng-model="shipmentBox.length" ng-disabled="!financeApproved" ng-change="updateBoxDetails()" style="width: 50px" ng-pattern="/^\d+$/" required numeric-value/>
+
+						<label>Width</label>
+						<input name="width" ng-model="shipmentBox.width" ng-disabled="!financeApproved" ng-change="updateBoxDetails()" style="width: 50px" ng-pattern="/^\d+$/" required numeric-value/>
+
+						<label>Depth</label>
+						<input name="depth" ng-model="shipmentBox.depth" ng-disabled="!financeApproved" ng-change="updateBoxDetails()" style="width: 50px" ng-pattern="/^\d+$/" required numeric-value/>
+						<select name="dimensionUnitCodeID" required style="width: 50px"
+							ng-model="shipmentBox.dimensionUnitCodeID" ng-change="updateBoxDetails()" ng-disabled="!financeApproved"
+							ng-options="c.value as c.text for c in dimensionUnitCodes | codeFilter:shipmentBox.dimensionUnitCodeID">
+						</select>
+
+						<label style="margin-left: 50px">Shipment in {{shipment.fillOption ===1 ? shipment.numberOfSameBoxes : boxes.length }} box(es) of <b>{{ shipment.fillOption === 1 ? "SAME" : "VARIED" }}</b></label>
+
+						<span style="margin-left: 50px">
+							<button type="button" class="btn btn-primary" ng-click="shipmentComplete()" ng-disabled="!hasAllShippingInfo() || completingShipment || !financeApproved">
+								Shipment Complete
+								<span ng-if="completingShipment"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+							</button>
+							<button type="button" class="btn btn-primary"
+								ng-if="shipment.fillOption === 2"
+								ng-disabled="isFirstBox || !financeApproved"
+								ng-click="prevBox()">
+									Previous Box
+							</button>
+							<button type="button" class="btn btn-primary"
+								ng-if="shipment.fillOption === 2"
+								ng-disabled="isLastBox || !financeApproved"
+								ng-click="nextBox()">
+									Next Box
+							</button>
+							<button type="button" class="btn btn-primary"
+									ng-disabled="!financeApproved"
+									ng-click="addBox()">
+								Add Box 
+							</button>
+							<button type="button" class="btn btn-danger"
+									ng-disabled="isFirstBox || !financeApproved"
+									ng-click="removeBox()">
+								Remove Box
+							</button>
+						</span>
+					</div>
+				</div>
+				<div class="row form-group">
+					<div class="row">
+						<label><b>Customer Order:</b> Sh/Hd/Ins</label>
+						<input name="shippingCharge" ng-disabled="!financeApproved" ng-model="shipment.shippingCharge" style="width: 50px" ng-required="isCompletingShipment" numeric-value/>
+						<label><b>Ship Company:</b> Sh/Hd/Ins {{ (rateQuote | currency:'$') || "N/A" }}</label>
+						<button type="button" class="btn btn-primary" style="margin-left: 15px" ng-click="useRateQuote()" ng-disabled="!gotRateQuote() || gettingQuote || !financeApproved">
+							Use This
+						</button>
+						<button type="button" class="btn btn-primary" style="margin-left: 15px" ng-click="getRateQuote()" ng-disabled="!hasAllShippingInfo() || gettingQuote || !financeApproved">
+							Get Quote
+							<span ng-if="gettingQuote"><i class="fa fa-spinner fa-spin fa-fw"></i></span>
+						</button>
+					</div>
+					<div class="row">
+						<label><b>Tracking Number:</b></label>
+						<input name="masterTrackingNumber" ng-model="shipment.masterTrackingNumber" ng-disabled="!financeApproved"/>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="section">
+			<div class="section-content">
+				<div class="row equal fill-space">
+					<table>
+						<tr>
+							<td><label>Order Number:</label></td>
+							<td><label>{{ customerOrder.customerOrderCustomID }}</label></td>
+						</tr>
+						<tr ng-if="customerOrder.poNumber">
+							<td><label>Purchase Order Number:</label></td>
+							<td><label>{{ customerOrder.poNumber }}</label></td>
+						</tr>
+						<tr>
+							<td><label>Order Date:</label></td>
+							<td><label>{{ customerOrder.submitDate | localTime:"MM/dd/yyyy" }}</label></td>
+						</tr>
+						<tr>
+							<td><label>Ship Company:</label></td>
+							<td>
+								<select name="shipCompanyType" style="width: 160px"
+									ng-required="isCompletingShipment"
+									ng-model="shipment.shipCompanyType"
+									ng-disabled="!financeApproved"
+									ng-options="c.value as c.text for c in shipCompanyCodes | codeFilter:shipment.shipCompanyType"
+									ng-change="changeShipCompany()">
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td><label>Ship Method:</label></td>
+							<td>
+								<select name="shipMethodCodeID" style="width: 160px"
+									ng-required="isCompletingShipment"
+									ng-model="shipment.shipMethodCodeID"
+									ng-disabled="!financeApproved"
+									ng-options="c.value as c.text for c in shipChoiceCodes | codeFilter:shipment.shipMethodCodeID">
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td><label>Ship Account #:</label></td>
+							<td>
+								<input name="length" style="width: 160px" ng-model="shipment.shipAccountNumber" ng-required="isCompletingShipment" ng-disabled="!financeApproved"/>
+							</td>
+						</tr>
+						<tr>
+							<td><label>Partial Ship:</label></td>
+							<td><label>{{ customerOrder.isPartialShipAcceptable ? "Yes" : "No" }}</label></td>
+						</tr>
+						<tr>
+							<td><label>Sales Rep:</label></td>
+							<td><label>{{ customerOrder.salesRep }}</label></td>
+						</tr>
+					</table>
+					<div>
+						<div class="row">
+							<label class="col-sm-12">Ship To:</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerCustomID }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerName }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerShipName }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerShipAddress }}</label>
+						</div>
+						<div class="row" ng-show="customerOrder.customerShipAddress2.length > 0">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerShipAddress2 }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerShipCityStateZip }}</label>
+						</div>
+						<div class="row">
+							<label class="col-sm-12 m-l-10">{{ customerOrder.customerShipCountry }}</label>
+						</div>
+						<div ng-if="customerOrder.isInternationalCustomer" class="m-t-5">
+							<div class="row">
+								<label class="col-sm-12">Intermediary Shipping:</label>
+							</div>
+							<div class="row">
+								<label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingName }}</label>
+							</div>
+							<div class="row">
+								<label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingAddress }}</label>
+							</div>
+							<div class="row">
+								<label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingContactName }}</label>
+							</div>
+							<div class="row">
+								<label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingContactNumber }}</label>
+							</div>
+							<div class="row">
+								<label class="col-sm-12 m-l-10">{{ customerOrder.intermediaryShippingContactEmail }}</label>
+							</div>
+						</div>
+					</div>
+					<table style="max-width: 33%;">
+						<tr style="vertical-align:top;">
+							<td class="text-top" style="padding-right: 15px;"><label>Last Updated:</label></td>
+							<td>{{ customerOrder.updatedBy }} <br /> {{ customerOrder.updatedOn | localTime}}</td>
+						</tr>
+						<tr style="vertical-align:top;">
+							<td style="padding-right: 15px;"><label>Internal Notes:</label></td>
+							<td>{{ customerOrder.notes }}</td>
+						</tr>
+						<tr style="vertical-align:top;">
+							<td style="padding-right: 15px;"><label>Instructions:</label></td>
+							<td>{{ customerOrder.instructions }}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<list-table
+			table="table"
+		></list-table>
+	</form>
+	
+	<div class="row form-group" ng-show="financeApproved  && requiresFinancingApproval">
+		<div class="col">
+			<br/>
+        <label>Financing Approved By: {{customerOrder.financingApprovedBy}} | {{customerOrder.financingApprovedOn | localTime}}</label>
+		</div>
+	</div>
+</div>
+<script type="text/ng-template" id="Addbox.html">
+	<div class="modal-header">
+		<h4>Add Another Box</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<form name="form">
+			<fieldset>
+				<div class="row form-group">
+					<label class="required">Do Not Fill Reason</label>
+					<br/>
+					<input ng-model="doNotFillReason"  maxlength="200"/>
+				</div>
+			</fieldSet>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-primary" ng-click="close()">Cancel</button>
+		<button type="button" class="btn btn-primary" ng-click="saveFill()">Update</button>
+	</div>
+</script>

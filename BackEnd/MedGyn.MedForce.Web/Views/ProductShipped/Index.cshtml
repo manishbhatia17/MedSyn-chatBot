@@ -1,0 +1,67 @@
+﻿@using MedGyn.MedForce.Common.Configurations;
+
+@inject Microsoft.Extensions.Options.IOptions<AppSettings> appSettings;
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Product - Shipped";
+}
+@section Scripts {
+<script type="text/javascript" src="~/js/App/Controllers/ProductShippedController.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+<script type="text/javascript" src="~/js/App/Services/ProductShippedService.js?cashbust=@appSettings.Value.BuildTimestamp.ToString("s")"></script>
+}
+<style>
+    input[type=search] {
+        display: none;
+    }
+</style>
+<div ng-controller="ProductShippedController" ng-cloak>
+    <div  style="display: flex; justify-content: space-between;">
+        <div>
+            <h1>
+                Product - Shipped
+            </h1>
+            <h6 style="padding-top: 0px; margin-top: 0px;" id="search_title"></h6>
+        </div>
+        <div>
+            <div style="display: flex">
+                <div>
+                    <label>Start date</label>
+                    <input type="date" name="start_date" id="start_date" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched" />
+                    <div>
+                        <label>Product ID</label>
+                        <input type="text" name="product_id" id="product_id" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched" />
+                    </div>
+                </div>
+                <div>
+                    <label>End date</label>
+                    <input type="date" name="end_date" id="end_date" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched" />
+                    <div>
+                        <label>Product Name</label>
+                        <input type="text" name="product_name" id="product_name" class="form-control ng-pristine ng-valid ng-empty ng-valid-min ng-touched" />
+                    </div>
+                </div>
+                <div class="form-actions" style="display: flex; justify-content: center; align-items: end;">
+                    <div class="buttons">
+                        <button type="button" ng-click="filterInvoices()" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+                <div class="form-actions" style="display: flex; justify-content: center; align-items: end">
+                    <div class="buttons"> 
+                        <button type="button" ng-click="clearFields()" class="btn btn-primary">Clear</button>
+                    </div>
+                </div>
+            </div>
+                    <label style="color: darkred" id="empty_warning">Enter start date, end date, product ID to search</label>
+                    <label style="color: darkred" id="wrong_date">End date should be greater than the start date.</label>
+                    <h5 id="total_quantity" style="padding: 0; margin: 0; text-align: right; padding-top: 10px;"></h5>
+                    <h5 id="total_amount" style="padding: 0; margin: 0; text-align: right; padding-top: 10px;"></h5>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between;"> 
+    <list-table table="table"
+                service="ProductShippedService"
+                fetch-func="searchInvoice",
+                style="width: 100%;">
+</div>
+

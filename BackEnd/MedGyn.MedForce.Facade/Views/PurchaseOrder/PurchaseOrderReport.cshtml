@@ -1,0 +1,158 @@
+@using System.Linq;
+@{
+	Layout = "Views.Shared._ReportLayout.cshtml";
+	static string join(params string[] args)
+	{
+		return string.Join(", ", args.Where(s => !string.IsNullOrWhiteSpace(s)));
+	}
+}
+
+<div class="flex">
+	<div class="medgyn-info">
+		<img src="data:image/png;base64,@Model.LogoString" style="height: 90px">
+		<div>@Model.MedGynAddress @Model.MedGynCity, @Model.MedGynStateOrProvinceCode @Model.MedGynPostalCode</div>
+		<div>Fax: @Model.MedGynFax</div>
+		<div>Toll-Free: @Model.MedGynTollFreePhone Email: @Model.MedGynEmail</div>
+	</div>
+
+	<div class="half-children">
+		<div class="flex">
+			<div class="side-label">
+				To:
+			</div>
+			<div class="address-label">
+				<div>@Model.VendorName</div>
+				<div>@Model.VendorAddress</div>
+				<div>@join(Model.VendorCity, Model.VendorState, Model.VendorZip)</div>
+				<div>@Model.VendorCountry</div>
+			</div>
+		</div>
+		<div class="flex">
+			<div class="side-label">
+				Ship To:
+			</div>
+			<div class="address-label">
+				<div>@Model.MedGynName</div>
+				<div>@Model.MedGynAddress</div>
+				<div>@Model.MedGynCity, @Model.MedGynStateOrProvinceCode @Model.MedGynPostalCode</div>
+				<div>@Model.MedGynCountryAbbr</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div style="clear:both;">
+	<div style="font-size: 20px">Purchase Order</div>
+	<br />
+	<table>
+		<tr>
+			<td class="box">
+				<div>
+					<table>
+						<tr>
+							<td>PO Number</td>
+							<td>@Model.PurchaseOrderCustomID</td>
+						</tr>
+						<tr>
+							<td>Order Date</td>
+							<td>@Model.SubmitDate</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td class="box">
+				<div>
+					<table>
+						<tr>
+							<td>Shipping Method</td>
+							<td>@Model.ShipMethod</td>
+						</tr>
+						<tr>
+							<td>Expected Ship</td>
+							<td>@Model.ExpectedDate</td>
+						</tr>
+						<tr>
+							<td>Partial Ship</td>
+							<td>@Model.IsPartialShipAcceptable</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td class="box">
+				<div>
+					<table>
+						<tr>
+							<td>Vendor ID</td>
+							<td>@Model.VendorID</td>
+						</tr>
+						<tr>
+							<td>Payment Terms</td>
+							<td>@Model.PaymentTerms</td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+<div>
+	<table style="width: 100%" class="stripe">
+		<thead>
+			<tr>
+				<th>Prod ID</th>
+				<th>Name</th>
+				<th class="align-right">Ord</th>
+				<th class="align-right">Pkd</th>
+				<th class="align-right">Price</th>
+				<th class="align-right">Ext</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var product in Model.Products)
+			{
+				<tr>
+					<td>@product.ProductCustomID</td>
+					<td>@product.ProductName</td>
+					<td class="align-right">@product.Quantity</td>
+					<td class="align-right">@product.QuantityPacked</td>
+					<td class="align-right">$@product.Price</td>
+					<td class="align-right">$@product.Ext</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+<div><br /></div>
+<div class="flex half-children">
+	<div></div>
+	<div>
+		<div class="half-children">
+			<span>Subtotal</span>
+			<span class="align-right">$@Model.Subtotal</span>
+		</div>
+		<div class="half-children">
+			<span>Taxes</span>
+			<span class="align-right">$@Model.Taxes</span>
+		</div>
+		<div class="half-children">
+			<span>Sh/Hd/In</span>
+			<span class="align-right">$@Model.ShippingCharge</span>
+		</div>
+		<div class="half-children">
+			<span>Total</span>
+			<span class="align-right">$@Model.TotalAmount</span>
+		</div>
+	</div>
+</div>
+<div class="flex">
+    <div>
+        <div>
+            <span>Notes - </span>
+            <span>@Model.Notes</span>
+        </div>
+        <div>
+            <span>VP Approved - </span>
+            <span>@Model.VpApproved</span>
+        </div>
+    </div>
+    <div></div>
+</div>

@@ -1,0 +1,8 @@
+{
+	"scripts": {
+		"merge-master": "git checkout master && git pull && git merge develop && git push && git checkout develop"
+	},
+	"devDependencies": {
+		"eslint": "^8.56.0"
+	}
+}

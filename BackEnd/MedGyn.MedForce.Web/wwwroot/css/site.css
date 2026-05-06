@@ -1,0 +1,683 @@
+﻿@import "https://fonts.googleapis.com/css?family=Open+Sans";
+
+/*
+    main layout
+*/
+html {
+	background: white;
+	box-sizing: border-box;
+	height: 100%;
+	min-height: 100%;
+	position: relative;
+}
+
+body {
+	color: #2b2b2b;
+	background-color: #f3f3f3;
+	font-family: "Open Sans", sans-serif;
+	font-weight: 300;
+	height: 100%;
+	margin: 0;
+	min-height: 100%;
+	overflow-x: hidden;
+	position: relative;
+	display: flex;
+	flex-direction: column;
+}
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+label {
+	white-space: nowrap;
+	font-weight: 500;
+	max-width: 100%;
+}
+label.wrap-text {
+	white-space: break-spaces;
+}
+
+.form-control::-webkit-input-placeholder,
+::placeholder {
+	color: #2b2b2b;
+}
+
+.modal-content {
+	background-color: #f3f3f3;
+}
+
+.content-wrapper {
+	margin-top: 92px;
+	margin-bottom: 25px;
+	height: 100%;
+	overflow: hidden auto;
+	padding: 20px;
+}
+
+.details-header {
+	margin-bottom: 10px;
+}
+
+.details-alert {
+	display: flex;
+	justify-content: center;
+}
+.details-alert > :first-child {
+	color: #b46b93;
+	font-weight: bold;
+	margin: 0;
+	padding: 0;
+}
+
+.details-header-content {
+	display: flex;
+}
+.details-header-content h1 {
+	margin-right: 50px;
+}
+.details-header-content h1:last-of-type {
+	flex-grow: 1;
+	margin-right: 0;
+}
+.details-header-content .form-actions {
+	align-self: center;
+	padding: 15px 0;
+	height: 68px;
+	display: flex;
+	align-items: center;
+}
+.details-header-content .form-actions .buttons {
+	display: flex;
+	flex-wrap: wrap;
+	align-self: baseline;
+}
+.details-header-content .form-actions .buttons > button {
+	margin: 5px 0 0 5px;
+}
+
+.details-additional-actions {
+	display: inline-flex;
+}
+.details-additional-actions label {
+	margin-bottom: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-weight: normal;
+	padding: 15px;
+}
+
+h1 {
+	font-size: 20px;
+	margin-top: 0;
+	margin-bottom: 0;
+	text-transform: uppercase;
+}
+
+h2 {
+	line-height: 36px;
+	font-size: 24px;
+}
+
+h3 {
+	line-height: 30px;
+	font-size: 21px;
+}
+
+h4 {
+	line-height: 22px;
+	font-size: 18px;
+}
+
+h5 {
+	font-size: 18px;
+	font-size: 16px;
+}
+
+h5 {
+	font-size: 16px;
+	font-size: 14px;
+}
+
+input[type="checkbox"].large {
+	min-height: 18px;
+	min-width: 18px;
+	margin: 0 5px;
+}
+
+input:not([type="radio"]):not([type="checkbox"]):not(.form-control),
+select {
+	border: 1px solid #aaa;
+	height: 25px;
+}
+
+/********** Text colors **********/
+.text-white {
+	color: #ffffff;
+}
+
+.text-danger,
+.text-error {
+	color: red;
+}
+
+.text-warning {
+	color: #cbc3ae;
+}
+
+.text-success {
+	color: #b46b93;
+}
+
+.text-info {
+	color: #85b4d0;
+}
+
+.text-primary {
+	color: #b5a8b9;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.text-top {
+	vertical-align: top;
+}
+
+.text-bottom {
+	vertical-align: bottom;
+}
+
+.btn-default,
+.btn-default.disabled {
+	background: #f6f6f6 !important;
+	border: 1px solid #f6f6f6 !important;
+}
+
+.btn-default:hover,
+.btn-primdefaultary.disabled:hover,
+.btn-default:focus,
+.btn-default.disabled:focus,
+.btn-default.focus,
+.btn-default.disabled.focus {
+	background: #f6f6f6 !important;
+	opacity: 0.8;
+	border: 1px solid #f6f6f6 !important;
+}
+
+.btn-default.active,
+.btn-default:active,
+.open > .dropdown-toggle.btn-default {
+	color: #333;
+	background-color: #e4e4e4 !important;
+	border-color: #e4e4e4 !important;
+}
+
+.btn-primary,
+.btn-primary.disabled,
+.btn-primary:focus,
+.btn-primary:active {
+	background: white;
+	border: 1px solid #919d9d;
+	color: #2b2b2b;
+}
+
+.btn-primary:hover,
+.btn-primary:hover:focus,
+.btn-primary:hover:active {
+	background: #b46b93 !important;
+	border: 1px solid #b46b93 !important;
+	color: white !important;
+}
+
+fieldset[disabled] .btn-primary:hover,
+fieldset[disabled] .btn-primary:hover:focus,
+fieldset[disabled] .btn-primary:hover:active,
+.btn-primary[disabled]:hover,
+.btn-primary[disabled]:hover:focus,
+.btn-primary[disabled]:hover:active {
+	background: white !important;
+	border: 1px solid #919d9d !important;
+	color: #919d9d !important;
+}
+
+.btn-success,
+.btn-success:focus,
+.btn-success:active,
+.btn-success:active:focus {
+	background: white;
+	border: 1px solid #b46b93;
+	color: #b46b93;
+}
+
+.btn-error,
+.btn-error:focus,
+.btn-error:active,
+.btn-error:active:focus {
+	color: red;
+	background: white;
+	border: 1px solid red;
+}
+
+	.btn-danger,
+	.btn-danger:focus,
+	.btn-danger:active,
+	.btn-danger:active:focus
+	{
+		background: #b46b93;
+	}
+
+		.btn-danger:hover {
+			background-color: white;
+			color: #2b2b2b;
+			border: 1px solid #919d9d;
+		}
+
+		.btn-danger:disabled:hover {
+			background-color: #b46b93;
+			color: white;
+		}
+
+		/**********Bootstrap overight**********/
+		.dropdown-menu {
+			border: 1px solid rgba(120, 130, 140, 0.13);
+			border-radius: 0px;
+			box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05) !important;
+			-webkit-box-shadow: 0px !important;
+			-moz-box-shadow: 0px !important;
+			padding-bottom: 8px;
+			margin-top: 0px;
+		}
+
+.dropdown-menu > li > a {
+	padding: 9px 20px;
+}
+
+.dropdown-menu > li > a:focus,
+.dropdown-menu > li > a:hover {
+	background: #b46b93;
+}
+
+/*
+
+    login layout
+
+*/
+
+.login-register {
+	background: url("../images/loginpicture.jpg");
+	background-size: cover;
+	background-position-x: center;
+	height: 100%;
+}
+.login-box {
+	width: 400px;
+	background: #ffffff;
+	padding: 25px;
+	margin: auto;
+	margin-top: 88px;
+}
+
+.validation-summary-valid {
+	display: none;
+}
+
+.form-group .password-control {
+	padding-right: 40px;
+}
+
+.form-group .password-tooltip {
+	position: absolute;
+	top: 10px;
+	right: 5px;
+}
+
+.password-tooltip .tooltip-item {
+	background: none;
+}
+
+.login-box .form-material .form-group {
+	overflow: inherit;
+}
+
+.login-box .tooltip-text {
+	padding: 1.21em;
+	white-space: pre-line;
+}
+
+/*
+
+    entity types
+
+*/
+
+#myTable .no-padding,
+#myTable2 .no-padding {
+	padding: 0;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+#myTable .table-checkboxes,
+#myTable2 .table-checkboxes {
+	text-align: center;
+	padding-left: 2%;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#myTable .form-control,
+#myTable2 .form-control {
+	width: auto;
+	padding: 0 5px;
+	transition: none;
+}
+
+#myTable .table-actions,
+#myTable2 .table-actions {
+	text-align: center;
+	vertical-align: middle;
+}
+
+#myTable .table-group,
+#myTable2 .table-group {
+	color: #565656;
+	padding-right: 5px;
+}
+
+#myTable .table-file,
+#myTable2 .table-file {
+	color: #565656;
+	padding-right: 5px;
+}
+
+#myTable .table-trash,
+#myTable2 .table-trash {
+	color: red;
+}
+
+#myTable .id-column,
+#myTable2 .id-column {
+	vertical-align: middle;
+}
+
+/*
+
+    security keys
+
+*/
+
+.security-key-table .delete-header {
+	text-align: center;
+}
+
+#myTable.security-key-table .form-control {
+	width: 100%;
+}
+
+/*
+
+    Generated Page CSS classes
+
+*/
+.page-header {
+	color: #2b2b2b;
+	margin: 10px 0;
+	font-weight: 300;
+	line-height: 48px;
+	font-size: 36px;
+	border-bottom: 0;
+}
+
+.button-bar button {
+	display: inline-block;
+	margin: 0 5px;
+}
+
+.button-bar div {
+	display: inline-block;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+	border-bottom: 3px solid #2e8826;
+}
+
+/*
+
+    Invoices
+
+*/
+
+.has-error .form-control {
+	border-bottom: 1px solid rgb(204, 41, 61);
+}
+
+/*
+
+    search results
+
+*/
+
+.pointer td {
+	cursor: pointer;
+}
+
+/*
+
+    profile page
+
+*/
+.profile-footer-buttons {
+	text-align: right;
+	padding-right: 20px;
+}
+
+.profile-footer-buttons .btn {
+	margin-right: 25px;
+}
+
+/*
+
+    User table
+
+*/
+.btn-add-user {
+	/* push button down closer to table */
+	position: relative;
+	margin-top: 25px;
+	margin-bottom: 35px;
+	z-index: 10;
+}
+
+/*
+
+	Query Builder
+
+*/
+.table-fixed-col {
+	overflow-x: scroll;
+	overflow-y: visible;
+	margin-left: 11em;
+}
+
+.table-fixed-col tr > td {
+	display: inline-block !important;
+	width: 360px;
+	min-width: 360px;
+	border-right: 1px solid #eff2f5;
+}
+
+.table-fixed-col th > label {
+	margin-top: 12px;
+}
+
+.table-header-column {
+	background-color: #eff2f5;
+	width: 10em;
+	position: absolute !important;
+	left: 0;
+	height: 100%;
+}
+
+.table-header-column span {
+	font-weight: 500;
+}
+
+.table-header-column .control-label {
+	padding-top: 0;
+}
+
+.table-header-column th span {
+	padding-top: 3px;
+	margin-top: 0;
+}
+
+.attribute-sort {
+	width: 95% !important;
+}
+
+.criteria {
+	width: 100%;
+	display: inline-block;
+	box-sizing: border-box;
+}
+
+.criteria-operator {
+	display: inline-block;
+	width: 15%;
+}
+
+.criteria-input {
+	width: 83%;
+	display: inline-block;
+}
+
+.criteria-input input {
+	width: 100% !important;
+}
+
+.query-checkbox-control {
+	margin-top: 0 !important;
+	padding-top: 5px;
+}
+
+.query-input-full-width {
+	width: 95% !important;
+}
+
+.column-btn-group {
+	text-align: center;
+}
+
+.column-btn-group i {
+	font-size: 2em;
+	color: #666666;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+.action-button-disabled {
+	color: #cccccc;
+	cursor: not-allowed;
+}
+
+#myTable .query-table-no-padding {
+	/* padding: 0; */
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+#myTable .query-table-checkboxes {
+	text-align: center;
+	/* padding-left: 2%; */
+	display: table-cell;
+	vertical-align: middle;
+}
+
+.drawer-contents-row + .drawer-contents-row {
+	margin-top: 20px;
+	padding-top: 10px;
+	border-top: 1px solid black;
+}
+
+.table-dresser thead,
+.table-dresser tbody {
+	border: 1px solid #f1f2f7;
+}
+
+.drawer-contents-row {
+	display: flex;
+	flex-direction: column;
+}
+
+.table-dresser th.footable-sortable span.fooicon {
+	opacity: 0.5;
+}
+
+/* dresser styles need custom row coloring since row details (drawer contents) are shown and hidden */
+/*		TODO: this could be improved with the drawer contents */
+.table-dresser > tbody > tr.dresser-row:nth-of-type(odd) {
+	background-color: #f7fafc !important;
+}
+
+.table-dresser > tbody > tr.dresser-row:nth-of-type(even) {
+	background-color: #ffffff !important;
+}
+
+.container-left-justified {
+	margin-left: 0px;
+	margin-right: 5px;
+}
+
+.container-right-justified {
+	margin-left: 5px;
+	margin-right: 0px;
+	float: right;
+}
+
+.container-no-margins {
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.container-shadow-white {
+	box-shadow: 3px 3px 10px #888888;
+	padding: 10px;
+	margin: 5px;
+	background-color: #ffffff !important;
+}
+
+.container-no-padding {
+	padding: 0 !important;
+}
+
+.form-control::placeholder{
+	color: gray;
+	font-style: italic;
+}
+
+.greenLight {
+	color: mediumseagreen;
+}
+
+.redLight {
+    color: red;
+}

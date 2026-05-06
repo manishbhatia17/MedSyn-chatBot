@@ -1,0 +1,86 @@
+@model int
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Receive Purchase Order";
+}
+
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Services/purchaseOrderService.js"></script>
+	<script type="text/javascript" src="~/js/App/Controllers/purchaseOrder/purchaseOrderReceiveController.js"></script>
+}
+
+@section Styles {
+	<link rel="stylesheet" href="~/css/components/order-product-list.css" />
+}
+
+<div ng-controller="purchaseOrderReceiveController" ng-init="init(@Model)" ng-cloak>
+	<div class="details-header">
+		<div class="details-header-content">
+			<h1>Receive Purchase Order</h1>
+			<div class="form-actions">
+				<div class="buttons">
+					<button type="button" ng-click="save()" class="btn btn-primary">Save</button>
+					<cancel-button page="/PurchaseOrder" form="form" save="save()"></cancel-button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="section">
+		<div class="section-content">
+			<div class="row equal fill-space">
+				<table>
+					<tr>
+						<td><label> Number:</label></td>
+						<td><label>{{ purchaseOrder.purchaseOrderCustomID }}</label></td>
+					</tr>
+					<tr>
+						<td><label>Order Date:</label></td>
+						<td><label>{{ purchaseOrder.submitDate | localTime:"MM/dd/yyyy" }}</label></td>
+					</tr>
+					<tr>
+						<td><label>Ship Company:</label></td>
+						<td><label>{{ purchaseOrder.shipCompany }}</label></td>
+					</tr>
+					<tr>
+						<td><label>Ship Method:</label></td>
+						<td><label>{{ purchaseOrder.shipMethod }}</label></td>
+					</tr>
+					<tr>
+						<td><label>Partial Ship:</label></td>
+						<td><label>{{ purchaseOrder.isPartialShipAcceptable ? "Yes" : "No" }}</label></td>
+					</tr>
+					<tr>
+						<td><label>Expected:</label></td>
+						<td><label>{{ purchaseOrder.expectedDate | date:"MM/dd/yyyy" }}</label></td> @* ExpectedDate doesn't need localTime filter *@
+					</tr>
+				</table>
+				<div>
+					<div class="row">
+						<label class="col-sm-12">From:</label>
+					</div>
+					<div class="row">
+						<label class="col-sm-12 m-l-10">{{ purchaseOrder.shippingFrom }}</label>
+					</div>
+				</div>
+				<table>
+					<tr>
+						<td class="text-top"><label>Last Updated:</label></td>
+						<td><label>{{ purchaseOrder.updatedBy }} <br/> {{ purchaseOrder.updatedOn | localTime}}</label></td>
+					</tr>
+					<tr>
+						<td><label>Notes:</label></td>
+						<td><label>{{ purchaseOrder.notes }}</label></td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<form name="form" prompt-before-leave>
+		<list-table
+			table="table"
+		></list-table>
+	</form>
+</div>

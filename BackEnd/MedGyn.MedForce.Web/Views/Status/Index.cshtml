@@ -1,0 +1,59 @@
+@model MedGyn.MedForce.Facade.ViewModels.StatusViewModel
+@{
+    ViewData["Title"] = "Status";
+}
+
+<h1>Status</h1>
+
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(model => model.IsDatabaseConnected)
+    @Html.HiddenFor(model => model.DatabaseVersion)
+    @Html.HiddenFor(model => model.CurrentVersion)
+    @Html.HiddenFor(model => model.IsUpdatedSuccessfully)
+    @Html.HiddenFor(model => model.IsPublishedSuccessfully)
+
+    <table>
+        <tbody>
+            <tr style="padding: 5px;">
+                @{
+                    if (Model.IsDatabaseConnected)
+                    {
+                        <td style="background-color: #00ff00; border: 1px black solid; padding: 10px;">Database</td>
+                    }
+                    else
+                    {
+                        <td style="background-color: #ff0000; border: 1px black solid; padding: 10px;">Database</td>
+                    }
+                }
+            </tr>
+        </tbody>
+    </table>
+    <p>
+        Database Version: @Html.DisplayFor(model => model.DatabaseVersion)
+    </p>
+    @if (!string.IsNullOrEmpty(Model.CurrentVersion))
+    {
+        <p>
+            Current Version: @Html.DisplayFor(model => model.CurrentVersion)
+        </p>
+    }
+    else
+    {
+        <p>
+            Current Version: N/A
+        </p>
+    }
+    <p>
+        Enter Password:
+    </p>
+    <p>
+        @Html.PasswordFor(model => model.UpdatePassword) <button name="updateDatabase" id="updateDatabase" type="submit">Update Database</button>
+    </p>
+    if (Model.IsUpdatedSuccessfully.HasValue)
+    {
+        <p>
+            Database Updated: @(Model.IsUpdatedSuccessfully.Value ? "True" : "False")
+        </p>
+    }
+}

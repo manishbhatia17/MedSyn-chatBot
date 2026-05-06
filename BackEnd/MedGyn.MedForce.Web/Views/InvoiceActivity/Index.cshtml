@@ -1,0 +1,21 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Invoice Activity Report";
+}
+@section Scripts {
+    <script type="text/javascript" src="~/js/App/Controllers/Reports/invoiceActivityController.js"></script>
+    <script type="text/javascript" src="~/js/App/Services/invoiceActivityService.js"></script>
+}
+<div ng-controller="invoiceActivityController" ng-cloak>
+    <div style="display: flex; justify-content: space-between;">
+        <h1>
+            Invoice Activity Report
+        </h1>
+    </div>
+    <div class="body-wrapper">
+        <list-table table="table"
+                    service="invoiceActivityService"
+                    fetch-func="fetchInvoiceActivity">
+        </list-table>
+    </div>
+</div>

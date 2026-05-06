@@ -1,0 +1,263 @@
+<script type="text/ng-template" id="ListTableTemplate.html">
+				<div class="dataTables_wrapper no-footer">
+		<div ng-show="loading" class="spinner-wrapper" id="spinner-wrapper">
+			<div class="spinner-wrapper-loader">
+			<div class="lds-heart">
+				<div><img src="/images/MedGyn Simbol -01.png" alt="loading..." style="width:128px;height:128px"/></div>
+			</div>
+			</div>
+		</div>
+		<div class="controls-wrapper">
+			<div class="dataTables_length" ng-if="!table.noPagination">
+				<label>
+					Show
+					<select class="form-control" style="display: inline-block; width: 75px;"
+						ng-model="searchCriteria.pageSize"
+						ng-options="pageSize for pageSize in pageSizes"
+						ng-change="searchCriteria.page = 0; refreshSearch();">
+					</select>
+					entries
+				</label>
+			</div>
+			<div class="additional_filters">
+				<div ng-repeat="filter in table.additionalFilters" ng-class="{{ filter.class }}" ng-style="{{ filter.style }}" ng-if="!isFilterDisabled(filter)">
+					<div ng-if="filter.type === 'dropdown'">
+						<select class="form-control"
+							ng-change="filterChanged(filter)"
+							ng-model="additionalFilters[filter.parameter]"
+							ng-options="o.value as o.text for o in filter.values">
+						</select>
+					</div>
+					<div ng-if="filter.type === 'checkbox'">
+						<label style="display:flex; flex-wrap:nowrap; align-items: center; height: 38px; margin: 0;">
+							<span ng-if="filter.label.position === 'left'"> {{ filter.label.text }} </span>
+							<input type="checkbox"
+								style="margin: 0 5px;"
+								ng-model="additionalFilters[filter.parameter]"
+								ng-change="filterChanged(filter)">
+							<span ng-if="filter.label.position === 'right'"> {{ filter.label.text }} </span>
+						</label>
+					</div>
+					<div ng-if="filter.type === 'date'" style="display: flex">
+						<label style="display:flex; flex-wrap:nowrap; align-items: center; height: 38px; margin: 0;">
+							{{ filter.text }}&nbsp;
+						</label>
+						<input type="date" class="form-control"
+								ng-model="additionalFilters[filter.parameter]"
+								ng-change="filterChanged(filter)">
+					</div>
+				</div>
+			</div>
+			<div class="dataTables_filter">
+				<input type="search" class="form-control"
+						placeholder="Search"
+						ng-if="!table.hideSearch"
+						ng-model="searchCriteria.search"
+						ng-model-options="{ debounce: 500 }"
+						ng-change="searchCriteria.page = 0; refreshSearch()">
+				<br>
+				<button class="btn btn-primary m-l-20" ng-if="!table.hideAdd" ng-click="callAddFunc()">Add +</button>
+				<button class="btn btn-primary m-l-20" ng-if="!table.hideUpload" ng-click="callUploadOrderFunc()">Upload +</button>
+				<button class="btn btn-primary m-l-20" ng-if="isEditable && !table.hideSave" ng-click="callSaveFunc()"
+					ng-class="{'btn-success': !isSaving && saveSuccess === true, 'btn-error': !isSaving && saveSuccess === false}">
+					<span ng-if="!isSaving && saveSuccess === undefined">Save</span>
+					<span ng-if="isSaving">Saving <i class="fa fa-spinner fa-spin fa-fw"></i></span>
+					<span ng-if="!isSaving && saveSuccess === true">Save Complete <i class="fa fa-check-circle" aria-hidden="true"></i></span>
+					<span ng-if="!isSaving && saveSuccess === false">Saved Failed <i class="fa fa-times-circle" aria-hidden="true"></i></span>
+				</button>
+				<button class="btn btn-primary m-l-20" ng-if="table.exportExcelFn" ng-click="table.exportExcelFn(this)">Excel</button>
+				<button class="btn btn-primary m-l-20" ng-if="!table.hidePriceImport" ng-click="callImportPriceFunc()">Import Prices</button>
+				<button class="btn btn-primary m-l-20" ng-if="table.checkboxAction" ng-disabled="!hasChecked()" ng-click="callCheckboxFunc()">{{table.checkboxAction.name}}</button>
+				<button class="btn btn-primary m-l-20" ng-if="backRoute" ng-click="goBack()">Back</button>
+				<div ng-if="showCheckbox()" style="padding-top:15px;">
+					<label>
+						<span>Select All</span>
+						<input type="checkbox" ng-model="selection.allSelected" ng-change="selectAll()">
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="table-wrapper">
+			<form name="listForm" prompt-before-leave>
+				<table id="medgyn-table" class="dataTable stripe">
+					<thead>
+						<tr role="row">
+							<th ng-repeat="column in table.dataColumns | filter:columnFilterFn " ng-click=" table.sorting && sort(column.field)">
+								<div ng-class="{
+									sorting: table.sorting && searchCriteria.sortColumn !== column.field,
+									sorting_asc: table.sorting && searchCriteria.sortColumn === column.field && searchCriteria.sortAsc,
+									sorting_desc: table.sorting && searchCriteria.sortColumn === column.field && !searchCriteria.sortAsc,
+								}" style="display:flex;">
+								<div>{{ column.title }}<div>
+								</div>
+							</th>
+							<th ng-repeat="column in table.actionColumns | filter:columnFilterFn">
+								{{ column.title }}
+							</th>
+							<th ng-if="showEdit()">Edit</th>
+							<th ng-if="showCheckbox()">Select</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-repeat="row in table.data" role="row" ng-class="{ even: $even, odd: $odd }">
+							<td ng-repeat="col in table.dataColumns | filter:columnFilterFn">
+								<span ng-if="!col.editable && !col.link && !col.enableHtml">
+									{{ col.display ? col.display(row[col.field], row) : row[col.field] }}
+								</span>
+								<a ng-if="!col.editable && col.link" ng-href="{{ getLink(row, col) }}">
+									{{ col.display ? col.display(row[col.field], row) : row[col.field] }}
+								</a>
+								<div ng-if="!col.editable && !col.link && col.enableHtml" ng-bind-html="col.render(row[col.field])" data-html="true">
+								</div>
+								<span ng-if="col.editable">
+									<input type="{{ col.type || 'text' }}"
+										name="{{col.field}}_{{row[table.idField]}}"
+										id="{{col.field}}_{{row[table.idField]}}"
+										ng-model="row[col.field]"
+										ng-required="isColumnRequired(row, col)"
+										ng-disabled="!isColumnEditable(row, col)"
+										ng-change="onChange(row, col)">
+										<error-messages></error-messages>
+								</span>
+							</td>
+							<td ng-repeat="col in table.actionColumns | filter:columnFilterFn">
+								<button class="btn btn-primary"
+									ng-disabled="isActionDisabled(row, col)"
+									ng-click="col.func(row[table.idField], row)">
+									{{ col.buttonText || col.title }}
+								</button>
+							</td>
+							<td ng-if="showEdit()" ng-click="goToDetails(row[table.idField], row)"><a><i class="fa fa-edit"></a></td>
+							<td ng-if="showCheckbox()" class="text-center">
+								<input class="table-selection" type="checkbox" ng-model="selection.checkboxes[checkboxField(row)]" data-field-value="{{checkboxField(row)}}">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+
+			<div ng-if="!table.noPagination" class="pagination-wrapper">
+				<div class="dataTables_info" role="status" ng-if="table.totalResults">Showing {{ table.start + 1 }} to {{ table.end }} of {{ table.totalResults }} entries</div>
+				<div class="dataTables_info" role="status" ng-if="!table.totalResults">No results</div>
+
+				<div class="dataTables_paginate paging_simple_numbers" ng-if="table.totalPages < 7 || table.showAllPages">
+					<a class="paginate_button previous" ng-class="{ disabled: table.currentPage === 0 }" ng-click="goToPage(table.currentPage - 1)">Previous</a>
+					<span ng-repeat="p in table.pages track by $index">
+						<a class="paginate_button" ng-class="{ current: table.currentPage === $index }" ng-click="goToPage($index)">{{ $index + 1 }}</a>
+					</span>
+					<a class="paginate_button next" ng-class="{ disabled: table.currentPage === table.totalPages - 1 }" ng-click="goToPage(table.currentPage + 1)">Next</a>
+				</div>
+
+				<div class="dataTables_paginate paging_simple_numbers" ng-if="table.totalPages >= 7">
+					<a class="paginate_button previous" ng-class="{ disabled: table.currentPage === 0 }" ng-click="goToPage(table.currentPage - 1)">Previous</a>
+
+					<a class="paginate_button" ng-class="{ current: table.currentPage === 0 }" ng-click="goToPage(0)">{{ 1 }}</a>
+
+					<span ng-if="table.currentPage <= 4">
+						<a class="paginate_button" ng-class="{ current: table.currentPage === 1 }" ng-click="goToPage(1)">{{ 2 }}</a>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === 2 }" ng-click="goToPage(2)">{{ 3 }}</a>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === 3 }" ng-click="goToPage(3)">{{ 4 }}</a>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === 4 }" ng-click="goToPage(4)">{{ 5 }}</a>
+						<span class="ellipsis">...</span>
+					</span>
+
+					<span ng-if="table.currentPage > 4 && table.currentPage < table.totalPages - 4">
+						<span class="ellipsis">...</span>
+						<a class="paginate_button" ng-click="goToPage(table.currentPage - 1)" ng-if="table.currentPage > 1">{{ table.currentPage }}</a>
+						<a class="paginate_button current">{{ table.currentPage + 1 }}</a>
+						<a class="paginate_button" ng-click="goToPage(table.currentPage + 1)" ng-if="table.currentPage < table.totalPages - 1">{{ table.currentPage + 2 }}</a>
+						<span class="ellipsis">...</span>
+					</span>
+
+					<span ng-if="table.currentPage >= table.totalPages - 4">
+						<span class="ellipsis">...</span>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === table.totalPages - 5 }" ng-click="goToPage(table.totalPages - 5)">{{ table.totalPages - 4 }}</a>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === table.totalPages - 4 }" ng-click="goToPage(table.totalPages - 4)">{{ table.totalPages - 3 }}</a>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === table.totalPages - 3 }" ng-click="goToPage(table.totalPages - 3)">{{ table.totalPages - 2 }}</a>
+						<a class="paginate_button" ng-class="{ current: table.currentPage === table.totalPages - 2 }" ng-click="goToPage(table.totalPages - 2)">{{ table.totalPages - 1 }}</a>
+					</span>
+
+					<a class="paginate_button" ng-class="{ current: table.currentPage === table.totalPages - 1 }" ng-click="goToPage(table.totalPages - 1)">{{ table.totalPages }}</a>
+
+					<a class="paginate_button next" ng-class="{ disabled: table.currentPage === table.totalPages - 1 }" ng-click="goToPage(table.currentPage + 1)">Next</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
+<script type="text/ng-template" id="UploadOrderModal.html">
+	<div ng-show="modalLoading" class="modal-spinner-wrapper">
+		<div class="modal-spinner-wrapper-loader">
+			<div class="lds-heart">
+				<div>
+					<img src="/images/MedGyn Simbol -01.png" alt="loading..." style="width:128px;height:128px"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-header">
+		<h4>Upload Customer Order</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<div class="alert alert-warning">
+			<p>This action is currently in Beta testing and may not work correctly. Please verify the invoice information after uploading.</p>
+		</div>
+		<form name="form">
+			<fieldset">
+				<div class="row form-group">
+					<input type="file" class="form-control" onchange="angular.element(this).scope().onFileChange(this)"/>
+					<error-messages></error-messages>
+				</div>
+			</fieldSet>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<div class="row">
+			<div class="col-md-4 text-left">
+				<button type="button" class="btn btn-danger" ng-click="close()">Close</button>
+			</div>
+			<div class="col-md-8">
+				<button type="button" class="btn btn-primary" ng-click="uploadOrder()">Upload</button>
+			</div>
+		</div>
+	</div>
+
+</script>
+
+<script type="text/ng-template" id="ImportPriceAdjustments.html">
+	<div ng-show="modalLoading" class="modal-spinner-wrapper">
+		<div class="modal-spinner-wrapper-loader">
+			<div class="lds-heart">
+				<div>
+					<img src="/images/MedGyn Simbol -01.png" alt="loading..." style="width:128px;height:128px"/>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal-header">
+		<h4>Import Price CSV</h4>
+	</div>
+	<div class="modal-body container-fluid">
+		<form name="form">
+			<fieldset">
+				<div class="row form-group">
+					<label for="priceImport">Select a CSV file to import:</label>
+					<input type="file" class="form-control" onchange="angular.element(this).scope().onFileChange(this)" id="priceImport"/>
+					<error-messages></error-messages>
+				</div>
+			</fieldSet>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<div class="row">
+			<div class="col-md-4 text-left">
+				<button type="button" class="btn btn-danger" ng-click="close()">Close</button>
+			</div>
+			<div class="col-md-8">
+				<button type="button" class="btn btn-primary" ng-click="uploadPrices()">Upload</button>
+			</div>
+		</div>
+	</div>
+
+</script>

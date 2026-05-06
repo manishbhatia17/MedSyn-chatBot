@@ -1,0 +1,24 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Invoices - Archived";
+}
+@section Scripts {
+    <script type="text/javascript" src="~/js/App/Controllers/archivedInvoiceController.js"></script>
+    <script type="text/javascript" src="~/js/App/Services/archivedInvoiceService.js"></script>
+}
+<div ng-controller="archivedInvoiceController" ng-cloak>
+    <div style="display: flex; justify-content: space-between;">
+        <h1>
+            Invoices - Archived
+        </h1>
+        <h1 ng-show="table.grandTotal">
+            Grand Total: {{ table.grandTotal | currency:'$' }}
+        </h1>
+    </div>
+    <list-table table="table"
+                service="archivedInvoiceService"
+                fetch-func="fetchArchivedInvoices">
+</div>
+
+

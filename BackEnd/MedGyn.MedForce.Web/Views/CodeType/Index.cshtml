@@ -1,0 +1,25 @@
+
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+	ViewData["Title"] = "Code Types";
+}
+
+@section Scripts {
+	<script type="text/javascript" src="~/js/App/Controllers/codesAndTypes/codeTypeListController.js"></script>
+	<script type="text/javascript" src="~/js/App/Services/codeService.js"></script>
+}
+
+<div ng-controller="codeTypeListController" ng-cloak>
+	<h1>
+		Code Type List
+	</h1>
+	<div class="body-wrapper">
+		<list-table
+			table="table"
+			service="codeService"
+			fetch-func="fetchCodeTypes"
+			save-func="save"
+		></list-table>
+	</div>
+</div>
+

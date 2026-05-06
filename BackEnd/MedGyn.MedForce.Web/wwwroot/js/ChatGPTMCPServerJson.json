@@ -1,0 +1,132 @@
+﻿[
+  {
+    "type": "function",
+    "function": {
+      "name": "GetProductByName",
+      "description": "Retrieve product information by product name.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_name": {
+            "type": "string",
+            "description": "The name of the product to look up. Names can be multipe words"
+          }
+        },
+        "required": [ "product_name" ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "GetProductById",
+      "description": "Retrieve product information by product ID. ",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "The unique ID of the product. an ID is usually a number or number and character string."
+
+          }
+        },
+        "required": [ "product_id" ]
+
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "GetInvoice",
+      "description": "Fetch invoice details for a customer order by using the invoice number.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "invoice_number": {
+            "type": "string",
+            "description": "The number associated with the invoice."
+
+          }
+        },
+        "required": [ "invoice_number" ]
+
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "GetInvoicesByCustomer",
+      "description": "Retrieve all invoices associated with a customer ID.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "description": "The ID of the customer whose invoices should be fetched."
+
+          }
+        },
+        "required": [ "customer_id" ]
+
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "GetCustomerPO",
+      "description": "Retrieves the Purchase Order (PO) for a customer based on the PO number they provided. This is usually a request with send me my order, the PO number is...",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "po_number": {
+            "type": "string",
+            "description": "The Purchase Order (PO) number that should be fetched."
+
+          }
+        },
+        "required": [ "po_number" ]
+
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "GetCustomerOrder",
+      "description": "Retrieves the Customer Order (CO) for a customer based on the Customer Order number they provided. This is usually a request with send me my order, the CO number is...",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "co_number": {
+            "type": "string",
+            "description": "The Customer Order (CO) number that should be fetched."
+
+          }
+        },
+        "required": [ "co_number" ]
+
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "GetCustomerOrderByEmail",
+      "description": "Retrieves a list of Customer Orders (CO) for a customer where an email doesnt have a specific customer order number or po number. This is usually a request with I have a question about my recent order, or my orders",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "The from email address of the requestor"
+
+          }
+        },
+        "required": []
+      }
+    }
+  }
+]
