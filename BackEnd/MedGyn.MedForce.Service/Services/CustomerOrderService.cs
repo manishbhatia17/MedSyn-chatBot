@@ -899,5 +899,73 @@ namespace MedGyn.MedForce.Service.Services
 				showInternational, showDomesticDistributors, showDomesticNonDistributors);
 			return output;
 		}
-	}
+
+        public async Task<CustomerOrderChatStatusContract> GetCustomerOrderChatStatus(string poNumber)
+        {
+            var order = await _customerOrderRepository.GetCustomerOrderChatStatusByPO(poNumber);
+
+            if (order == null)
+                return null;
+
+            bool isApproved = order.VPApprovedOn != null;
+
+            bool isShipped =order.ShipmentComplete != null && order.ShipmentComplete == true;
+
+            bool isInvoiced = order.InvoiceSent != null && order.InvoiceSent == true;
+
+            string status = "Waiting Submission";
+
+            if (order.IsDoNotFill != null && order.IsDoNotFill == true)
+            {
+                status = "Do Not Fill";
+            }
+            else if (isInvoiced)
+            {
+                status = "Invoiced";
+            }
+            else if (isShipped)
+            {
+                status = "Shipped";
+            }
+            else if (isApproved)
+            {
+                status = "Approved";
+            }
+            else if (order.MGApprovedOn != null)
+            {
+                status = "Waiting VP Approval";
+            }
+            else if (order.SubmitDate != null)
+            {
+                status = "Waiting Manager Approval";
+            }
+
+            return new CustomerOrderChatStatusContract
+            {
+				Carrier = order.CarrierName1??order.CarrierName2??null,
+
+				AttachmentURI = order.AttachmentURI??null,
+
+                CustomerOrderID = order.CustomerOrderID,
+
+                CustomerOrderCustomID = order.CustomerOrderCustomID,
+
+                PONumber = order.PONumber,
+
+                Status = status,
+
+                IsApproved = isApproved,
+
+                IsShipped = isShipped,
+
+                IsInvoiced = isInvoiced,
+
+                TrackingNumber = order.MasterTrackingNumber,
+
+                InvoiceNumber = order.InvoiceNumber,
+
+                InvoiceDate = order.InvoiceDate
+            };
+        }
+    }
 }

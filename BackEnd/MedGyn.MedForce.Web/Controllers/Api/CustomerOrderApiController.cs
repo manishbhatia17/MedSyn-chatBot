@@ -629,6 +629,6 @@ namespace MedGyn.MedForce.Web.Controllers.Api
                 _logger.LogError(ex, "Error sending invoice for customer order");
                 return StatusCode(500);
 			}
-		}
-	}
+        }
+    }
 }

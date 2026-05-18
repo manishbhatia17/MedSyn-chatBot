@@ -86,6 +86,7 @@ namespace MedGyn.MedForce.Data.Interfaces
 		IList<dynamic> GetPeachTreeInvoiceShippingByBatchId(int BatchId);
 		IList<dynamic> GetPeachTreeInvoiceCreditCardFeeByBatchId(int BatchId);
 		IList<dynamic> GetPreviousPeachTreeInvoicesByDate(string StartDate, string EndDate);
+		Task<dynamic> GetCustomerOrderChatStatusByPO(string poNumber);
 
-	}
+    }
 }

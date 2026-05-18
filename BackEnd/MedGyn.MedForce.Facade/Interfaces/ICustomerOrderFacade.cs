@@ -19,7 +19,6 @@ namespace MedGyn.MedForce.Facade.Interfaces
 		bool CanManagerApproveOrder(int customerOrderId);
 		bool CanVpApproveOrder(int customerOrderId);
 		Task<CustomerOrderViewModel> CreateCustomerOrderFromFile(string File);
-
         Task<CustomerOrderViewModel> SaveCustomerOrder(CustomerOrderViewModel customerOrder, bool submit);
 		Task<OrderProductsViewModel> GetCustomerOrderHistoryForProduct(int productID, int customerID);
 		SaveResults ApproveCustomerOrder(int customerOrderID, bool isVPApproval);

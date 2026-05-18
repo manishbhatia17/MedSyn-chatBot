@@ -15,7 +15,7 @@ namespace MedGyn.MedForce.Facade.Handlers.Interfaces
 		GetCustomerOrder = 4,
 		GetCustomerOrderByEmail = 5
 	}
-	public interface IEmailBotCommandHandler
+	public interface IEmailBotCommandHandler	
 	{
 		EmailBotCommandType CommandType { get; }
 

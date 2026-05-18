@@ -35,9 +35,24 @@ namespace MedGyn.MedForce.Web.Controllers.Api
             model.IsExistingCustomer = await _customerFacade.VerifyCustomerByEmailAsync(model.Email);
 
             // Log the chat entry
-            await _chatBotFacade.LogCustomerChatAsync(model);
+            int id = await _chatBotFacade.LogCustomerChatAsync(model);
 
-            return Ok(new { model.IsExistingCustomer });
+            return Ok(new {
+                ChatLogId = id,
+                model.IsExistingCustomer });
         }
+
+        /// <summary>
+        /// Chats with customer providing the appropriate result
+        /// </summary>
+        /// <param name="request">Chat Details(Message)</param>
+        /// <returns>Returns text with information</returns>
+        [HttpPost("chat")]
+        public async Task<IActionResult>Chat([FromBody]CustomerChatRequestDTO request)
+        {
+            var response = await _chatBotFacade.ProcessMessage(request);
+            return Ok(response);
+        }
+
     }
 }

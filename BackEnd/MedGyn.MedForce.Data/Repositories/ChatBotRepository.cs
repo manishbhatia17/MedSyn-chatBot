@@ -20,5 +20,10 @@ namespace MedGyn.MedForce.Data.Repositories
 
             return log.Id;
         }
+
+        public async Task<CustomerChatLog> GetCustomerChatLogAsync(int id)
+        {
+            return await _dbContext.GetAsync<CustomerChatLog>(id);
+        }
     }
 }

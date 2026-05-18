@@ -1,4 +1,5 @@
 using MedGyn.MedForce.Data.Models;
+using MedGyn.MedForce.Data.Repositories;
 using NHibernate;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,6 +45,12 @@ namespace MedGyn.MedForce.Data.Interfaces
 		IQueryable<Role> Roles { get; }
 		IQueryable<SecurityKey> SecurityKeys { get; }
 		IQueryable<User> Users { get; }
+		IQueryable<Territory> Territories { get; }
+		IQueryable<RepresentativeTerritory> RepersentativeTerritories { get; }
+		IQueryable<Region> Regions { get; }
+		IQueryable<Country> Countries { get; }
+		IQueryable<State> States { get; }
+		IQueryable<Representative> Repersentatives { get; }
 		IQueryable<Vendor> Vendors { get; }
 		IQueryable<CustomerChatLog> CustomerChatLogs { get; }
 	}

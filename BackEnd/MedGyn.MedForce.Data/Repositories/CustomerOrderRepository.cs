@@ -2913,5 +2913,63 @@ namespace MedGyn.MedForce.Data.Repositories
 				return null;
             }
 		}
-	}
+
+        public async Task<dynamic>GetCustomerOrderChatStatusByPO(string poNumber)
+        {
+            var queryText = $@"
+        SELECT TOP 1
+            co.{nameof(CustomerOrder.CustomerOrderID)}
+            ,co.{nameof(CustomerOrder.CustomerOrderCustomID)}
+            ,co.{nameof(CustomerOrder.PONumber)}
+            ,co.{nameof(CustomerOrder.SubmitDate)}
+            ,co.{nameof(CustomerOrder.MGApprovedOn)}
+            ,co.{nameof(CustomerOrder.VPApprovedOn)}
+            ,co.{nameof(CustomerOrder.IsDoNotFill)}
+            ,co.{nameof(CustomerOrder.IsFilling)}
+            ,co.{nameof(CustomerOrder.FilledByOn)}
+            ,co.{nameof(CustomerOrder.ShippedByOn)}
+            ,co.{nameof(CustomerOrder.AttachmentURI)}
+
+            ,ship.{nameof(CustomerOrderShipment.InvoiceNumber)}
+            ,ship.{nameof(CustomerOrderShipment.InvoiceDate)}
+            ,ship.{nameof(CustomerOrderShipment.InvoiceSent)}
+            ,ship.{nameof(CustomerOrderShipment.ShipmentComplete)}
+            ,ship.{nameof(CustomerOrderShipment.MasterTrackingNumber)}
+
+            ,ship1.CodeName
+            as CarrierName1
+
+            ,ship2.CodeName
+            as CarrierName2
+
+        FROM CustomerOrder co
+
+        LEFT JOIN CustomerOrderShipment ship
+            ON ship.{nameof(CustomerOrderShipment.CustomerOrderID)}
+            = co.{nameof(CustomerOrder.CustomerOrderID)}
+
+        LEFT JOIN CustomerShippingInfo csi
+            ON csi.CustomerShippingInfoID
+            = co.CustomerShippingInfoID
+        
+        LEFT JOIN Code ship1
+            ON ship1.CodeID
+            = csi.ShipCompany1CodeID
+
+         LEFT JOIN Code ship2
+             ON ship2.CodeID
+             = csi.ShipCompany2CodeID
+
+        WHERE co.{nameof(CustomerOrder.PONumber)}
+            = :poNumber
+    ";
+
+            var result = await _dbContext.Session
+                .CreateSQLQuery(queryText)
+                .SetString("poNumber", poNumber)
+                .DynamicListAsync();
+
+            return result.FirstOrDefault();
+        }
+    }
 }

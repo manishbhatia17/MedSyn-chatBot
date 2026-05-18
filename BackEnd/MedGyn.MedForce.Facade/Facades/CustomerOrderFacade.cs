@@ -2418,7 +2418,7 @@ namespace MedGyn.MedForce.Facade.Facades
 			}
 		}
 
-		public class Invoice
+        public class Invoice
 
 		{
 			public string MedGynAddress { get; set; }

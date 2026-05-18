@@ -128,5 +128,43 @@
         "required": []
       }
     }
-  }
+  },
+    {
+        "type": "function",
+        "function": {
+            "name": "GetRepersentativeByCountryOrState",
+            "description": "Retrieve the sales representative based on customer state or country.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "state": {
+                        "type": "string",
+                        "description": "Customer state or province if available."
+                    },
+                    "country": {
+                        "type": "string",
+                        "description": "Customer country if available."
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "LeaveMessageForMedGyn",
+            "description": "Send a customer question or message to the MedGyn representative team.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "The customer's message or question."
+                    }
+                },
+                "required": [ "message" ]
+            }
+        }
+    }
 ]

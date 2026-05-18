@@ -14,7 +14,7 @@ namespace MedGyn.MedForce.Service.Services
         {
             _chatBotRepository = chatBotRepository;
         }
-        public async Task LogCustomerChatAsync(CustomerChatLogContract model)
+        public async Task<int> LogCustomerChatAsync(CustomerChatLogContract model)
         {
             var entity = new CustomerChatLog
             {
@@ -26,7 +26,12 @@ namespace MedGyn.MedForce.Service.Services
                 CustomerId = model.CustomerId,
                 CreatedAt = DateTime.UtcNow
             };
-            await _chatBotRepository.AddCustomerChatLogAsync(entity);
+           return await _chatBotRepository.AddCustomerChatLogAsync(entity);
+        }
+
+        public async Task<CustomerChatLog> GetCustomerChatLogAsync(int id)
+        {
+            return await _chatBotRepository.GetCustomerChatLogAsync(id);
         }
     }
 }

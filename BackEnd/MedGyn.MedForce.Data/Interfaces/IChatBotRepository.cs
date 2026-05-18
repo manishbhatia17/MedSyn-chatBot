@@ -6,5 +6,6 @@ namespace MedGyn.MedForce.Data.Interfaces
     public interface IChatBotRepository
     {
         Task<int> AddCustomerChatLogAsync(CustomerChatLog log);
+        Task<CustomerChatLog> GetCustomerChatLogAsync(int id);
     }
 }

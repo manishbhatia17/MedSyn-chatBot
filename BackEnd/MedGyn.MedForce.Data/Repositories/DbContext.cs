@@ -34,6 +34,12 @@ namespace MedGyn.MedForce.Data.Repositories
 		public IQueryable<User> Users => _session.Query<User>();
 		public IQueryable<Vendor> Vendors => _session.Query<Vendor>();
 		public IQueryable<CustomerChatLog> CustomerChatLogs => _session.Query<CustomerChatLog>();
+		public IQueryable<Representative> Repersentatives => _session.Query<Representative>();
+		public IQueryable<Territory> Territories => _session.Query<Territory>();
+		public IQueryable<RepresentativeTerritory> RepersentativeTerritories => _session.Query<RepresentativeTerritory>();
+		public IQueryable<Region> Regions => _session.Query<Region>();
+		public IQueryable<Country> Countries => _session.Query<Country>();
+		public IQueryable<State> States => _session.Query<State>();
 
 
 		public DbContext(ISession session)

@@ -60,6 +60,8 @@ namespace MedGyn.MedForce.Web
 			services.AddScoped<ICustomerFacade, CustomerFacade>();
 			services.AddScoped<IChatBotFacade, ChatBotFacade>();
 			services.AddScoped<IChatBotService, ChatBotService>();
+			services.AddScoped<IRepersentativeTerritoryFacade, RepersentativeTerritoryFacade>();
+			services.AddScoped<IRepersentativeTerritoryService, RepresentativeTerritoryService>();
 			services.AddScoped<ICustomerOrderFacade, CustomerOrderFacade>();
 			services.AddScoped<IProductFacade, ProductFacade>();
 			services.AddScoped<IPurchaseOrderFacade, PurchaseOrderFacade>();
@@ -71,12 +73,21 @@ namespace MedGyn.MedForce.Web
 
 			//Factories
 			services.AddScoped<IEmailBotCommandHandlerFactory, EmailbotCommandHandlerFactory>();
+			services.AddScoped<ICustomerChatBotCommandHandlerFactory, CustomerChatBotCommandHandlerFactory>();
 
 			//CommandHandlers
+
+			//Email Bot
 			services.AddTransient<IEmailBotCommandHandler, GetProductByNameCommandHandler>();
 			services.AddTransient<IEmailBotCommandHandler, GetProductByIdCommandHandler>();
 			services.AddTransient<IEmailBotCommandHandler, GetCustomerPOCommandHandler>();
 			services.AddTransient<IEmailBotCommandHandler, GetCustomerOrderCommandHandler>();
+
+            //Chat Bot
+			services.AddTransient<ICustomerChatBotCommandHandler,GetProductByNameCustomerChatBotCommandHandler>();
+			services.AddTransient<ICustomerChatBotCommandHandler, GetCustomerPOCustomerChatBotCommandHandler>();
+			services.AddTransient<ICustomerChatBotCommandHandler, GetRepersentativeByStateOrCountryCustomerChatBotCommandHandler>();
+			services.AddTransient<ICustomerChatBotCommandHandler, LeaveMessageForMedGynCustomerChatBotCommandHandler>();
 
 			//services
 			services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -109,6 +120,7 @@ namespace MedGyn.MedForce.Web
 			services.AddScoped<IUserRepository, UserRepository>();
 			services.AddScoped<IVendorRepository, VendorRepository>();
 			services.AddScoped<IChatBotRepository, ChatBotRepository>();
+			services.AddScoped<IRepresentativeTerritoryRepository, RepresentativeTerritoryRepository>();
 
 			services.AddScoped<Medforce.Graph.Services.Interfaces.IEmailService, GraphEmailService>();
 			services.AddScoped<ILLMAgent, Medgyn.Meforce.LLMAgent.LLMAgents.ChatGPTAgent>();

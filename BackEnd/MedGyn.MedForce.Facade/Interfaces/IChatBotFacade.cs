@@ -5,6 +5,7 @@ namespace MedGyn.MedForce.Facade.Interfaces
 {
     public interface IChatBotFacade
     {
-        Task LogCustomerChatAsync(CustomerChatLogModel model);
+        Task<int> LogCustomerChatAsync(CustomerChatLogModel model);
+        Task<CustomerChatResponseDTO> ProcessMessage(CustomerChatRequestDTO request);
     }
 }
