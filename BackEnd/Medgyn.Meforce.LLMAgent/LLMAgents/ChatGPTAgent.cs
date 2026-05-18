@@ -19,7 +19,7 @@ namespace Medgyn.Meforce.LLMAgent.LLMAgents
 		public ChatGPTAgent(IHttpClientFactory httpClientFactory)
 		{
 			_httpClient = httpClientFactory.CreateClient("ChatGPTClient");
-			_apiKey = "";
+			_apiKey = string.Empty;
 			_model = "gpt-4o-mini";/* "gpt -5-mini"*/;// "gpt -3.5-turbo-0125";
 			_messages = new List<ChatMessage>();
 		}
