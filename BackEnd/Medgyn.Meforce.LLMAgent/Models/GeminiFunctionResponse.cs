@@ -29,6 +29,7 @@ namespace Medgyn.Meforce.LLMAgent.Models
 	{
 		public FunctionCall FunctionCall { get; set; }
 		public string ThoughtSignature { get; set; }
+		public string Text { get; set; }
 	}
 
 	public class FunctionCall

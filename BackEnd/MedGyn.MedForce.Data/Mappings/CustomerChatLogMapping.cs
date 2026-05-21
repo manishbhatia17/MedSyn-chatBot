@@ -17,6 +17,8 @@ namespace MedGyn.MedForce.Data.Mappings
 
             Map(x => x.Email);
 
+            Map(x => x.PhoneNumber);
+
             Map(x => x.State);
 
             Map(x => x.Country);

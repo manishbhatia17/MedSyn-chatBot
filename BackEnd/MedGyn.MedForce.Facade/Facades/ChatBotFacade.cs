@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Medgyn.Meforce.LLMAgent.Services;
@@ -26,6 +27,7 @@ namespace MedGyn.MedForce.Facade.Facades
             {
                 Name = model.Name,
                 Email = model.Email,
+                PhoneNumber = model.PhoneNumber,
                 State = model.State,
                 Country = model.Country,
                 IsExistingCustomer = model.IsExistingCustomer,
@@ -36,31 +38,42 @@ namespace MedGyn.MedForce.Facade.Facades
 
         public async Task<CustomerChatResponseDTO> ProcessMessage(CustomerChatRequestDTO request)
         {
-            string functionJson = File.ReadAllText(@".\wwwroot\js\ChatGPTMCPServerJson.json");
+            try
+            {
+                string functionJson = File.ReadAllText(@".\wwwroot\js\ChatGPTMCPServerJson.json");
 
-            var llmResponse = await _llmService.AgentFunction(request.Message,functionJson,"You are a MedGyn customer chatbot assistant.");
+                var llmResponse = await _llmService.AgentFunction(
+                    request.Message,
+                    functionJson,
+                    "You are a helpful MedGyn customer support assistant. Use the available functions to answer the customer's question.");
 
-            if (llmResponse == null)
+                if (llmResponse == null)
+                {
+                    return new CustomerChatResponseDTO
+                    {
+                        Message = "I wasn't able to understand your request. Could you please rephrase your question?"
+                    };
+                }
+
+                var handler = _handlerFactory.GetCommandHandler(llmResponse.FunctionName);
+
+                if (handler == null)
+                {
+                    return new CustomerChatResponseDTO
+                    {
+                        Message = "I'm not sure how to help with that. Please select an option from the menu or ask about products, orders, or your sales representative."
+                    };
+                }
+
+                return await handler.HandleAsync(llmResponse.Parameters.ToArray(), request);
+            }
+            catch (Exception ex)
             {
                 return new CustomerChatResponseDTO
                 {
-                    Message =
-                        "Unable to process request."
+                    Message = $"Error: {ex.Message}"
                 };
             }
-
-            var handler = _handlerFactory.GetCommandHandler(llmResponse.FunctionName);
-
-            if (handler == null)
-            {
-                return new CustomerChatResponseDTO
-                {
-                    Message =
-                        "No handler found."
-                };
-            }
-
-            return await handler.HandleAsync(llmResponse.Parameters.ToArray(),request);
         }
           
     }

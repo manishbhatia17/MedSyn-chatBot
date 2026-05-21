@@ -1,7 +1,7 @@
 import * as signalR from '@microsoft/signalr';
 import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ChatService, UserInfoModel, chatMessage } from '../service/ChatService/chat.service';
+import { ChatService, UserInfoModel, chatMessage, CustomerChatRequest, CustomerChatResponse } from '../service/ChatService/chat.service';
 import { UserStateService } from '../service/user-state.service';
 import { LocationService } from '../service/location.service';
 import { Country, State } from 'country-state-city';
@@ -10,7 +10,7 @@ import { environment } from '../environments/environment';
 import { Observable, Observer } from 'rxjs';
 import { ChatMessage, ChatRule } from 'src/model/chatMessage';
 import {  ActionType, OptionModel, RuleMeta } from 'src/model/optionModel';
-import { ChatEngineService } from 'src/service/ChatService/chatEngine.service';
+import { ChatEngineService } from 'src/service/ChatService/chatengine.service';
 import { ChatState } from 'src/model/chatState';
 
 @Component({
@@ -46,6 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
   });
   messageToSend: string = '';
   isLoading = false;
+  chatLogId: number = null;
   private hubConnection: signalR.HubConnection;
 
   userId = null;
@@ -120,28 +121,34 @@ export class AppComponent implements OnInit, OnDestroy {
       let chatData: UserInfoModel = {
         name: this.chatForm.get('name').value,
         email: this.chatForm.get('email').value,
-        phoneNumber: parseInt(this.chatForm.get('phoneNumber').value),
+        phoneNumber: this.chatForm.get('phoneNumber').value,
         state: this.chatForm.get('state')?.value,
         country: this.chatForm.get('country')?.value,
         isExistingCustomer: !!this.chatForm.get('isExistingCustomer')?.value,
         customerId: this.chatForm.get('isExistingCustomer')?.value
-          ? (this.chatForm.get('customerId')?.value ?? '').toString().trim()
+          ? parseInt((this.chatForm.get('customerId')?.value ?? '').toString().trim(), 10)
           : undefined,
       }
 
-      // Save user state
       this.userStateService.setUserState(chatData);
       this.isExistingCustomer = chatData.isExistingCustomer;
-      //call the api to stre the data in backend and then push the greeting and options to user
-      //------------------------------------------ do it later 
+      this.isLoading = true;
 
-      this.handleUserResponse(RuleMeta.MainMenuOption.intent,null);
-      
-        this.IsUserDataSubmited = true;
-        this.optionsShownTime = new Date();
-        // ensure options visible and scroll to bottom so options and later selected messages are visible
-        setTimeout(() => this.scrollToBottom(), 80);
-      
+      this.chatService.LogChatCustomer(chatData).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.chatLogId = response.chatLogId;
+          this.isExistingCustomer = response.isExistingCustomer;
+          this.handleUserResponse(RuleMeta.MainMenuOption.intent, null);
+          this.IsUserDataSubmited = true;
+          this.optionsShownTime = new Date();
+          setTimeout(() => this.scrollToBottom(), 80);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.TimerErrorSummary('Unable to connect. Please try again.');
+        }
+      });
     } else {
       this.chatForm.markAllAsTouched();
       this.TimerErrorSummary("Please enter valid data")
@@ -204,17 +211,23 @@ AddMessageToChat(message: string, isIncoming: boolean = true) {
 
 SendMessage(): void {
     if (this.messageToSend?.trim()) {
-     
-      //call handle user message to get the response from bot based on the message and current state of conversation
-      //const botResponse = this.handleUserMessage(this.messageToSend, { currentRuleId: '', context: {} }, null);
-       this.chatMessages.push({ isIncoming: false, message: this.messageToSend });
-      this.scrollToBottom();
+      const messageText = this.messageToSend;
+      this.AddMessageToChat(messageText, false);
       this.messageToSend = '';
-      console.log(this.chatMessages)
+      this.isLoading = true;
 
-    }
-    else {
-      this.TimerErrorSummary('Please enter message')
+      this.chatService.SendChatMessage({ chatLogId: this.chatLogId, message: messageText }).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.AddMessageToChat(response.message, true);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.AddMessageToChat('Sorry, I was unable to process your request. Please try again.', true);
+        }
+      });
+    } else {
+      this.TimerErrorSummary('Please enter message');
     }
   }
 

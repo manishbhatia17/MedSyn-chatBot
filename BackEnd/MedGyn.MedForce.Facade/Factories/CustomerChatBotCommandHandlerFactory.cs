@@ -67,12 +67,11 @@ namespace MedGyn.MedForce.Facade.Factories
                     CustomerChatBotCommandType
                          .GetRepersentativeByCountryOrState,
 
-                "LeaveMessageForMedGyn" => 
-                   CustomerChatBotCommandType
+                "LeaveMessageForMedGyn" =>
+                    CustomerChatBotCommandType
                          .LeaveMessageForMedGyn,
 
-                _ => throw new ArgumentException(
-                    $"Unknown function name: {functionName}")
+                _ => (CustomerChatBotCommandType)(-1)
             };
         }
     }

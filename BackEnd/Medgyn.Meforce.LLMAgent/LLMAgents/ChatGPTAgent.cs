@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenAI.Chat;
 using Medgyn.Meforce.LLMAgent.Declarations;
+using Microsoft.Extensions.Options;
+using Medgyn.Meforce.LLMAgent.Configurations;
 
 namespace Medgyn.Meforce.LLMAgent.LLMAgents
 {
@@ -16,11 +18,11 @@ namespace Medgyn.Meforce.LLMAgent.LLMAgents
 		private readonly string _apiKey;
 		private readonly string _model;
 
-		public ChatGPTAgent(IHttpClientFactory httpClientFactory)
+		public ChatGPTAgent(IHttpClientFactory httpClientFactory, IOptions<OpenAISettings> openAISettings)
 		{
 			_httpClient = httpClientFactory.CreateClient("ChatGPTClient");
-			_apiKey = string.Empty;
-			_model = "gpt-4o-mini";/* "gpt -5-mini"*/;// "gpt -3.5-turbo-0125";
+			_apiKey = openAISettings.Value.ApiKey;
+			_model = openAISettings.Value.Model ?? "gpt-4o-mini";
 			_messages = new List<ChatMessage>();
 		}
 
@@ -67,22 +69,22 @@ namespace Medgyn.Meforce.LLMAgent.LLMAgents
 
 				if (chatCompletion.ToolCalls.Count > 0)
 				{
-					for (int i = 0; chatCompletion.ToolCalls.Count < i; i++)
+					for (int i = 0; i < chatCompletion.ToolCalls.Count; i++)
 					{
 						_messages.Add(new ToolChatMessage(chatCompletion.ToolCalls[i].Id, content));
 					}
 
-					return chatCompletion.ToolCalls is T ? (T)chatCompletion.ToolCalls : default(T);
+					var toolCallsList = new List<ChatToolCall>(chatCompletion.ToolCalls);
+					return (T)(object)toolCallsList;
 				}
 				else
 				{
 					return default(T);
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
-				string error = ex.Message;
-				return default(T);
+				throw new InvalidOperationException($"ChatGPT AgentFunction failed: {ex.Message}", ex);
 			}
 		}
 

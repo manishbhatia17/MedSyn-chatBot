@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 export interface UserState {
   name: string;
   email: string;
-  phoneNumber: number;
+  phoneNumber: string;
   state: string;
   country: string;
   isExistingCustomer?: boolean;
-  customerId?: string;
+  customerId?: number;
 }
 
 @Injectable({

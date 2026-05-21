@@ -77,35 +77,35 @@ namespace MedGyn.MedForce.Facade.Handlers
             sb.AppendLine(
                 $"Invoiced: {order.IsInvoiced}");
 
+            if (order.InvoiceNumber != null)
+                sb.AppendLine($"Invoice Number: {order.InvoiceNumber}");
+
+            if (!string.IsNullOrEmpty(order.Carrier))
+                sb.AppendLine($"Carrier: {order.Carrier}");
+
             if (!string.IsNullOrEmpty(order.TrackingNumber))
             {
-                sb.AppendLine(
-                    $"Tracking Number: {order.TrackingNumber}");
-            }
+                sb.AppendLine($"Tracking Number: {order.TrackingNumber}");
 
-            if (order.InvoiceNumber != null)
-            {
-                sb.AppendLine(
-                    $"Invoice Number: {order.InvoiceNumber}");
-            }
+                string trackingUrl = null;
+                string carrier = order.Carrier?.ToLower() ?? string.Empty;
+                if (carrier.Contains("ups"))
+                    trackingUrl = $"https://www.ups.com/track?tracknum={order.TrackingNumber}";
+                else if (carrier.Contains("fedex"))
+                    trackingUrl = $"https://www.fedex.com/fedextrack/?tracknumbers={order.TrackingNumber}";
 
-            if(!string.IsNullOrEmpty(order.Carrier))
-            {
-                sb.AppendLine(
-                    $"Carrier Name: {order.Carrier}");
+                if (trackingUrl != null)
+                    sb.AppendLine($"Track your shipment here: {trackingUrl}");
             }
 
             if (!string.IsNullOrEmpty(order.AttachmentURI))
-            {
-                sb.AppendLine(
-                    $"Attachment: {order.AttachmentURI}");
-            }
+                sb.AppendLine($"Invoice download link: {order.AttachmentURI}");
 
             string aiResponse =
                 await _llmService
                     .SummarizeContent(
                         sb.ToString(),
-                        "You are a medical supplies customer support assistant. Explain order status clearly and professionally.");
+                        "You are a medical supplies customer support assistant. Explain the order status clearly and professionally. Include any tracking or invoice links exactly as provided.");
 
             return new CustomerChatResponseDTO
             {

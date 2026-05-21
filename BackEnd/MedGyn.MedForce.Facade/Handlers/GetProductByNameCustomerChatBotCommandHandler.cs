@@ -52,15 +52,37 @@ namespace MedGyn.MedForce.Facade.Handlers
                 };
             }
 
-            string prompt = $@"
-Product Name: {product.ProductName}
-Product ID: {product.ProductCustomID}
-";
+            var sb = new StringBuilder();
+            sb.AppendLine($"Product Name: {product.ProductName}");
+            sb.AppendLine($"Product ID: {product.ProductCustomID}");
+
+            if (!string.IsNullOrWhiteSpace(product.Description))
+                sb.AppendLine($"Description: {product.Description}");
+
+            if (!string.IsNullOrWhiteSpace(product.Manufacturer))
+                sb.AppendLine($"Manufacturer: {product.Manufacturer}");
+
+            if (!string.IsNullOrWhiteSpace(product.Notes))
+                sb.AppendLine($"Notes: {product.Notes}");
+
+            if (product.PriceDomesticList.HasValue)
+                sb.AppendLine($"List Price: ${product.PriceDomesticList:F2}");
+
+            sb.AppendLine($"Status: {(product.IsDiscontinued ? "Discontinued" : "Available")}");
+
+            if (!string.IsNullOrWhiteSpace(product.PrimaryImageURI))
+                sb.AppendLine($"Product Image: {product.PrimaryImageURI}");
+
+            string systemPrompt =
+                "You are a MedGyn medical supplies sales assistant. " +
+                "Provide a clear and helpful summary of this product using the information provided. " +
+                "At the end of your response, ask the customer if they would like to place an order " +
+                "online at www.medgyn.com or if they would like to speak with their sales representative.";
 
             string response =
                 await _llmService.SummarizeContent(
-                    prompt,
-                    "You are a medical supplies assistant.");
+                    sb.ToString(),
+                    systemPrompt);
 
             return new CustomerChatResponseDTO
             {

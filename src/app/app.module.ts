@@ -12,7 +12,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@a
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; // Import BrowserAnimationsModule
 import { APIInterceptor } from '../../apiInterceptor/api.interceptor';
 import { CustomerOptionsComponent } from './shared/customer-options/customer-options.component';
-import { ChatEngineService } from 'src/service/ChatService/chatEngine.service';
+import { ChatEngineService } from 'src/service/ChatService/chatengine.service';
 
 @NgModule({
     declarations: [

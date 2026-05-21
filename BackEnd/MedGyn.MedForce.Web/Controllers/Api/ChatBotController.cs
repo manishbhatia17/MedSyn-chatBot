@@ -7,7 +7,7 @@ using MedGyn.MedForce.Facade.DTOs;
 
 namespace MedGyn.MedForce.Web.Controllers.Api
 {
-    [Authorize]
+    [AllowAnonymous]
     [Route("api/chatbot")]
     public class ChatBotController : BaseApiController
     {
@@ -31,8 +31,8 @@ namespace MedGyn.MedForce.Web.Controllers.Api
             if (model == null || string.IsNullOrWhiteSpace(model.Email))
                 return BadRequest("Invalid customer details.");
 
-            // Use facade to verify customer existence
-            model.IsExistingCustomer = await _customerFacade.VerifyCustomerByEmailAsync(model.Email);
+            // Existing customer is determined by whether they provided a Customer ID
+            model.IsExistingCustomer = model.CustomerId.HasValue;
 
             // Log the chat entry
             int id = await _chatBotFacade.LogCustomerChatAsync(model);

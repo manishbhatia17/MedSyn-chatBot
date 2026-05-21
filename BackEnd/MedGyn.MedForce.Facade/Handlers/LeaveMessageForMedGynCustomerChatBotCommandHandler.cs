@@ -98,6 +98,11 @@ namespace MedGyn.MedForce.Facade.Handlers
 
                 template =
                     template.Replace(
+                        "@CustomerPhone",
+                        customer.PhoneNumber ?? string.Empty);
+
+                template =
+                    template.Replace(
                         "@State",
                         customer.State);
 

@@ -21,6 +21,17 @@ export class ChatService {
     let url = `${this.apiUrl}Chat/RegisterChatUser`;
     return this.http.post(url, chatUserdata);
   }
+
+  LogChatCustomer(model: UserInfoModel) {
+    let url = `${this.apiUrl}chatbot/logchatcustomer`;
+    return this.http.post<ChatLogResponse>(url, model);
+  }
+
+  SendChatMessage(request: CustomerChatRequest) {
+    let url = `${this.apiUrl}chatbot/chat`;
+    return this.http.post<CustomerChatResponse>(url, request);
+  }
+
   GetChatUserList() {
     let url = `${this.apiUrl}Chat/GetChatUsers`;
     return this.http.get(url);
@@ -49,12 +60,28 @@ export interface chatMessage {
 
 export interface UserInfoModel {
   name: string;
-  phoneNumber: number;
+  phoneNumber: string;
   email: string;
   state: string;
   country: string;
   isExistingCustomer?: boolean;
-  customerId?: string;
+  customerId?: number;
+}
+
+export interface CustomerChatRequest {
+  chatLogId: number;
+  message: string;
+}
+
+export interface CustomerChatResponse {
+  functionName: string;
+  message: string;
+  data?: any;
+}
+
+export interface ChatLogResponse {
+  chatLogId: number;
+  isExistingCustomer: boolean;
 }
 export interface ChatUser {
   chatUserId: string;

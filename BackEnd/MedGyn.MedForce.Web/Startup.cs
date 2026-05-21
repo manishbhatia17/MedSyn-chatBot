@@ -38,6 +38,22 @@ namespace MedGyn.MedForce.Web
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddCors(options =>
+			{
+				options.AddPolicy("ChatBotPolicy", policy =>
+				{
+					policy.SetIsOriginAllowed(origin =>
+							origin.StartsWith("http://localhost") ||
+							origin.StartsWith("https://localhost") ||
+							origin == "https://www.medgyn.com" ||
+							origin == "https://medgyn.com"
+						)
+						.AllowAnyHeader()
+						.AllowAnyMethod()
+						.AllowCredentials();
+				});
+			});
+
 			//think this is for NHibernate?
 			services.AddDistributedMemoryCache();
 
@@ -134,6 +150,7 @@ namespace MedGyn.MedForce.Web
 			//configurations
 			services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+			services.Configure<Medgyn.Meforce.LLMAgent.Configurations.OpenAISettings>(Configuration.GetSection("OpenAISettings"));
 			services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
 			services.Configure<ShipStationAPISettings>(Configuration.GetSection("ShipStationAPISettings"));
 
@@ -179,6 +196,7 @@ namespace MedGyn.MedForce.Web
 			}
 
 			app.UseStaticFiles();
+			app.UseCors("ChatBotPolicy");
 			app.UseAuthentication();
 			var cookiePolicyOptions = new CookiePolicyOptions
 			{

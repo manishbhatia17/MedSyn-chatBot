@@ -10,6 +10,8 @@ namespace MedGyn.MedForce.Data.Models
 
         public virtual string Email { get; set; }
 
+        public virtual string PhoneNumber { get; set; }
+
         public virtual string State { get; set; }
 
         public virtual string Country { get; set; }

@@ -1,5 +1,7 @@
 ﻿using Medgyn.Meforce.LLMAgent.Models;
+using Newtonsoft.Json;
 using OpenAI.Chat;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,16 +15,21 @@ namespace Medgyn.Meforce.LLMAgent.Mappers
 			return new LLMFunctionServiceContract()
 			{
 				FunctionName = toolCall.FunctionName,
-				Parameters = new List<string>(toolCall.FunctionArguments.ToString().Split(','))
+				Parameters = new List<string> { toolCall.FunctionArguments.ToString() }
 			};
 		}
 
 		public LLMFunctionServiceContract GeminiToServiceContract(GeminiFunctionResponse geminiFunctionResponse)
 		{
+			var functionCall = geminiFunctionResponse.Candidates
+				.SelectMany(c => c.Content.Parts)
+				.First(p => p.FunctionCall != null)
+				.FunctionCall;
+
 			return new LLMFunctionServiceContract
 			{
-				FunctionName = "GetProductByName",
-				Parameters = new List<string> { "product_name" }
+				FunctionName = functionCall.Name,
+				Parameters = new List<string> { JsonConvert.SerializeObject(functionCall.Args) }
 			};
 		}
 	}

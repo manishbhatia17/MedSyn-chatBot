@@ -6,8 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <!-- Microsoft.Extensions.Options kept for ChatGPTAgent IOptions<OpenAISettings> -->
     <PackageReference Include="OpenAI" Version="2.2.0" />
   </ItemGroup>
+
 
 </Project>

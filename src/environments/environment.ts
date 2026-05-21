@@ -1,12 +1,12 @@
 export const environment = {
-    //production: true,
-    //apiBaseUrl: "https://localhost:44455/api/",
-    //socketUrl: "https://localhost:7290/",
-    //sockeytEndPointNotify: "chat/"
+    // Deployed dev: uncomment below and comment out the local block
+    // production: true,
+    // apiBaseUrl: "https://medgyn-dev.azurewebsites.net/api/",
+    // socketUrl: "https://medgyn-dev.azurewebsites.net/",
 
-    production: true,
-    apiBaseUrl: "https://helpdesk.techbitsolution.com/api/",
-    socketUrl: "https://helpdesk.techbitsolution.com/",
+    production: false,
+    apiBaseUrl: "http://localhost:14229/api/",
+    socketUrl: "http://localhost:14229/",
     sockeytEndPointNotify: "chat/"
 
 };

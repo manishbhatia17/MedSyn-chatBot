@@ -23,7 +23,7 @@ namespace Medgyn.Meforce.LLMAgent.Services
 		public async Task<LLMFunctionServiceContract> AgentFunction(string content, string agentFunctions, string agentDirections = "")
 		{
 			string functionJson = System.IO.File.ReadAllText(@".\wwwroot\js\ChatGPTMCPServerJson.json");
-			var response = await _lLMAgent.AgentFunction<List<ChatToolCall>>(content, functionJson);
+			var response = await _lLMAgent.AgentFunction<List<ChatToolCall>>(content, functionJson, agentDirections);
 			if (response != null && response.Count > 0 && response[0].FunctionName != null)
 			{
 

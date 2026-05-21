@@ -20,6 +20,7 @@ namespace MedGyn.MedForce.Service.Services
             {
                 Name = model.Name,
                 Email = model.Email,
+                PhoneNumber = model.PhoneNumber,
                 State = model.State,
                 Country = model.Country,
                 IsExistingCustomer = model.IsExistingCustomer,
