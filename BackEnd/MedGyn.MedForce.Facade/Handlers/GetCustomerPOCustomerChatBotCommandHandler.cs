@@ -39,6 +39,9 @@ namespace MedGyn.MedForce.Facade.Handlers
                     <Dictionary<string, string>>(
                         parameters[0]);
 
+            if (!request.CustomerId.HasValue)
+                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "To view order information, please verify your account first by providing your customer ID." };
+
             if (!dict.TryGetValue("po_number", out string poNumber) || string.IsNullOrWhiteSpace(poNumber))
                 return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Please provide your PO number to look up the order." };
 
