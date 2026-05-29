@@ -157,7 +157,7 @@
               </div>
             </div>
             <div class="chat-input-bar">
-              <input type="text" placeholder="Type your message..." [(ngModel)]="messageToSend" />
+              <input type="text" placeholder="Type your message..." [(ngModel)]="messageToSend" (keyup.enter)="SendMessage()" />
 
               <button class="send-btn" (click)="SendMessage()">
                 <svg viewBox="0 0 24 24">
