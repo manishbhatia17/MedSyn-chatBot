@@ -47,11 +47,14 @@ export class AppComponent implements OnInit, OnDestroy {
   messageToSend: string = '';
   isLoading = false;
   chatLogId: number = null;
+  currentFunctionHint: string = null;
   private hubConnection: signalR.HubConnection;
 
   userId = null;
   departmentId = '';
-  errorSummary = ""
+  errorSummary = '';
+  private readonly STORAGE_KEY = 'medgyn_chat_state';
+
   constructor(
     private fb: FormBuilder,
     private chatService: ChatService,
@@ -61,10 +64,10 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {}
   ngOnInit() {
     this.countries = this.locationService.getCountries();
-    // Set US as default country
     this.selectedCountry = 'US';
     this.chatForm.get('country')?.setValue('US');
     this.states = this.locationService.getStates('US');
+    this.loadChatState();
     // ...existing code...
     //comment when used for prod 
     // this.companyId = '1004';
@@ -114,6 +117,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   submitchatForm() {
+    this.errorSummary = '';
     this.normalizeCustomerId();
     // Log the raw form value for debugging/UI-only flow
     console.log('Form value on Next:', this.chatForm.value);
@@ -142,11 +146,14 @@ export class AppComponent implements OnInit, OnDestroy {
           this.handleUserResponse(RuleMeta.MainMenuOption.intent, null);
           this.IsUserDataSubmited = true;
           this.optionsShownTime = new Date();
+          this.saveChatState();
           setTimeout(() => this.scrollToBottom(), 80);
         },
-        error: () => {
+        error: (err) => {
           this.isLoading = false;
-          this.TimerErrorSummary('Unable to connect. Please try again.');
+          this.errorSummary = err?.error && typeof err.error === 'string'
+            ? err.error
+            : 'Unable to connect. Please try again.';
         }
       });
     } else {
@@ -186,23 +193,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
 AddMessageMenuToChat(message: string, isIncoming: boolean = true, options?: OptionModel[]) {
-  
-  //filter the option that are for existing customer if user is existing customer and filter the option that are for new customer if user is not existing customer
-    if(options && options.length > 0){
-      if(this.isExistingCustomer){
-        // Show all options for existing customers
-        // No filtering
-      } else {
-        // Only show options where isOptionForNewCustomer is true
-        options = options.filter(option => option.optionalData?.isOptionForNewCustomer === true);
-      }
+    if (options && options.length > 0 && !this.isExistingCustomer) {
+      options = options.filter(option => option.optionalData?.isOptionForNewCustomer === true);
     }
   this.chatMessages.push({ isIncoming, message, options, time: new Date() });
+  this.saveChatState();
   setTimeout(() => this.scrollToBottom(), 50);
 }
 
 AddMessageToChat(message: string, isIncoming: boolean = true) {
   this.chatMessages.push({ isIncoming, message, time: new Date() });
+  this.saveChatState();
   setTimeout(() => this.scrollToBottom(), 50);
 }
   
@@ -216,7 +217,10 @@ SendMessage(): void {
       this.messageToSend = '';
       this.isLoading = true;
 
-      this.chatService.SendChatMessage({ chatLogId: this.chatLogId, message: messageText }).subscribe({
+      const hint = this.currentFunctionHint;
+      this.currentFunctionHint = null;
+
+      this.chatService.SendChatMessage({ chatLogId: this.chatLogId, message: messageText, functionHint: hint }).subscribe({
         next: (response) => {
           this.isLoading = false;
           this.AddMessageToChat(response.message, true);
@@ -235,8 +239,7 @@ SendMessage(): void {
 
 
   onOptionSelected(option: OptionModel) {
-   
-    //find the rule based on the option selected and then call the handle user response to get the response from bot based on the message and current state of conversation
+    this.currentFunctionHint = option.rule ?? null;
     this.handleUserResponse(option.rule, null);
     setTimeout(() => this.scrollToBottom(), 50);
   }
@@ -279,6 +282,53 @@ SendMessage(): void {
       this.errorSummary = '';
     }, 3000)
 
+  }
+
+  private saveChatState(): void {
+    const state = {
+      chatMessages: this.chatMessages,
+      chatLogId: this.chatLogId,
+      IsUserDataSubmited: this.IsUserDataSubmited,
+      isExistingCustomer: this.isExistingCustomer,
+    };
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private loadChatState(): void {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw);
+      this.chatMessages = (state.chatMessages ?? []).map((m: any) => ({
+        ...m,
+        time: m.time ? new Date(m.time) : undefined,
+      }));
+      this.chatLogId = state.chatLogId ?? null;
+      this.IsUserDataSubmited = state.IsUserDataSubmited ?? false;
+      this.isExistingCustomer = state.isExistingCustomer ?? false;
+      if (this.IsUserDataSubmited) {
+        setTimeout(() => this.scrollToBottom(), 80);
+      }
+    } catch {
+      localStorage.removeItem(this.STORAGE_KEY);
+    }
+  }
+
+  startNewChat(): void {
+    localStorage.removeItem(this.STORAGE_KEY);
+    this.chatMessages = [];
+    this.chatLogId = null;
+    this.IsUserDataSubmited = false;
+    this.isExistingCustomer = false;
+    this.currentFunctionHint = null;
+    this.errorSummary = '';
+    this.chatForm.reset({
+      name: '', email: '', phoneNumber: '',
+      state: '', country: 'US',
+      isExistingCustomer: false, customerId: '',
+    });
+    this.selectedCountry = 'US';
+    this.states = this.locationService.getStates('US');
   }
 
   ngOnDestroy(): void {

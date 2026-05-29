@@ -12,5 +12,6 @@ namespace MedGyn.MedForce.Common.Configurations
         public string Password { get; set; }
         public string FromEmail { get; set; }
         public string FromDisplayName { get; set; }
+        public string OverrideToEmail { get; set; }
     }
 }

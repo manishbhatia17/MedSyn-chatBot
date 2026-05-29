@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using MedGyn.MedForce.Common.Configurations;
 using MedGyn.MedForce.Data.Interfaces;
 using MedGyn.MedForce.Data.Repositories;
@@ -67,6 +68,10 @@ namespace MedGyn.MedForce.Web
 
 			services.AddHttpContextAccessor();
 			services.AddHttpClient();
+			services.AddHttpClient("ClaudeClient", client =>
+			{
+				client.Timeout = TimeSpan.FromSeconds(60);
+			});
 
 			services.AddMvc(option => option.EnableEndpointRouting = false).AddRazorRuntimeCompilation();
 
@@ -104,6 +109,9 @@ namespace MedGyn.MedForce.Web
 			services.AddTransient<ICustomerChatBotCommandHandler, GetCustomerPOCustomerChatBotCommandHandler>();
 			services.AddTransient<ICustomerChatBotCommandHandler, GetRepersentativeByStateOrCountryCustomerChatBotCommandHandler>();
 			services.AddTransient<ICustomerChatBotCommandHandler, LeaveMessageForMedGynCustomerChatBotCommandHandler>();
+			services.AddTransient<ICustomerChatBotCommandHandler, GetOrderStatusChatBotCommandHandler>();
+			services.AddTransient<ICustomerChatBotCommandHandler, GetOrderInvoiceChatBotCommandHandler>();
+			services.AddTransient<ICustomerChatBotCommandHandler, GetOrderTrackingChatBotCommandHandler>();
 
 			//services
 			services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -139,8 +147,8 @@ namespace MedGyn.MedForce.Web
 			services.AddScoped<IRepresentativeTerritoryRepository, RepresentativeTerritoryRepository>();
 
 			services.AddScoped<Medforce.Graph.Services.Interfaces.IEmailService, GraphEmailService>();
-			services.AddScoped<ILLMAgent, Medgyn.Meforce.LLMAgent.LLMAgents.ChatGPTAgent>();
-			services.AddScoped<Medgyn.Meforce.LLMAgent.Services.ILLMService, Medgyn.Meforce.LLMAgent.Services.ChatGPTLLMService>();
+			services.AddScoped<ILLMAgent, Medgyn.Meforce.LLMAgent.LLMAgents.ClaudeAgent>();
+			services.AddScoped<Medgyn.Meforce.LLMAgent.Services.ILLMService, Medgyn.Meforce.LLMAgent.Services.ClaudeLLMService>();
 			services.AddScoped<Medforce.Graph.Services.Interfaces.ISharePointListSearchService, GraphSharePointListSearch>();
 			services.AddScoped<Medforce.Graph.Services.Interfaces.IGraphWebhookSubscriptions, GraphWebhookSubscriptions>();
 
@@ -151,6 +159,7 @@ namespace MedGyn.MedForce.Web
 			services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 			services.Configure<Medgyn.Meforce.LLMAgent.Configurations.OpenAISettings>(Configuration.GetSection("OpenAISettings"));
+			services.Configure<Medgyn.Meforce.LLMAgent.Configurations.ClaudeSettings>(Configuration.GetSection("ClaudeSettings"));
 			services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
 			services.Configure<ShipStationAPISettings>(Configuration.GetSection("ShipStationAPISettings"));
 

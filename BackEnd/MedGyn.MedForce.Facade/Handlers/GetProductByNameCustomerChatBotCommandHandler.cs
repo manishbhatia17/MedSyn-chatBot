@@ -1,9 +1,7 @@
-﻿using Medgyn.Meforce.LLMAgent.Services;
-using MedGyn.MedForce.Facade.DTOs;
+﻿using MedGyn.MedForce.Facade.DTOs;
 using MedGyn.MedForce.Facade.Handlers.Interfaces;
 using MedGyn.MedForce.Service.Interfaces;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,84 +10,64 @@ namespace MedGyn.MedForce.Facade.Handlers
 {
     public class GetProductByNameCustomerChatBotCommandHandler : ICustomerChatBotCommandHandler
     {
-        public CustomerChatBotCommandType CommandType =>
-            CustomerChatBotCommandType.GetProductByName;
+        public CustomerChatBotCommandType CommandType => CustomerChatBotCommandType.GetProductByName;
 
-        private readonly IProductService
-            _productService;
+        private readonly IProductService _productService;
 
-        private readonly ILLMService
-            _llmService;
-
-        public GetProductByNameCustomerChatBotCommandHandler(
-            IProductService productService,
-            ILLMService llmService)
+        public GetProductByNameCustomerChatBotCommandHandler(IProductService productService)
         {
             _productService = productService;
-            _llmService = llmService;
         }
 
-        public async Task<CustomerChatResponseDTO>HandleAsync(string[] parameters,CustomerChatRequestDTO request)
+        public async Task<CustomerChatResponseDTO> HandleAsync(string[] parameters, CustomerChatRequestDTO request)
         {
-            var dict =
-                JsonConvert.DeserializeObject<
-                    Dictionary<string, string>>(
-                        parameters[0]);
+            var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(parameters[0]);
 
-            string productName =
-                dict["product_name"];
+            if (!dict.TryGetValue("product_name", out string productName) || string.IsNullOrWhiteSpace(productName))
+                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Please provide a product name to search for." };
 
-            var product =
-                _productService
-                    .SearchProductByName(productName);
+            var product = _productService.SearchProductByName(productName);
 
             if (product == null)
-            {
-                return new CustomerChatResponseDTO
-                {
-                    FunctionName = CommandType.ToString(),
-                    Message = "Product not found."
-                };
-            }
+                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Product not found." };
 
             var sb = new StringBuilder();
-            sb.AppendLine($"Product Name: {product.ProductName}");
-            sb.AppendLine($"Product ID: {product.ProductCustomID}");
+            sb.AppendLine($"Here is the information for **{product.ProductName}** (Product ID: {product.ProductCustomID}):");
+            sb.AppendLine();
 
             if (!string.IsNullOrWhiteSpace(product.Description))
-                sb.AppendLine($"Description: {product.Description}");
+            {
+                sb.AppendLine(product.Description);
+                sb.AppendLine();
+            }
 
             if (!string.IsNullOrWhiteSpace(product.Manufacturer))
-                sb.AppendLine($"Manufacturer: {product.Manufacturer}");
+                sb.AppendLine($"**Manufacturer:** {product.Manufacturer}");
 
-            if (!string.IsNullOrWhiteSpace(product.Notes))
-                sb.AppendLine($"Notes: {product.Notes}");
+            if (!string.IsNullOrWhiteSpace(product.Color))
+                sb.AppendLine($"**Color:** {product.Color}");
 
             if (product.PriceDomesticList.HasValue)
-                sb.AppendLine($"List Price: ${product.PriceDomesticList:F2}");
+                sb.AppendLine($"**List Price:** ${product.PriceDomesticList:F2}");
 
-            sb.AppendLine($"Status: {(product.IsDiscontinued ? "Discontinued" : "Available")}");
+            sb.AppendLine($"**Status:** {(product.IsDiscontinued ? "Discontinued" : "Available")}");
+
+            if (product.SpecialOrderOnly == true)
+                sb.AppendLine("**Special Order:** This product is available by special order only.");
+
+            if (product.InternationalOnly == true)
+                sb.AppendLine("**Availability:** International markets only.");
+
+            if (!string.IsNullOrWhiteSpace(product.Notes))
+                sb.AppendLine($"**Notes:** {product.Notes}");
 
             if (!string.IsNullOrWhiteSpace(product.PrimaryImageURI))
-                sb.AppendLine($"Product Image: {product.PrimaryImageURI}");
+                sb.AppendLine($"**Product Image:** {product.PrimaryImageURI}");
 
-            string systemPrompt =
-                "You are a MedGyn medical supplies sales assistant. " +
-                "Provide a clear and helpful summary of this product using the information provided. " +
-                "At the end of your response, ask the customer if they would like to place an order " +
-                "online at www.medgyn.com or if they would like to speak with their sales representative.";
+            sb.AppendLine();
+            sb.AppendLine("Would you like to **place an order online** at [www.medgyn.com](https://www.medgyn.com), or would you prefer to **speak with your sales representative** for personalized assistance?");
 
-            string response =
-                await _llmService.SummarizeContent(
-                    sb.ToString(),
-                    systemPrompt);
-
-            return new CustomerChatResponseDTO
-            {
-                FunctionName = CommandType.ToString(),
-                Message = response,
-                Data = product
-            };
+            return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = sb.ToString(), Data = product };
         }
     }
 }

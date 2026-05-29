@@ -900,9 +900,9 @@ namespace MedGyn.MedForce.Service.Services
 			return output;
 		}
 
-        public async Task<CustomerOrderChatStatusContract> GetCustomerOrderChatStatus(string poNumber)
+        public async Task<CustomerOrderChatStatusContract> GetCustomerOrderChatStatus(string poNumber, int? customerId = null)
         {
-            var order = await _customerOrderRepository.GetCustomerOrderChatStatusByPO(poNumber);
+            var order = await _customerOrderRepository.GetCustomerOrderChatStatusByPO(poNumber, customerId);
 
             if (order == null)
                 return null;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Medgyn.Meforce.LLMAgent.Services;
@@ -6,6 +7,8 @@ using MedGyn.MedForce.Facade.DTOs;
 using MedGyn.MedForce.Facade.Factories.Interfaces;
 using MedGyn.MedForce.Facade.Interfaces;
 using MedGyn.MedForce.Service.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace MedGyn.MedForce.Facade.Facades
 {
@@ -14,12 +17,30 @@ namespace MedGyn.MedForce.Facade.Facades
         private readonly IChatBotService _chatBotService;
         private readonly ILLMService _llmService;
         private readonly ICustomerChatBotCommandHandlerFactory _handlerFactory;
+        private readonly IMemoryCache _cache;
 
-        public ChatBotFacade(IChatBotService chatBotService,ILLMService llmService, ICustomerChatBotCommandHandlerFactory handlerFactory)
+        private const string FunctionDeclCacheKey = "ClaudeFunctionDeclarations";
+
+        private static readonly HashSet<string> AllowedFunctionHints = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "GetProductByName",
+            "GetCustomerPO",
+            "GetCustomerOrderByEmail",
+            "GetRepersentativeByCountryOrState",
+            "LeaveMessageForMedGyn",
+            "leave_message",
+            "GetOrderStatus",
+            "GetOrderInvoice",
+            "GetOrderTracking"
+        };
+
+        public ChatBotFacade(IChatBotService chatBotService, ILLMService llmService,
+            ICustomerChatBotCommandHandlerFactory handlerFactory, IMemoryCache cache)
         {
             _chatBotService = chatBotService;
             _llmService = llmService;
             _handlerFactory = handlerFactory;
+            _cache = cache;
         }
         public async Task<int> LogCustomerChatAsync(CustomerChatLogModel model)
         {
@@ -36,24 +57,64 @@ namespace MedGyn.MedForce.Facade.Facades
            return await _chatBotService.LogCustomerChatAsync(contract);
         }
 
+        private string BuildLocationContext(string state, string country)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrWhiteSpace(state)) parts.Add(state);
+            if (!string.IsNullOrWhiteSpace(country)) parts.Add(country);
+
+            if (parts.Count == 0) return string.Empty;
+
+            return $" The customer is located in {string.Join(", ", parts)}. Use this location automatically when looking up their sales representative.";
+        }
+
         public async Task<CustomerChatResponseDTO> ProcessMessage(CustomerChatRequestDTO request)
         {
             try
             {
-                string functionJson = File.ReadAllText(@".\wwwroot\js\ChatGPTMCPServerJson.json");
+                string chatLogCacheKey = $"ChatLog_{request.ChatLogId}";
+                string chatLogStateCacheKey = $"ChatLog_{request.ChatLogId}_State";
+                string chatLogCountryCacheKey = $"ChatLog_{request.ChatLogId}_Country";
+
+                if (!_cache.TryGetValue(chatLogCacheKey, out int? customerId))
+                {
+                    var chatLog = await _chatBotService.GetCustomerChatLogAsync(request.ChatLogId);
+                    customerId = chatLog?.CustomerId;
+                    _cache.Set(chatLogCacheKey, customerId, TimeSpan.FromHours(1));
+                    _cache.Set(chatLogStateCacheKey, chatLog?.State, TimeSpan.FromHours(1));
+                    _cache.Set(chatLogCountryCacheKey, chatLog?.Country, TimeSpan.FromHours(1));
+                }
+                request.CustomerId = customerId;
+
+                _cache.TryGetValue(chatLogStateCacheKey, out string customerState);
+                _cache.TryGetValue(chatLogCountryCacheKey, out string customerCountry);
+
+                if (!_cache.TryGetValue(FunctionDeclCacheKey, out string functionJson))
+                {
+                    functionJson = File.ReadAllText(@".\wwwroot\js\ClaudeFunctionDeclarations.json");
+                    _cache.Set(FunctionDeclCacheKey, functionJson);
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.FunctionHint) && AllowedFunctionHints.Contains(request.FunctionHint))
+                {
+                    var hintedHandler = _handlerFactory.GetCommandHandler(request.FunctionHint);
+                    if (hintedHandler != null)
+                        return await hintedHandler.HandleAsync(new[] { JsonConvert.SerializeObject(new { message = request.Message }) }, request);
+                }
+
+                var locationContext = BuildLocationContext(customerState, customerCountry);
+                var systemPrompt = $"You are a helpful MedGyn customer support assistant. Use the available functions to answer the customer's question.{locationContext}";
 
                 var llmResponse = await _llmService.AgentFunction(
                     request.Message,
                     functionJson,
-                    "You are a helpful MedGyn customer support assistant. Use the available functions to answer the customer's question.");
+                    systemPrompt);
 
                 if (llmResponse == null)
-                {
-                    return new CustomerChatResponseDTO
-                    {
-                        Message = "I wasn't able to understand your request. Could you please rephrase your question?"
-                    };
-                }
+                    return new CustomerChatResponseDTO { Message = "I wasn't able to understand your request. Could you please rephrase your question?" };
+
+                if (!string.IsNullOrWhiteSpace(llmResponse.TextResponse))
+                    return new CustomerChatResponseDTO { Message = llmResponse.TextResponse };
 
                 var handler = _handlerFactory.GetCommandHandler(llmResponse.FunctionName);
 

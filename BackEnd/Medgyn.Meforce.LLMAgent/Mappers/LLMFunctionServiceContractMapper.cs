@@ -32,5 +32,16 @@ namespace Medgyn.Meforce.LLMAgent.Mappers
 				Parameters = new List<string> { JsonConvert.SerializeObject(functionCall.Args) }
 			};
 		}
+
+		public LLMFunctionServiceContract ClaudeToServiceContract(ClaudeMessageResponse response)
+		{
+			var toolUseBlock = response.Content.First(c => c.Type == "tool_use");
+
+			return new LLMFunctionServiceContract
+			{
+				FunctionName = toolUseBlock.Name,
+				Parameters = new List<string> { JsonConvert.SerializeObject(toolUseBlock.Input) }
+			};
+		}
 	}
 }

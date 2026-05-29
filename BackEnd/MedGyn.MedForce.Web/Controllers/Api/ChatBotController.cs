@@ -34,6 +34,9 @@ namespace MedGyn.MedForce.Web.Controllers.Api
             // Existing customer is determined by whether they provided a Customer ID
             model.IsExistingCustomer = model.CustomerId.HasValue;
 
+            if (model.CustomerId.HasValue && !_customerFacade.CustomerExists(model.CustomerId.Value))
+                return BadRequest("Customer ID not found. Please check your ID and try again.");
+
             // Log the chat entry
             int id = await _chatBotFacade.LogCustomerChatAsync(model);
 

@@ -2914,7 +2914,7 @@ namespace MedGyn.MedForce.Data.Repositories
             }
 		}
 
-        public async Task<dynamic>GetCustomerOrderChatStatusByPO(string poNumber)
+        public async Task<dynamic>GetCustomerOrderChatStatusByPO(string poNumber, int? customerId = null)
         {
             var queryText = $@"
         SELECT TOP 1
@@ -2951,7 +2951,7 @@ namespace MedGyn.MedForce.Data.Repositories
         LEFT JOIN CustomerShippingInfo csi
             ON csi.CustomerShippingInfoID
             = co.CustomerShippingInfoID
-        
+
         LEFT JOIN Code ship1
             ON ship1.CodeID
             = csi.ShipCompany1CodeID
@@ -2962,12 +2962,17 @@ namespace MedGyn.MedForce.Data.Repositories
 
         WHERE co.{nameof(CustomerOrder.PONumber)}
             = :poNumber
+            {(customerId.HasValue ? "AND co.CustomerID = :customerId" : "")}
     ";
 
-            var result = await _dbContext.Session
+            var query = _dbContext.Session
                 .CreateSQLQuery(queryText)
-                .SetString("poNumber", poNumber)
-                .DynamicListAsync();
+                .SetString("poNumber", poNumber);
+
+            if (customerId.HasValue)
+                query = query.SetInt32("customerId", customerId.Value);
+
+            var result = await query.DynamicListAsync();
 
             return result.FirstOrDefault();
         }

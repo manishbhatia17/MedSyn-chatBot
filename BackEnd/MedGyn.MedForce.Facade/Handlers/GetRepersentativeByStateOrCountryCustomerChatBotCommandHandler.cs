@@ -1,5 +1,4 @@
-﻿using Medgyn.Meforce.LLMAgent.Services;
-using MedGyn.MedForce.Facade.DTOs;
+﻿using MedGyn.MedForce.Facade.DTOs;
 using MedGyn.MedForce.Facade.Handlers.Interfaces;
 using MedGyn.MedForce.Service.Interfaces;
 using Newtonsoft.Json;
@@ -15,21 +14,12 @@ namespace MedGyn.MedForce.Facade.Handlers
         public CustomerChatBotCommandType CommandType =>
             CustomerChatBotCommandType.GetRepersentativeByCountryOrState;
 
-        private readonly IRepersentativeTerritoryService
-            _representativeTerritoryService;
-
-        private readonly ILLMService
-            _llmService;
+        private readonly IRepersentativeTerritoryService _representativeTerritoryService;
 
         public GetRepersentativeByStateOrCountryCustomerChatBotCommandHandler(
-            IRepersentativeTerritoryService representativeTerritoryService,
-            ILLMService llmService)
+            IRepersentativeTerritoryService representativeTerritoryService)
         {
-            _representativeTerritoryService =
-                representativeTerritoryService;
-
-            _llmService =
-                llmService;
+            _representativeTerritoryService = representativeTerritoryService;
         }
 
         public async Task<CustomerChatResponseDTO>
@@ -80,46 +70,28 @@ namespace MedGyn.MedForce.Facade.Handlers
                 Phone = representative.Representative.Phone
             };
 
-            StringBuilder sb =
-                new StringBuilder();
+            string location = !string.IsNullOrEmpty(state) ? state : country;
 
-            sb.AppendLine(
-                $"Representative Name: {representativeData.Name}");
+            var sb = new StringBuilder();
+            sb.AppendLine($"Your MedGyn sales representative for {location}:");
+            sb.AppendLine();
+            sb.AppendLine($"**Name:** {representativeData.Name}");
+            sb.AppendLine($"**Email:** {representativeData.Email}");
+            sb.AppendLine($"**Phone:** {representativeData.Phone}");
 
-            sb.AppendLine(
-                $"Email: {representativeData.Email}");
+            if (!string.IsNullOrWhiteSpace(representative.Territory?.Name))
+                sb.AppendLine($"**Territory:** {representative.Territory.Name}");
 
-            sb.AppendLine(
-                $"Phone: {representativeData.Phone}");
-
-            if (!string.IsNullOrEmpty(state))
-            {
-                sb.AppendLine(
-                    $"Location: {state}");
-            }
-
-            if (!string.IsNullOrEmpty(country))
-            {
-                sb.AppendLine(
-                    $"Location: {country}");
-            }
-
-            string aiResponse =
-                await _llmService
-                    .SummarizeContent(
-                        sb.ToString(),
-                        "You are a medical supplies customer support assistant. Explain representative contact information clearly and professionally.");
+            sb.AppendLine();
+            sb.AppendLine("Feel free to reach out to them directly — they'll be happy to assist you with personalized support!");
+            sb.AppendLine();
+            sb.AppendLine("Is there anything else I can help you with?");
 
             return new CustomerChatResponseDTO
             {
-                FunctionName =
-                    CommandType.ToString(),
-
-                Message =
-                    aiResponse,
-
-                Data =
-                    representativeData
+                FunctionName = CommandType.ToString(),
+                Message = sb.ToString(),
+                Data = representativeData
             };
         }
     }

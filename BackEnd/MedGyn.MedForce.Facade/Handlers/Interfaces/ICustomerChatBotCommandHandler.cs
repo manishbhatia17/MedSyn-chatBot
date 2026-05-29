@@ -15,7 +15,10 @@ namespace MedGyn.MedForce.Facade.Handlers.Interfaces
         GetCustomerOrder,
         GetCustomerOrderByEmail,
         GetRepersentativeByCountryOrState,
-        LeaveMessageForMedGyn
+        LeaveMessageForMedGyn,
+        GetOrderStatus,
+        GetOrderInvoice,
+        GetOrderTracking
     }
     public interface ICustomerChatBotCommandHandler
     {

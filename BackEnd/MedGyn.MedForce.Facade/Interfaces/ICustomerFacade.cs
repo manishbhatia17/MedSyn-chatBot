@@ -15,5 +15,6 @@ namespace MedGyn.MedForce.Facade.Interfaces
 		byte[] ExportListExcel(SearchCriteriaViewModel searchCriteria, bool seeAll, int userId, bool seeDomestic, bool seeDomesticDistribution, bool seeDomesticAfaxys, bool seeInternational);
 		List<CustomerShippingInfoViewModel> SaveCustomerShippingInfo(CustomerShippingInfoViewModel customerShippingInfo);
 		Task<bool> VerifyCustomerByEmailAsync(string email);
+	bool CustomerExists(int customerId);
 	}
 }

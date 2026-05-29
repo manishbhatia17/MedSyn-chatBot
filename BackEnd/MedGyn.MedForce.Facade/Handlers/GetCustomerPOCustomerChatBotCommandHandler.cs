@@ -39,13 +39,13 @@ namespace MedGyn.MedForce.Facade.Handlers
                     <Dictionary<string, string>>(
                         parameters[0]);
 
-            string poNumber =
-                dict["po_number"];
+            if (!dict.TryGetValue("po_number", out string poNumber) || string.IsNullOrWhiteSpace(poNumber))
+                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Please provide your PO number to look up the order." };
 
             var order =
                 await _customerOrderService
                     .GetCustomerOrderChatStatus(
-                        poNumber);
+                        poNumber, request.CustomerId);
 
             if (order == null)
             {

@@ -1,24 +1,25 @@
 <div class="chatbot-main" [class.open]="IsChatBot">
-  <div *ngIf="IsChatBot" class="chat-form">
+  <div *ngIf="IsChatBot" class="chat-form" [class.chat-mode]="IsUserDataSubmited">
     <div class="chat-row">
       <div class="chat-title">
         <div class="icon-circle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z"
-              stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#000000"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M9 8.01953V8" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M15 8.01953V8" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none">
+            <path d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
         <div>
           <h4>Welcome To MedGyn</h4>
           <p>Let's get you the help you need</p>
         </div>
-        <!-- <p>Please Fill in details to start</p> -->
-        <!-- <p *ngIf="errorSummary!=''" class="errorSummary">{{errorSummary}}</p> -->
+        <button *ngIf="IsUserDataSubmited" class="new-chat-btn" (click)="startNewChat()" title="Start a new chat">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Chat
+        </button>
       </div>
 
       <div class="chat-col">
@@ -90,6 +91,7 @@
                   class="invalid-message">Customer ID is required</span>
               </div>
 
+              <p *ngIf="errorSummary" class="errorSummary">{{errorSummary}}</p>
               <button type="submit" class="start-chat">Next</button>
             </form>
 
@@ -118,8 +120,9 @@
                       <path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round"></path>
                     </svg></div>
-                  <div class="chat-receiver">{{m.message}}<div class="msg-time">{{ m.time ? (m.time
-                      | date:'h:mm a') : '' }}</div>
+                  <div class="chat-receiver">
+                    <span [innerHTML]="m.message | linkify"></span>
+                    <div class="msg-time">{{ m.time ? (m.time | date:'h:mm a') : '' }}</div>
                   </div>
                 </div>
                 }@else{
@@ -135,34 +138,11 @@
                 
                 @if (m.options) {
                 <div class="options-row">
-                  <div class="options-right">
-                    <app-customer-options [message]="m.message" [options]="m.options"
-                      (optionSelected)="onOptionSelected($event)"></app-customer-options>
-                  </div>
+                  <app-customer-options [message]="m.message" [options]="m.options"
+                    (optionSelected)="onOptionSelected($event)"></app-customer-options>
                 </div>
-
                 }
                 }
-
-
-
-                <!-- options aligned to the right of the bubble -->
-
-
-                <!-- messages that appear below the options (selected options / user messages) -->
-
-
-
-
-                <!-- other outgoing messages (kept below) -->
-                <!-- <div class="chat-history">
-                  <ng-container *ngFor="let m of chatMessages">
-                    <div *ngIf="!m.isIncoming" [ngClass]="m.isIncoming ? 'chat-receiver' : 'chat-sender'">
-                      {{ m.message }}
-                      <div class="msg-time">{{ m.time ? (m.time | date:'h:mm a') : '' }}</div>
-                    </div>
-                  </ng-container>
-                </div> -->
 
 
                 @if (isLoading) {

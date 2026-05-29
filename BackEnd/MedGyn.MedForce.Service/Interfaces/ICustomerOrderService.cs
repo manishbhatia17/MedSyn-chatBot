@@ -68,7 +68,7 @@ namespace MedGyn.MedForce.Service.Interfaces
 		IList<PeachTreeInvoiceContract> GetPeachTreeInvoiceExportByBatchId(int BatchId);
 		IList<PeachTreeInvoiceContract> GetPreviousPeachTreeInvoicesByDate(DateTime StartDate, DateTime EndDate);
 
-        Task<CustomerOrderChatStatusContract> GetCustomerOrderChatStatus(string poNumber);
+        Task<CustomerOrderChatStatusContract> GetCustomerOrderChatStatus(string poNumber, int? customerId = null);
 
     }
 }

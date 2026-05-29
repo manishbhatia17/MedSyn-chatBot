@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -57,8 +58,14 @@ namespace MedGyn.MedForce.Service.Services
 
         public void SendEmail(string toEmail, string subject, string body, string ccEmail = null, Dictionary<string, Stream> attachments = null)
         {
+            if (!string.IsNullOrWhiteSpace(_emailSettings.OverrideToEmail))
+            {
+                if (!_webHostEnvironment.IsDevelopment())
+                    throw new InvalidOperationException("OverrideToEmail is set but the application is not running in Development. Remove this setting before deploying to staging or production.");
+                toEmail = _emailSettings.OverrideToEmail;
+            }
+
             var fromAddress = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromDisplayName);
-            //var toAddress = new MailAddress(toEmail);
             var email = new MailMessage();
             if(toEmail.Contains(';'))
             {

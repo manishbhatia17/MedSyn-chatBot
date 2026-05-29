@@ -8,5 +8,7 @@ namespace MedGyn.MedForce.Facade.DTOs
     {
         public int ChatLogId { get; set; }
         public string Message { get; set; }
+        public int? CustomerId { get; set; }
+        public string FunctionHint { get; set; }
     }
 }

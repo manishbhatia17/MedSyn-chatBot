@@ -8,5 +8,6 @@ namespace Medgyn.Meforce.LLMAgent.Models
 	{
 		public string FunctionName { get; set; }
 		public List<string> Parameters { get; set; }
+		public string TextResponse { get; set; }
 	}
 }

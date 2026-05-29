@@ -1,0 +1,90 @@
+[
+  {
+    "name": "GetProductByName",
+    "description": "Retrieve product information by product name.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "product_name": {
+          "type": "string",
+          "description": "The name of the product to look up."
+        }
+      },
+      "required": [ "product_name" ]
+    }
+  },
+  {
+    "name": "GetOrderStatus",
+    "description": "Get the current status of a customer order (e.g. approved, shipped, invoiced). Use when the customer asks about order status or order progress.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "po_number": {
+          "type": "string",
+          "description": "The Purchase Order (PO) number provided by the customer."
+        }
+      },
+      "required": [ "po_number" ]
+    }
+  },
+  {
+    "name": "GetOrderInvoice",
+    "description": "Get the invoice details for a customer order (invoice number and invoice download link). Use when the customer asks about an invoice.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "po_number": {
+          "type": "string",
+          "description": "The Purchase Order (PO) number provided by the customer."
+        }
+      },
+      "required": [ "po_number" ]
+    }
+  },
+  {
+    "name": "GetOrderTracking",
+    "description": "Get the shipping and tracking information for a customer order (carrier, tracking number, tracking URL). Use when the customer asks about shipping or tracking.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "po_number": {
+          "type": "string",
+          "description": "The Purchase Order (PO) number provided by the customer."
+        }
+      },
+      "required": [ "po_number" ]
+    }
+  },
+  {
+    "name": "GetRepersentativeByCountryOrState",
+    "description": "Retrieve the sales representative based on customer state or country.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "description": "Customer state or province if available."
+        },
+        "country": {
+          "type": "string",
+          "description": "Customer country if available."
+        }
+      },
+      "required": []
+    }
+  },
+  {
+    "name": "LeaveMessageForMedGyn",
+    "description": "Send a customer question or message to the MedGyn representative team.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The customer's message or question."
+        }
+      },
+      "required": [ "message" ]
+    }
+  }
+]

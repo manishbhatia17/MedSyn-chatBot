@@ -34,6 +34,12 @@ namespace MedGyn.MedForce.Facade.Facades
 			return await _customerService.VerifyCustomerByEmailAsync(email);
 		}
 
+		public bool CustomerExists(int customerId)
+		{
+			var customer = _customerService.GetCustomer(customerId);
+			return customer != null && customer.CustomerID > 0;
+		}
+
 		public CustomerListViewModel GetCustomerListViewModel(SearchCriteriaViewModel sc, bool seeAll, int userId, bool seeDomestic, bool seeDomesticDistribution, bool seeDomesticAfaxys, bool seeInternational)
 		{
 			var customers           = _customerService.GetAllCustomers(sc.Search, sc.SortColumn, sc.SortAsc, seeAll, userId, seeDomestic, seeDomesticDistribution, seeDomesticAfaxys, seeInternational);

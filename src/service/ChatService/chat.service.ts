@@ -71,6 +71,7 @@ export interface UserInfoModel {
 export interface CustomerChatRequest {
   chatLogId: number;
   message: string;
+  functionHint?: string;
 }
 
 export interface CustomerChatResponse {

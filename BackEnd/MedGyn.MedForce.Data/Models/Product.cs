@@ -59,9 +59,30 @@ namespace MedGyn.MedForce.Data.Models
 
 		public Product(dynamic result)
 		{
-			ProductID = result.ProductID;
-			ProductName = result.ProductName;
-			ProductCustomID = result.ProductCustomID;
+			ProductID                      = result.ProductID;
+			ProductName                    = result.ProductName;
+			ProductCustomID                = result.ProductCustomID;
+			Description                    = result.Description is DBNull ? null : result.Description;
+			Manufacturer                   = result.Manufacturer is DBNull ? null : result.Manufacturer;
+			Color                          = result.Color is DBNull ? null : result.Color;
+			Notes                          = result.Notes is DBNull ? null : result.Notes;
+			PriceDomesticList              = result.PriceDomesticList is DBNull ? (decimal?)null : (decimal?)result.PriceDomesticList;
+			PriceDomesticDistribution      = result.PriceDomesticDistribution is DBNull ? (decimal?)null : (decimal?)result.PriceDomesticDistribution;
+			PriceDomesticAfaxys            = result.PriceDomesticAfaxys is DBNull ? (decimal?)null : (decimal?)result.PriceDomesticAfaxys;
+			PriceInternationalDistribution = result.PriceInternationalDistribution is DBNull ? (decimal?)null : (decimal?)result.PriceInternationalDistribution;
+			PriceDomesticPremier           = result.PriceDomesticPremier is DBNull ? (decimal?)null : (decimal?)result.PriceDomesticPremier;
+			PriceMainDistributor           = result.PriceMainDistributor is DBNull ? (decimal?)null : (decimal?)result.PriceMainDistributor;
+			Cost                           = result.Cost is DBNull ? (decimal?)null : (decimal?)result.Cost;
+			IsDiscontinued                 = result.IsDiscontinued is DBNull ? false : result.IsDiscontinued;
+			IsDeleted                      = result.IsDeleted is DBNull ? (bool?)null : (bool?)result.IsDeleted;
+			InternationalOnly              = result.InternationalOnly is DBNull ? (bool?)null : (bool?)result.InternationalOnly;
+			SpecialOrderOnly               = result.SpecialOrderOnly is DBNull ? (bool?)null : (bool?)result.SpecialOrderOnly;
+			PrimaryImageURI                = result.PrimaryImageURI is DBNull ? null : result.PrimaryImageURI;
+			UnitOfMeasureCodeID            = result.UnitOfMeasureCodeID is DBNull ? (int?)null : (int?)result.UnitOfMeasureCodeID;
+			PrimaryVendorID                = result.PrimaryVendorID is DBNull ? (int?)null : (int?)result.PrimaryVendorID;
+			ShipWeight                     = result.ShipWeight is DBNull ? (decimal?)null : (decimal?)result.ShipWeight;
+			ReorderPoint                   = result.ReorderPoint is DBNull ? (int?)null : (int?)result.ReorderPoint;
+			ReorderQuantity                = result.ReorderQuantity is DBNull ? (int?)null : (int?)result.ReorderQuantity;
 		}
 	}
 }

@@ -67,9 +67,21 @@ namespace MedGyn.MedForce.Facade.Factories
                     CustomerChatBotCommandType
                          .GetRepersentativeByCountryOrState,
 
-                "LeaveMessageForMedGyn" =>
+                "LeaveMessageForMedGyn" or "leave_message" =>
                     CustomerChatBotCommandType
                          .LeaveMessageForMedGyn,
+
+                "GetOrderStatus" =>
+                    CustomerChatBotCommandType
+                        .GetOrderStatus,
+
+                "GetOrderInvoice" =>
+                    CustomerChatBotCommandType
+                        .GetOrderInvoice,
+
+                "GetOrderTracking" =>
+                    CustomerChatBotCommandType
+                        .GetOrderTracking,
 
                 _ => (CustomerChatBotCommandType)(-1)
             };
