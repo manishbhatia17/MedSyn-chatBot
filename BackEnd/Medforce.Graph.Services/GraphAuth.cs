@@ -29,10 +29,14 @@ namespace GraphRepository
 			string clientId = _appSettings.GraphClientId;
 			_certThumbprint = _appSettings.GraphCertThumbprint;
 
-			App = ConfidentialClientApplicationBuilder.Create(clientId)
-				.WithCertificate(CreateCertificate())
-				.WithAuthority(new Uri("https://login.microsoftonline.com/" + realm))
-				.Build();
+			var certificate = CreateCertificate();
+			if (certificate != null)
+			{
+				App = ConfidentialClientApplicationBuilder.Create(clientId)
+					.WithCertificate(certificate)
+					.WithAuthority(new Uri("https://login.microsoftonline.com/" + realm))
+					.Build();
+			}
 
 			Scopes = new string[]
 			{
@@ -42,6 +46,9 @@ namespace GraphRepository
 
 		public async Task<string> GetAuthHeaderAsync()
 		{
+			if (App == null)
+				return null;
+
 			string token = "";
 			string cacheKey = "graph_token";
 
@@ -57,7 +64,6 @@ namespace GraphRepository
 				DateTimeOffset expirationDate = result.ExpiresOn;
 				_memoryCache.Set(cacheKey, token, expirationDate);
 			}
-
 
 			return token;
 		}

@@ -20,6 +20,8 @@ namespace Medforce.Graph.Services
 
 		public async Task<string> GetProductDocumentUrlAsync(string productId, string folder)
 		{
+			if (_graphClient == null) return null;
+
 			var site = await _graphClient.Sites[_appSettings.SharePointAcademySite].GetAsync();
 			if (site == null) return null;
 
@@ -54,6 +56,8 @@ namespace Medforce.Graph.Services
 
 		public async Task<List<string>> SearchSharePointList(string siteId, string listId, string query)
 		{
+			if (_graphClient == null) return new List<string>();
+
 			List<string> results = new List<string>();
 
 			// Build the search request for SharePoint list items

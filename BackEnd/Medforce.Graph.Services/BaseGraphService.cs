@@ -27,7 +27,9 @@ namespace GraphRepository
 			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 			GraphUrl = _appSettings.GraphUrl;
 
-			_graphClient = new GraphServiceClient(new ClientCertificateCredential(_appSettings.Realm, _appSettings.GraphClientId, CreateCertificate()));
+			var cert = CreateCertificate();
+			if (cert != null)
+				_graphClient = new GraphServiceClient(new ClientCertificateCredential(_appSettings.Realm, _appSettings.GraphClientId, cert));
 		}
 	}
 }
