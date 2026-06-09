@@ -948,6 +948,8 @@ namespace MedGyn.MedForce.Service.Services
 
                 CustomerOrderID = order.CustomerOrderID,
 
+                CustomerOrderShipmentID = order.CustomerOrderShipmentID is DBNull ? (int?)null : (int?)order.CustomerOrderShipmentID,
+
                 CustomerOrderCustomID = order.CustomerOrderCustomID,
 
                 PONumber = order.PONumber,

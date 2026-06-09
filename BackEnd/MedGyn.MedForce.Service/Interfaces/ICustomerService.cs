@@ -12,6 +12,7 @@ namespace MedGyn.MedForce.Service.Interfaces
 		CustomerContract GetCustomer(int customerId);
 		CustomerContract GetCustomerByEmail(string email);
 		Task<bool> VerifyCustomerByEmailAsync(string email);
+		bool CustomerExistsWithEmail(int customerId, string email);
 		CustomerContract SaveCustomer(CustomerContract customerContract);
 		void SaveCustomerShippingInfo(CustomerShippingInfoContract shippingInfo);
 

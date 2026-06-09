@@ -58,5 +58,6 @@ namespace MedGyn.MedForce.Facade.Interfaces
 		Task<byte[]> ExportProductListExcel(SearchCriteriaViewModel searchCriteria, int type, CustomerOrderStatusEnum status, DateRangeEnum dateOption);
 		byte[] GetPeachTreeInvoiceExportByBatchId(int BatchId);
 		void SetCustomerOrderToDoNotFill(int customerOrderID, DoNotFillViewModel doNotFillViewModel);
+		Task<bool> ShipmentBelongsToCustomerAsync(int shipmentId, int customerId);
 	}
 }

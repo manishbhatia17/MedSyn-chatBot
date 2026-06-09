@@ -224,6 +224,11 @@ SendMessage(): void {
         next: (response) => {
           this.isLoading = false;
           this.AddMessageToChat(response.message, true);
+          // If the backend returned no data, the operation wasn't completed —
+          // restore the hint so the next message retries the same function
+          if (!response.data && hint) {
+            this.currentFunctionHint = hint;
+          }
         },
         error: () => {
           this.isLoading = false;
@@ -239,11 +244,64 @@ SendMessage(): void {
 
 
   onOptionSelected(option: OptionModel) {
-    this.currentFunctionHint = option.rule ?? null;
-    this.handleUserResponse(option.rule, null);
+    if (option.action === ActionType.ExternalLink) {
+      window.open(option.value, '_blank');
+      return;
+    }
+
+    const rule = this.chatEngine.detectIntent(option.rule);
+
+    if (rule?.action === ActionType.CallAPI) {
+      this.AddMessageToChat(option.label, false);
+      this.isLoading = true;
+      this.chatService.SendChatMessage({
+        chatLogId: this.chatLogId,
+        message: option.label,
+        functionHint: rule.actionPayload as string
+      }).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.AddMessageToChat(response.message, true);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.AddMessageToChat('Sorry, I was unable to process your request. Please try again.', true);
+        }
+      });
+    } else {
+      this.currentFunctionHint = option.rule ?? null;
+      this.handleUserResponse(option.rule, null);
+    }
+
     setTimeout(() => this.scrollToBottom(), 50);
   }
  
+
+  onMessageAreaClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const action = target.getAttribute('data-chataction');
+    if (!action) return;
+
+    const rule = this.chatEngine.detectIntent(RuleMeta.REQUEST_REP_INFO.id);
+    if (rule?.action === ActionType.CallAPI) {
+      this.AddMessageToChat('Speak to Sales Rep', false);
+      this.isLoading = true;
+      this.chatService.SendChatMessage({
+        chatLogId: this.chatLogId,
+        message: 'Speak to Sales Rep',
+        functionHint: rule.actionPayload as string
+      }).subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.AddMessageToChat(response.message, true);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.AddMessageToChat('Sorry, I was unable to process your request. Please try again.', true);
+        }
+      });
+    }
+  }
 
   //Animation methods below
   //----------------------------------------------------

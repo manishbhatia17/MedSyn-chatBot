@@ -11,7 +11,7 @@ export const chatRules:ChatRule[] = [
         action: ActionType.DisplayMenu,
         actionPayload: [
             {
-                label: "Provide product information",
+                label: "Receive product information",
                 action: ActionType.ProcessRule,
                 value: RuleMeta.REQUEST_PRODUCT_INFO.id,
                 optionalData: {
@@ -20,7 +20,7 @@ export const chatRules:ChatRule[] = [
                 rule: RuleMeta.REQUEST_PRODUCT_INFO.id
             },
             {
-                label: "Contact information for your rep",
+                label: "Receive information for your rep",
                 action: RuleMeta.REQUEST_REP_INFO.intent,
                 isOptionForExistingCustomer: false,
                 value: RuleMeta.REQUEST_REP_INFO.id,
@@ -39,7 +39,7 @@ export const chatRules:ChatRule[] = [
                 rule: RuleMeta.REQUEST_ORDER_STATUS.id
             },
             {
-                label: "Order invoice",
+                label: "PO Details",
                 action: RuleMeta.REQUEST_ORDER_INVOICE.intent,
                 value: RuleMeta.REQUEST_ORDER_INVOICE.id,
                 optionalData: {
@@ -55,6 +55,15 @@ export const chatRules:ChatRule[] = [
                     isOptionForNewCustomer: false
                 },
                 rule: RuleMeta.REQUEST_ORDER_TRACKING.id
+            },
+            {
+                label: "Invoice Details",
+                action: RuleMeta.REQUEST_INVOICE_VIEW.intent,
+                value: RuleMeta.REQUEST_INVOICE_VIEW.id,
+                optionalData: {
+                    isOptionForNewCustomer: false
+                },
+                rule: RuleMeta.REQUEST_INVOICE_VIEW.id
             },
             {
                 label: "Leave a message",
@@ -78,35 +87,43 @@ export const chatRules:ChatRule[] = [
     {
         id: RuleMeta.REQUEST_REP_INFO.id,
         intent: RuleMeta.REQUEST_REP_INFO.intent,
-        response: `Below is the detail of your area representative contact information. Please reach out to them for further assistance.`,
+        response: ``,
         priority: Priority.High,
-        action: ActionType.DisplayMessage
+        action: ActionType.CallAPI,
+        actionPayload: 'GetRepersentativeByCountryOrState'
     },
     {
         id: RuleMeta.REQUEST_ORDER_STATUS.id,
         intent: RuleMeta.REQUEST_ORDER_STATUS.intent,
-        response: `Please provide your order ID or details.`,
+        response: `Please provide your purchase order number.`,
         priority: Priority.High,
         action: ActionType.DisplayMessage
     },
     {
         id: RuleMeta.REQUEST_ORDER_INVOICE.id,
         intent: RuleMeta.REQUEST_ORDER_INVOICE.intent,
-        response: `Please provide your order ID or details.`,
+        response: `Please provide your purchase order number.`,
         priority: Priority.High,
         action: ActionType.DisplayMessage
     },
     {
         id: RuleMeta.REQUEST_ORDER_TRACKING.id,
         intent: RuleMeta.REQUEST_ORDER_TRACKING.intent,
-        response: `Please provide your order ID or details.`,
+        response: `Please provide your purchase order number.`,
+        priority: Priority.High,
+        action: ActionType.DisplayMessage
+    },
+    {
+        id: RuleMeta.REQUEST_INVOICE_VIEW.id,
+        intent: RuleMeta.REQUEST_INVOICE_VIEW.intent,
+        response: `Please provide your purchase order number to view the invoice.`,
         priority: Priority.High,
         action: ActionType.DisplayMessage
     },
     {
         id: RuleMeta.LEAVE_MESSAGE.id,
         intent: RuleMeta.LEAVE_MESSAGE.intent,
-        response: `Please provide your message and contact information, and our team will get back to you as soon as possible.`,
+        response: `Please provide your message and our team will get back to you as soon as possible.`,
         priority: Priority.High,
         action: ActionType.DisplayMessage
     },

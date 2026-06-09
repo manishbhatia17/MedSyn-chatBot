@@ -2930,6 +2930,7 @@ namespace MedGyn.MedForce.Data.Repositories
             ,co.{nameof(CustomerOrder.ShippedByOn)}
             ,co.{nameof(CustomerOrder.AttachmentURI)}
 
+            ,ship.{nameof(CustomerOrderShipment.CustomerOrderShipmentID)}
             ,ship.{nameof(CustomerOrderShipment.InvoiceNumber)}
             ,ship.{nameof(CustomerOrderShipment.InvoiceDate)}
             ,ship.{nameof(CustomerOrderShipment.InvoiceSent)}

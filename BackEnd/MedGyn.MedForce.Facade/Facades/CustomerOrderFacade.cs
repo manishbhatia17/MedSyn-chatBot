@@ -2477,5 +2477,15 @@ namespace MedGyn.MedForce.Facade.Facades
 			public string CreditCardFee { get; set; }
 
 		}
+
+		public async Task<bool> ShipmentBelongsToCustomerAsync(int shipmentId, int customerId)
+		{
+			var shipment = _customerOrderService.GetCustomerOrderShipment(shipmentId);
+			if (shipment == null || shipment.CustomerOrderID == 0)
+				return false;
+
+			var order = _customerOrderService.GetCustomerOrder(shipment.CustomerOrderID);
+			return order != null && order.CustomerID == customerId;
+		}
 	}
 }

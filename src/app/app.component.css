@@ -116,6 +116,16 @@
   width: 34px;
   height: 34px;
 }
+.icon-circle.logo-icon,
+.icon-circle-2.logo-icon {
+  background-image: url('../assets/LogoIcon.png') !important;
+  background-size: 65% !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-color: #fff !important;
+}
+.icon-circle.logo-icon svg,
+.icon-circle-2.logo-icon svg { display: none; }
 
 /* ── BODY LAYOUT CHAIN ──────────────────────────────────── */
 .chat-row {

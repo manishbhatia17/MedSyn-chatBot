@@ -51,7 +51,7 @@ namespace MedGyn.MedForce.Facade.Factories
                     CustomerChatBotCommandType
                         .GetInvoice,
 
-                "GetCustomerPO" =>
+                "GetCustomerPO" or "request_order_invoice" =>
                     CustomerChatBotCommandType
                         .GetCustomerPO,
 
@@ -71,15 +71,15 @@ namespace MedGyn.MedForce.Facade.Factories
                     CustomerChatBotCommandType
                          .LeaveMessageForMedGyn,
 
-                "GetOrderStatus" =>
+                "GetOrderStatus" or "request_order_status" =>
                     CustomerChatBotCommandType
                         .GetOrderStatus,
 
-                "GetOrderInvoice" =>
+                "GetOrderInvoice" or "request_invoice_view" =>
                     CustomerChatBotCommandType
                         .GetOrderInvoice,
 
-                "GetOrderTracking" =>
+                "GetOrderTracking" or "request_order_tracking" =>
                     CustomerChatBotCommandType
                         .GetOrderTracking,
 

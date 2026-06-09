@@ -7,5 +7,6 @@ namespace MedGyn.MedForce.Facade.Interfaces
     {
         Task<int> LogCustomerChatAsync(CustomerChatLogModel model);
         Task<CustomerChatResponseDTO> ProcessMessage(CustomerChatRequestDTO request);
+        Task<byte[]> GetChatbotInvoicePdfAsync(int shipmentId, int chatLogId);
     }
 }

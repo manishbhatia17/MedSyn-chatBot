@@ -8,5 +8,6 @@ namespace Medforce.Graph.Services.Interfaces
 	public interface ISharePointListSearchService
 	{
 		Task<List<string>> SearchSharePointList(string siteId, string listId, string query);
+		Task<string> GetProductDocumentUrlAsync(string productId, string folder);
 	}
 }

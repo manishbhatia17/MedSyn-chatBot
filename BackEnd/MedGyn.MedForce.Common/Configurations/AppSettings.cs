@@ -61,5 +61,6 @@ namespace MedGyn.MedForce.Common.Configurations
 		public string GraphCertThumbprint { get; set; }
 		public string GraphUrl { get; set; }
 		public string BaseSharePointUrl { get; set; }
+		public string SharePointAcademySite { get; set; }
 	}
 }

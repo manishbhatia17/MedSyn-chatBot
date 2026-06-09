@@ -1,15 +1,8 @@
-<div class="chatbot-main" [class.open]="IsChatBot">
+﻿<div class="chatbot-main" [class.open]="IsChatBot">
   <div *ngIf="IsChatBot" class="chat-form" [class.chat-mode]="IsUserDataSubmited">
     <div class="chat-row">
       <div class="chat-title">
-        <div class="icon-circle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none">
-            <path d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M9 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+        <div class="icon-circle logo-icon"></div>
         <div>
           <h4>Welcome To MedGyn</h4>
           <p>Let's get you the help you need</p>
@@ -47,11 +40,11 @@
               </div>
 
               <div class="chat-input">
-                <input type="text" placeholder="Enter Phonenumber" required formControlName="phoneNumber" maxlength="10"
+                <input type="text" placeholder="Enter Phone Number" required formControlName="phoneNumber" maxlength="10"
                   [ngClass]="(chatForm.get('phoneNumber')?.invalid && (chatForm.get('phoneNumber')?.dirty || chatForm.get('phoneNumber')?.touched)) ? 'invalid form-control' : 'form-control'" />
                 <span
                   *ngIf="chatForm.get('phoneNumber')?.invalid && (chatForm.get('phoneNumber')?.dirty || chatForm.get('phoneNumber')?.touched)"
-                  class="invalid-message">PhoneNumber is Invalid</span>
+                  class="invalid-message">Phone Number is Invalid</span>
               </div>
 
               <div class="chat-input">
@@ -100,7 +93,7 @@
 
             @if(IsUserDataSubmited){
             <!-- messages area: fixed height, scrollable -->
-            <div class="chat-messages" #scrollContainerMessage>
+            <div class="chat-messages" #scrollContainerMessage (click)="onMessageAreaClick($event)">
               <div class="chat-inner">
 
 
@@ -108,18 +101,7 @@
                
                 @if(m.isIncoming){
                 <div class="incoming-wrap">
-                  <div class="icon-circle-2 icon-circle "><svg xmlns="http://www.w3.org/2000/svg" width="26px"
-                      height="26px" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z"
-                        stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                      <path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#fff"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                      <path d="M9 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-                      <path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round"></path>
-                    </svg></div>
+                  <div class="icon-circle-2 icon-circle logo-icon"></div>
                   <div class="chat-receiver">
                     <span [innerHTML]="m.message | linkify"></span>
                     <div class="msg-time">{{ m.time ? (m.time | date:'h:mm a') : '' }}</div>
@@ -147,7 +129,7 @@
 
                 @if (isLoading) {
                 <div class="incoming-wrap">
-                  <div class="icon-circle-2 icon-circle"><svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" viewBox="0 0 24 24" fill="none"><path d="M3 5V20.7929C3 21.2383 3.53857 21.4614 3.85355 21.1464L7.70711 17.2929C7.89464 17.1054 8.149 17 8.41421 17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5Z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 12C14.2005 12.6224 13.1502 13 12 13C10.8498 13 9.79952 12.6224 9 12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M9 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 8.01953V8" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div>
+                  <div class="icon-circle-2 icon-circle logo-icon"></div>
                   <div class="typing-indicator">
                     <span></span><span></span><span></span>
                   </div>

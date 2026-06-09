@@ -12,7 +12,8 @@ export const RuleMeta = {
     REQUEST_REP_INFO: {id:'request_rep_info', intent:'request_rep_info'},
     REQUEST_ORDER_STATUS: {id:'request_order_status', intent:'request_order_status'},
     REQUEST_ORDER_INVOICE: {id:'request_order_invoice', intent:'request_order_invoice'},
-    REQUEST_ORDER_TRACKING: {id:'request_order_tracking', intent:'request_order_tracking'},    
+    REQUEST_ORDER_TRACKING: {id:'request_order_tracking', intent:'request_order_tracking'},
+    REQUEST_INVOICE_VIEW: {id:'request_invoice_view', intent:'request_invoice_view'},
     LEAVE_MESSAGE: {id:'leave_message', intent:'leave_message'},
 };
 
@@ -21,7 +22,8 @@ export enum ActionType  {
     DisplayMenu = 'DisplayMenu',
     CollectInput = 'CollectInput',
     CallAPI =   'CallAPI',
-    ProcessRule = 'ProcessRule'
+    ProcessRule = 'ProcessRule',
+    ExternalLink = 'ExternalLink'
 }
 export enum Priority {
     Critical,

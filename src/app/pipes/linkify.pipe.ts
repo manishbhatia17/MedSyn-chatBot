@@ -14,10 +14,15 @@ export class LinkifyPipe implements PipeTransform {
     const linkButtons: string[] = [];
     const tokens: string[] = [];
 
-    // Handle markdown links [label](url) — use the label as the button text, collect for end
-    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_match, label, url) => {
-      linkButtons.push(this.renderUrlWithLabel(url, label));
-      return ''; // remove entirely from inline text; button appears at the end
+    // Handle markdown links [label](url) — support https:// and chataction://
+    text = text.replace(/\[([^\]]+)\]\(((?:https?|chataction):\/\/[^\s)]+)\)/g, (_match, label, url) => {
+      if (url.startsWith('chataction://')) {
+        const action = url.replace('chataction://', '');
+        linkButtons.push(`<a class="chat-link-btn" data-chataction="${action}" style="cursor:pointer">${this.escapeHtml(label)}</a>`);
+      } else {
+        linkButtons.push(this.renderUrlWithLabel(url, label));
+      }
+      return '';
     });
 
     // Handle bare https:// URLs — remove from inline, collect button for end
@@ -82,8 +87,7 @@ export class LinkifyPipe implements PipeTransform {
   }
 
   private renderUrlWithLabel(url: string, label: string): string {
-    const href = url.includes('medgyn.com') ? 'https://www.medgyn.com' : url;
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="chat-link-btn">${this.escapeHtml(label)}</a>`;
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="chat-link-btn">${this.escapeHtml(label)}</a>`;
   }
 
   private renderUrl(url: string): string {

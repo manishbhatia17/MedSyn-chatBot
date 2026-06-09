@@ -10,13 +10,15 @@ import { OptionModel } from 'src/model/optionModel';
   styleUrls: ['./customer-options.component.css']
 })
 export class CustomerOptionsComponent {
+  
   @Input() message: string = '';
   @Output() optionSelected = new EventEmitter<OptionModel>();
   @Input() options: OptionModel[] = [];
   selectedOption:OptionModel | null = null;
- ngOnInit() {
  
- }
+  ngOnInit() {
+
+  }
 
 
 
@@ -26,4 +28,5 @@ export class CustomerOptionsComponent {
     this.optionSelected.emit(option);
     console.log('Selected option:', option);
   }
+  
 }

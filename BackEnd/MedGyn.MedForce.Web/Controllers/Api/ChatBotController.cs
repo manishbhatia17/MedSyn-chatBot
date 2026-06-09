@@ -1,4 +1,5 @@
 using System;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -34,8 +35,8 @@ namespace MedGyn.MedForce.Web.Controllers.Api
             // Existing customer is determined by whether they provided a Customer ID
             model.IsExistingCustomer = model.CustomerId.HasValue;
 
-            if (model.CustomerId.HasValue && !_customerFacade.CustomerExists(model.CustomerId.Value))
-                return BadRequest("Customer ID not found. Please check your ID and try again.");
+            if (model.CustomerId.HasValue && !_customerFacade.CustomerExistsWithEmail(model.CustomerId.Value, model.Email))
+                return BadRequest("Customer ID and email address do not match. Please check your details and try again.");
 
             // Log the chat entry
             int id = await _chatBotFacade.LogCustomerChatAsync(model);
@@ -55,6 +56,25 @@ namespace MedGyn.MedForce.Web.Controllers.Api
         {
             var response = await _chatBotFacade.ProcessMessage(request);
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Returns the invoice PDF for a shipment, validated against the customer's chat session.
+        /// </summary>
+        [HttpGet("invoice/{shipmentId}/{chatLogId}")]
+        public async Task<IActionResult> GetInvoice(int shipmentId, int chatLogId)
+        {
+            var pdf = await _chatBotFacade.GetChatbotInvoicePdfAsync(shipmentId, chatLogId);
+            if (pdf == null)
+                return Unauthorized();
+
+            Response.Headers.Add("Content-Disposition", new ContentDisposition
+            {
+                FileName = "Invoice.pdf",
+                Inline = true
+            }.ToString());
+
+            return File(pdf, "application/pdf");
         }
 
     }

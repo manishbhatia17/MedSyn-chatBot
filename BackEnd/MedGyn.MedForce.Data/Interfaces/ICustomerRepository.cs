@@ -11,6 +11,7 @@ namespace MedGyn.MedForce.Data.Interfaces
 		Customer GetCustomer(int customerID);
 		Customer GetCustomerByEmail(string email);
 		Task<Customer> GetCustomerByEmailAsync(string email);
+		Customer GetCustomerByIdAndEmail(int customerId, string email);
 		void UpdateCustomer(Customer customerModel);
 		Customer SaveCustomer(Customer customerModel);
 		void SaveCustomerShippingInfo(CustomerShippingInfo shippingInfo);

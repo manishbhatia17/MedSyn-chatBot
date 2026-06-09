@@ -81,10 +81,7 @@ namespace GraphRepository
 												validOnly);
 					// Get the first cert with the thumbprint
 					certificate = certCollection.OfType<X509Certificate2>().FirstOrDefault();
-
-					if (certificate is null)
-						throw new Exception($"Certificate with thumbprint {_certThumbprint} was not found");
-
+					 
 					DateTimeOffset expirationDate = DateTime.Now.AddDays(1);
 
 					_memoryCache.Set(_certThumbprint, certificate, expirationDate);

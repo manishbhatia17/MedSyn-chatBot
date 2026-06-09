@@ -1,10 +1,12 @@
 ﻿using GraphRepository;
 using MedGyn.MedForce.Common.Configurations;
+using System;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Medforce.Graph.Services
@@ -14,6 +16,40 @@ namespace Medforce.Graph.Services
 		public GraphSharePointListSearch(IMemoryCache memoryCache, IOptions<AppSettings> appSettings)
 			: base(memoryCache, appSettings)
 		{
+		}
+
+		public async Task<string> GetProductDocumentUrlAsync(string productId, string folder)
+		{
+			var site = await _graphClient.Sites[_appSettings.SharePointAcademySite].GetAsync();
+			if (site == null) return null;
+
+			var folderPath = $"/sites/MedGynAcademy/Shared Documents/{folder}";
+
+			var items = await _graphClient.Sites[site.Id].Lists["Shared Documents"].Items
+				.GetAsync(config =>
+				{
+					config.QueryParameters.Expand = new[] { "fields($select=ProductID,FileLeafRef,FileDirRef)" };
+					config.QueryParameters.Filter = $"fields/FileDirRef eq '{folderPath}'";
+					config.QueryParameters.Top = 500;
+				});
+
+			if (items?.Value == null) return null;
+
+			var match = items.Value.FirstOrDefault(item =>
+			{
+				var fields = item.Fields?.AdditionalData;
+				if (fields == null) return false;
+				fields.TryGetValue("ProductID", out var productIds);
+				return productIds?.ToString()?.Contains(productId) == true;
+			});
+
+			if (match?.Fields?.AdditionalData == null) return null;
+
+			match.Fields.AdditionalData.TryGetValue("FileLeafRef", out var fileName);
+			if (fileName == null) return null;
+
+			var encodedFileName = Uri.EscapeDataString(fileName.ToString());
+			return $"https://netorgft3403149.sharepoint.com{folderPath}/{encodedFileName}";
 		}
 
 		public async Task<List<string>> SearchSharePointList(string siteId, string listId, string query)

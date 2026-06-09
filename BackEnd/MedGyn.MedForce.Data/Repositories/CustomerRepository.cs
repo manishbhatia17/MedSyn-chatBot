@@ -146,6 +146,19 @@ namespace MedGyn.MedForce.Data.Repositories
 			return model;
 		}
 
+		public Customer GetCustomerByIdAndEmail(int customerId, string email)
+		{
+			var model = _dbContext.Customers.Where(w =>
+				w.CustomerID == customerId &&
+				(w.PrimaryEmail == email ||
+				 w.AdditionalContact1Email == email ||
+				 w.AdditionalContact2Email == email ||
+				 w.AdditionalContact3Email == email))
+				.FirstOrDefault();
+
+			return model;
+		}
+
 		public Customer SaveCustomer(Customer customer)
 		{
 			_dbContext.BeginTransaction();

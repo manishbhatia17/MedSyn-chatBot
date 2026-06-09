@@ -1,6 +1,8 @@
+using MedGyn.MedForce.Common.Configurations;
 using MedGyn.MedForce.Facade.DTOs;
 using MedGyn.MedForce.Facade.Handlers.Interfaces;
 using MedGyn.MedForce.Service.Interfaces;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
@@ -13,10 +15,14 @@ namespace MedGyn.MedForce.Facade.Handlers
         public CustomerChatBotCommandType CommandType => CustomerChatBotCommandType.GetOrderInvoice;
 
         private readonly ICustomerOrderService _customerOrderService;
+        private readonly string _baseUrl;
 
-        public GetOrderInvoiceChatBotCommandHandler(ICustomerOrderService customerOrderService)
+        public GetOrderInvoiceChatBotCommandHandler(
+            ICustomerOrderService customerOrderService,
+            IOptions<AppSettings> appSettings)
         {
             _customerOrderService = customerOrderService;
+            _baseUrl = appSettings.Value.Url?.TrimEnd('/');
         }
 
         public async Task<CustomerChatResponseDTO> HandleAsync(string[] parameters, CustomerChatRequestDTO request)
@@ -37,6 +43,7 @@ namespace MedGyn.MedForce.Facade.Handlers
             var sb = new StringBuilder();
             sb.AppendLine($"Here are the invoice details for PO **{order.PONumber}**:");
             sb.AppendLine();
+
             sb.AppendLine(!string.IsNullOrEmpty(order.InvoiceNumber)
                 ? $"**Invoice Number:** {order.InvoiceNumber}"
                 : "**Invoice Number:** Not yet generated.");
@@ -44,9 +51,12 @@ namespace MedGyn.MedForce.Facade.Handlers
             if (order.InvoiceDate.HasValue)
                 sb.AppendLine($"**Invoice Date:** {order.InvoiceDate:MMMM dd, yyyy}");
 
-            sb.AppendLine(!string.IsNullOrEmpty(order.AttachmentURI)
-                ? $"[Download Invoice]({order.AttachmentURI})"
-                : "**Invoice Download:** Not yet available.");
+            sb.AppendLine();
+
+            if (order.CustomerOrderShipmentID.HasValue && !string.IsNullOrWhiteSpace(_baseUrl) && request.ChatLogId > 0)
+                sb.AppendLine($"[View Invoice]({_baseUrl}/api/chatbot/invoice/{order.CustomerOrderShipmentID}/{request.ChatLogId})");
+            else
+                sb.AppendLine("**Invoice Download:** Not yet available.");
 
             return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = sb.ToString(), Data = order };
         }

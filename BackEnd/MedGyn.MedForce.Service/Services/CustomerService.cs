@@ -56,6 +56,12 @@ namespace MedGyn.MedForce.Service.Services
 			return model != null;
 		}
 
+		public bool CustomerExistsWithEmail(int customerId, string email)
+		{
+			var model = _customerRepository.GetCustomerByIdAndEmail(customerId, email);
+			return model != null && model.CustomerID > 0;
+		}
+
 		public CustomerContract SaveCustomer(CustomerContract customer)
 		{
 			var customerModel = customer.ToModel();

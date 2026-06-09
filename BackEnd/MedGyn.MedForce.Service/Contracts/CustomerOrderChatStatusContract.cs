@@ -9,6 +9,7 @@ namespace MedGyn.MedForce.Service.Contracts
 
         public string CustomerOrderCustomID { get; set; }
 
+        public int? CustomerOrderShipmentID { get; set; }
         public string AttachmentURI { get; set; }
 
         public string PONumber { get; set; }

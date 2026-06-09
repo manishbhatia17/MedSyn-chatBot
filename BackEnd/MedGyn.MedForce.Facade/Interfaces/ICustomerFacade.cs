@@ -16,5 +16,6 @@ namespace MedGyn.MedForce.Facade.Interfaces
 		List<CustomerShippingInfoViewModel> SaveCustomerShippingInfo(CustomerShippingInfoViewModel customerShippingInfo);
 		Task<bool> VerifyCustomerByEmailAsync(string email);
 	bool CustomerExists(int customerId);
+	bool CustomerExistsWithEmail(int customerId, string email);
 	}
 }

@@ -40,6 +40,11 @@ namespace MedGyn.MedForce.Facade.Facades
 			return customer != null && customer.CustomerID > 0;
 		}
 
+		public bool CustomerExistsWithEmail(int customerId, string email)
+		{
+			return _customerService.CustomerExistsWithEmail(customerId, email);
+		}
+
 		public CustomerListViewModel GetCustomerListViewModel(SearchCriteriaViewModel sc, bool seeAll, int userId, bool seeDomestic, bool seeDomesticDistribution, bool seeDomesticAfaxys, bool seeInternational)
 		{
 			var customers           = _customerService.GetAllCustomers(sc.Search, sc.SortColumn, sc.SortAsc, seeAll, userId, seeDomestic, seeDomesticDistribution, seeDomesticAfaxys, seeInternational);

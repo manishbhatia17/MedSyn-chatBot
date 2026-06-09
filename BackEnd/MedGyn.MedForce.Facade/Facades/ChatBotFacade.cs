@@ -18,6 +18,7 @@ namespace MedGyn.MedForce.Facade.Facades
         private readonly ILLMService _llmService;
         private readonly ICustomerChatBotCommandHandlerFactory _handlerFactory;
         private readonly IMemoryCache _cache;
+        private readonly ICustomerOrderFacade _customerOrderFacade;
 
         private const string FunctionDeclCacheKey = "ClaudeFunctionDeclarations";
 
@@ -31,16 +32,34 @@ namespace MedGyn.MedForce.Facade.Facades
             "leave_message",
             "GetOrderStatus",
             "GetOrderInvoice",
-            "GetOrderTracking"
+            "GetOrderTracking",
+            "request_invoice_view",
+            "request_order_status",
+            "request_order_invoice",
+            "request_order_tracking",
+        };
+
+        private static readonly HashSet<string> PoNumberHints = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "GetOrderStatus",
+            "GetOrderInvoice",
+            "GetOrderTracking",
+            "GetCustomerPO",
+            "request_invoice_view",
+            "request_order_status",
+            "request_order_invoice",
+            "request_order_tracking",
         };
 
         public ChatBotFacade(IChatBotService chatBotService, ILLMService llmService,
-            ICustomerChatBotCommandHandlerFactory handlerFactory, IMemoryCache cache)
+            ICustomerChatBotCommandHandlerFactory handlerFactory, IMemoryCache cache,
+            ICustomerOrderFacade customerOrderFacade)
         {
             _chatBotService = chatBotService;
             _llmService = llmService;
             _handlerFactory = handlerFactory;
             _cache = cache;
+            _customerOrderFacade = customerOrderFacade;
         }
         public async Task<int> LogCustomerChatAsync(CustomerChatLogModel model)
         {
@@ -99,7 +118,17 @@ namespace MedGyn.MedForce.Facade.Facades
                 {
                     var hintedHandler = _handlerFactory.GetCommandHandler(request.FunctionHint);
                     if (hintedHandler != null)
-                        return await hintedHandler.HandleAsync(new[] { JsonConvert.SerializeObject(new { message = request.Message }) }, request);
+                    {
+                        string hintParams;
+                        if (request.FunctionHint.Equals("GetRepersentativeByCountryOrState", StringComparison.OrdinalIgnoreCase))
+                            hintParams = JsonConvert.SerializeObject(new { state = customerState, country = customerCountry });
+                        else if (PoNumberHints.Contains(request.FunctionHint))
+                            hintParams = JsonConvert.SerializeObject(new { po_number = request.Message });
+                        else
+                            hintParams = JsonConvert.SerializeObject(new { message = request.Message });
+
+                        return await hintedHandler.HandleAsync(new[] { hintParams }, request);
+                    }
                 }
 
                 var locationContext = BuildLocationContext(customerState, customerCountry);
@@ -136,6 +165,18 @@ namespace MedGyn.MedForce.Facade.Facades
                 };
             }
         }
-          
+
+        public async Task<byte[]> GetChatbotInvoicePdfAsync(int shipmentId, int chatLogId)
+        {
+            var chatLog = await _chatBotService.GetCustomerChatLogAsync(chatLogId);
+            if (chatLog?.CustomerId == null)
+                return null;
+
+            var belongs = await _customerOrderFacade.ShipmentBelongsToCustomerAsync(shipmentId, chatLog.CustomerId.Value);
+            if (!belongs)
+                return null;
+
+            return _customerOrderFacade.GetInvoice(shipmentId);
+        }
     }
 }
