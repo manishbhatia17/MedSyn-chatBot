@@ -81,8 +81,29 @@ namespace MedGyn.MedForce.Data.Models
 			UnitOfMeasureCodeID            = result.UnitOfMeasureCodeID is DBNull ? (int?)null : (int?)result.UnitOfMeasureCodeID;
 			PrimaryVendorID                = result.PrimaryVendorID is DBNull ? (int?)null : (int?)result.PrimaryVendorID;
 			ShipWeight                     = result.ShipWeight is DBNull ? (decimal?)null : (decimal?)result.ShipWeight;
+			Length                         = result.Length is DBNull ? (decimal?)null : (decimal?)result.Length;
+			Width                          = result.Width is DBNull ? (decimal?)null : (decimal?)result.Width;
+			Depth                          = result.Depth is DBNull ? (decimal?)null : (decimal?)result.Depth;
+			ShipWeightUnitsCodeID          = result.ShipWeightUnitsCodeID is DBNull ? (int?)null : (int?)result.ShipWeightUnitsCodeID;
+			ShipDimensionUnitsCodeID       = result.ShipDimensionUnitsCodeID is DBNull ? (int?)null : (int?)result.ShipDimensionUnitsCodeID;
 			ReorderPoint                   = result.ReorderPoint is DBNull ? (int?)null : (int?)result.ReorderPoint;
 			ReorderQuantity                = result.ReorderQuantity is DBNull ? (int?)null : (int?)result.ReorderQuantity;
+			AdditionalVendor1ID            = result.AdditionalVendor1ID is DBNull ? (int?)null : (int?)result.AdditionalVendor1ID;
+			AdditionalVendor2ID            = result.AdditionalVendor2ID is DBNull ? (int?)null : (int?)result.AdditionalVendor2ID;
+			AdditionalVendor3ID            = result.AdditionalVendor3ID is DBNull ? (int?)null : (int?)result.AdditionalVendor3ID;
+			AdditionalVendor4ID            = result.AdditionalVendor4ID is DBNull ? (int?)null : (int?)result.AdditionalVendor4ID;
+			AdditionalVendor5ID            = result.AdditionalVendor5ID is DBNull ? (int?)null : (int?)result.AdditionalVendor5ID;
+			AdditionalVendor6ID            = result.AdditionalVendor6ID is DBNull ? (int?)null : (int?)result.AdditionalVendor6ID;
+			ExtraImage1URI                 = result.ExtraImage1URI is DBNull ? null : result.ExtraImage1URI;
+			ExtraImage2URI                 = result.ExtraImage2URI is DBNull ? null : result.ExtraImage2URI;
+			ExtraImage3URI                 = result.ExtraImage3URI is DBNull ? null : result.ExtraImage3URI;
+			ExtraImage4URI                 = result.ExtraImage4URI is DBNull ? null : result.ExtraImage4URI;
+			ExtraImage5URI                 = result.ExtraImage5URI is DBNull ? null : result.ExtraImage5URI;
+			ExtraImage6URI                 = result.ExtraImage6URI is DBNull ? null : result.ExtraImage6URI;
+			ExtraImage7URI                 = result.ExtraImage7URI is DBNull ? null : result.ExtraImage7URI;
+			ExtraImage8URI                 = result.ExtraImage8URI is DBNull ? null : result.ExtraImage8URI;
+			UpdatedOn                      = result.UpdatedOn is DBNull ? default(DateTime) : (DateTime)result.UpdatedOn;
+			UpdatedBy                      = result.UpdatedBy is DBNull ? 0 : (int)result.UpdatedBy;
 		}
 	}
 }

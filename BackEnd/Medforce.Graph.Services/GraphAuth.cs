@@ -37,6 +37,13 @@ namespace GraphRepository
 					.WithAuthority(new Uri("https://login.microsoftonline.com/" + realm))
 					.Build();
 			}
+			else if (!string.IsNullOrEmpty(_appSettings.GraphClientSecret))
+			{
+				App = ConfidentialClientApplicationBuilder.Create(clientId)
+					.WithClientSecret(_appSettings.GraphClientSecret)
+					.WithAuthority(new Uri("https://login.microsoftonline.com/" + realm))
+					.Build();
+			}
 
 			Scopes = new string[]
 			{

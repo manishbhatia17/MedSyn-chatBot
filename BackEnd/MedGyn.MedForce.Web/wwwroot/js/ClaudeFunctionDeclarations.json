@@ -74,6 +74,20 @@
     }
   },
   {
+    "name": "GetCustomerPO",
+    "description": "Get the details of a customer's purchase order, including order ID, status, invoice number, and a link to view the PO document. Use when the customer asks about their purchase order or PO details.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "po_number": {
+          "type": "string",
+          "description": "The Purchase Order (PO) number provided by the customer."
+        }
+      },
+      "required": [ "po_number" ]
+    }
+  },
+  {
     "name": "LeaveMessageForMedGyn",
     "description": "Send a customer question or message to the MedGyn representative team.",
     "input_schema": {

@@ -1,6 +1,6 @@
-﻿using MedGyn.MedForce.Data.Models;
-using MedGyn.MedForce.Facade.DTOs;
+﻿using MedGyn.MedForce.Facade.DTOs;
 using MedGyn.MedForce.Facade.Handlers.Interfaces;
+using MedGyn.MedForce.Facade.Interfaces;
 using MedGyn.MedForce.Service.Interfaces;
 using Newtonsoft.Json;
 using System;
@@ -16,28 +16,18 @@ namespace MedGyn.MedForce.Facade.Handlers
         public CustomerChatBotCommandType CommandType =>
             CustomerChatBotCommandType.LeaveMessageForMedGyn;
 
-        private readonly IRepersentativeTerritoryService
-            _representativeTerritoryService;
-
-        private readonly IChatBotService
-            _chatBotService;
-
-        private readonly IEmailService
-            _emailService;
+        private readonly ISalesTerritoryFacade _salesTerritoryFacade;
+        private readonly IChatBotService _chatBotService;
+        private readonly IEmailService _emailService;
 
         public LeaveMessageForMedGynCustomerChatBotCommandHandler(
-            IRepersentativeTerritoryService representativeTerritoryService,
+            ISalesTerritoryFacade salesTerritoryFacade,
             IChatBotService chatBotService,
             IEmailService emailService)
         {
-            _representativeTerritoryService =
-                representativeTerritoryService;
-
-            _chatBotService =
-                chatBotService;
-
-            _emailService =
-                emailService;
+            _salesTerritoryFacade = salesTerritoryFacade;
+            _chatBotService = chatBotService;
+            _emailService = emailService;
         }
 
         public async Task<CustomerChatResponseDTO>
@@ -77,48 +67,17 @@ namespace MedGyn.MedForce.Facade.Handlers
                     };
                 }
 
-                RepresentativeTerritory representativeTerritory =
-                    await _representativeTerritoryService
-                        .GetRepresentativeByCustomerChatLogId(
-                            request.ChatLogId);
+                var representative = await _salesTerritoryFacade
+                    .GetRepresentativeByLocationAsync(customer.State, customer.Country);
 
-                Representative representative =
-                    representativeTerritory?
-                        .Representative;
+                template = template.Replace("@CustomerName",    customer.Name);
+                template = template.Replace("@CustomerEmail",   customer.Email);
+                template = template.Replace("@CustomerPhone",   customer.PhoneNumber ?? string.Empty);
+                template = template.Replace("@State",           customer.State);
+                template = template.Replace("@Country",         customer.Country);
+                template = template.Replace("@CustomerMessage", customerMessage);
 
-                template =
-                    template.Replace(
-                        "@CustomerName",
-                        customer.Name);
-
-                template =
-                    template.Replace(
-                        "@CustomerEmail",
-                        customer.Email);
-
-                template =
-                    template.Replace(
-                        "@CustomerPhone",
-                        customer.PhoneNumber ?? string.Empty);
-
-                template =
-                    template.Replace(
-                        "@State",
-                        customer.State);
-
-                template =
-                    template.Replace(
-                        "@Country",
-                        customer.Country);
-
-                template =
-                    template.Replace(
-                        "@CustomerMessage",
-                        customerMessage);
-
-                string repEmail =
-                    representative?
-                        .Email;
+                string repEmail = representative?.Email;
 
                 if (!string.IsNullOrWhiteSpace(repEmail))
                 {
@@ -138,11 +97,9 @@ namespace MedGyn.MedForce.Facade.Handlers
 
                 return new CustomerChatResponseDTO
                 {
-                    FunctionName =
-                        CommandType.ToString(),
-
-                    Message =
-                        "Thank you. Your message has been forwarded to the MedGyn team."
+                    FunctionName = CommandType.ToString(),
+                    Message = "Thank you. Your message has been forwarded to the MedGyn team.",
+                    Data = new { sent = true }
                 };
             }
             catch (Exception)

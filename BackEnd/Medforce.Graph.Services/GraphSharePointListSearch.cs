@@ -1,6 +1,7 @@
 ﻿using GraphRepository;
 using MedGyn.MedForce.Common.Configurations;
 using System;
+using System.IO;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Graph;
@@ -18,40 +19,80 @@ namespace Medforce.Graph.Services
 		{
 		}
 
-		public async Task<string> GetProductDocumentUrlAsync(string productId, string folder)
+		private async Task<string> GetDriveIdAsync()
 		{
 			if (_graphClient == null) return null;
 
 			var site = await _graphClient.Sites[_appSettings.SharePointAcademySite].GetAsync();
 			if (site == null) return null;
 
-			var folderPath = $"/sites/MedGynAcademy/Shared Documents/{folder}";
+			var drive = await _graphClient.Sites[site.Id].Drive.GetAsync();
+			return drive?.Id;
+		}
 
-			var items = await _graphClient.Sites[site.Id].Lists["Shared Documents"].Items
+		private async Task<(string DriveId, DriveItem Item)?> FindBrochureItemAsync(string productId, string folder)
+		{
+			var driveId = await GetDriveIdAsync();
+			if (driveId == null) return null;
+
+			// FileDirRef is not indexed and is blank on these items, so it can't be used to
+			// filter server-side. Instead, list the children of the target folder directly.
+			var items = await _graphClient.Drives[driveId].Root
+				.ItemWithPath(folder).Children
 				.GetAsync(config =>
 				{
-					config.QueryParameters.Expand = new[] { "fields($select=ProductID,FileLeafRef,FileDirRef)" };
-					config.QueryParameters.Filter = $"fields/FileDirRef eq '{folderPath}'";
-					config.QueryParameters.Top = 500;
+					config.QueryParameters.Expand = new[] { "listItem($expand=fields($select=ProductID))" };
+					config.QueryParameters.Top = 999;
 				});
 
 			if (items?.Value == null) return null;
 
 			var match = items.Value.FirstOrDefault(item =>
 			{
-				var fields = item.Fields?.AdditionalData;
+				var fields = item.ListItem?.Fields?.AdditionalData;
 				if (fields == null) return false;
 				fields.TryGetValue("ProductID", out var productIds);
 				return productIds?.ToString()?.Contains(productId) == true;
 			});
 
-			if (match?.Fields?.AdditionalData == null) return null;
+			if (match?.Id == null) return null;
 
-			match.Fields.AdditionalData.TryGetValue("FileLeafRef", out var fileName);
-			if (fileName == null) return null;
+			return (driveId, match);
+		}
 
-			var encodedFileName = Uri.EscapeDataString(fileName.ToString());
-			return $"https://netorgft3403149.sharepoint.com{folderPath}/{encodedFileName}";
+		public async Task<byte[]> GetFileContentAsync(string filePath)
+		{
+			var driveId = await GetDriveIdAsync();
+			if (driveId == null) return null;
+
+			using var stream = await _graphClient.Drives[driveId].Root.ItemWithPath(filePath).Content.GetAsync();
+			if (stream == null) return null;
+
+			using var memoryStream = new MemoryStream();
+			await stream.CopyToAsync(memoryStream);
+			return memoryStream.ToArray();
+		}
+
+		public async Task<bool> ProductDocumentExistsAsync(string productId, string folder)
+		{
+			var match = await FindBrochureItemAsync(productId, folder);
+			return match != null;
+		}
+
+		public async Task<(byte[] Content, string FileName)?> GetProductDocumentContentAsync(string productId, string folder)
+		{
+			var match = await FindBrochureItemAsync(productId, folder);
+			if (match == null) return null;
+
+			var (driveId, item) = match.Value;
+
+			using var stream = await _graphClient.Drives[driveId].Items[item.Id].Content.GetAsync();
+			if (stream == null) return null;
+
+			using var memoryStream = new MemoryStream();
+			await stream.CopyToAsync(memoryStream);
+
+			return (memoryStream.ToArray(), item.Name);
 		}
 
 		public async Task<List<string>> SearchSharePointList(string siteId, string listId, string query)

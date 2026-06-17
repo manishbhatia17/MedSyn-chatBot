@@ -83,6 +83,7 @@ namespace MedGyn.MedForce.Web
 			services.AddScoped<IChatBotService, ChatBotService>();
 			services.AddScoped<IRepersentativeTerritoryFacade, RepersentativeTerritoryFacade>();
 			services.AddScoped<IRepersentativeTerritoryService, RepresentativeTerritoryService>();
+			services.AddScoped<ISalesTerritoryFacade, SalesTerritoryFacade>();
 			services.AddScoped<ICustomerOrderFacade, CustomerOrderFacade>();
 			services.AddScoped<IProductFacade, ProductFacade>();
 			services.AddScoped<IPurchaseOrderFacade, PurchaseOrderFacade>();

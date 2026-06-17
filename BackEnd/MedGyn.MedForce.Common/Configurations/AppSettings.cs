@@ -59,6 +59,7 @@ namespace MedGyn.MedForce.Common.Configurations
 		public string Realm { get; set; }
 		public string GraphClientId { get; set; }
 		public string GraphCertThumbprint { get; set; }
+		public string GraphClientSecret { get; set; }
 		public string GraphUrl { get; set; }
 		public string BaseSharePointUrl { get; set; }
 		public string SharePointAcademySite { get; set; }

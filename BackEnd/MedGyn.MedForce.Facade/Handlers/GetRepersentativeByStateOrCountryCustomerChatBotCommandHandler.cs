@@ -1,6 +1,6 @@
 ﻿using MedGyn.MedForce.Facade.DTOs;
 using MedGyn.MedForce.Facade.Handlers.Interfaces;
-using MedGyn.MedForce.Service.Interfaces;
+using MedGyn.MedForce.Facade.Interfaces;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
@@ -14,12 +14,12 @@ namespace MedGyn.MedForce.Facade.Handlers
         public CustomerChatBotCommandType CommandType =>
             CustomerChatBotCommandType.GetRepersentativeByCountryOrState;
 
-        private readonly IRepersentativeTerritoryService _representativeTerritoryService;
+        private readonly ISalesTerritoryFacade _salesTerritoryFacade;
 
         public GetRepersentativeByStateOrCountryCustomerChatBotCommandHandler(
-            IRepersentativeTerritoryService representativeTerritoryService)
+            ISalesTerritoryFacade salesTerritoryFacade)
         {
-            _representativeTerritoryService = representativeTerritoryService;
+            _salesTerritoryFacade = salesTerritoryFacade;
         }
 
         public async Task<CustomerChatResponseDTO>
@@ -46,7 +46,7 @@ namespace MedGyn.MedForce.Facade.Handlers
 
 
             var representative =
-                await _representativeTerritoryService
+                await _salesTerritoryFacade
                     .GetRepresentativeByLocationAsync(
                         state,country);
 
@@ -62,25 +62,17 @@ namespace MedGyn.MedForce.Facade.Handlers
                 };
             }
 
-            RepresentativeDTO representativeData = new RepresentativeDTO()
-            {
-                Email = representative.Representative.Email,
-                Id = representative.Representative.Id,
-                Name = representative.Representative.Name,
-                Phone = representative.Representative.Phone
-            };
-
             string location = !string.IsNullOrEmpty(state) ? state : country;
 
             var sb = new StringBuilder();
             sb.AppendLine($"Your MedGyn sales representative for {location}:");
             sb.AppendLine();
-            sb.AppendLine($"**Name:** {representativeData.Name}");
-            sb.AppendLine($"**Email:** {representativeData.Email}");
-            sb.AppendLine($"**Phone:** {representativeData.Phone}");
+            sb.AppendLine($"**Name:** {representative.Name}");
+            sb.AppendLine($"**Email:** {representative.Email}");
+            sb.AppendLine($"**Phone:** {representative.Phone}");
 
-            if (!string.IsNullOrWhiteSpace(representative.Territory?.Name))
-                sb.AppendLine($"**Territory:** {representative.Territory.Name}");
+            if (!string.IsNullOrWhiteSpace(representative.TerritoryName))
+                sb.AppendLine($"**Territory:** {representative.TerritoryName}");
 
             sb.AppendLine();
             sb.AppendLine("Feel free to reach out to them directly — they'll be happy to assist you with personalized support!");
@@ -91,7 +83,7 @@ namespace MedGyn.MedForce.Facade.Handlers
             {
                 FunctionName = CommandType.ToString(),
                 Message = sb.ToString(),
-                Data = representativeData
+                Data = representative
             };
         }
     }

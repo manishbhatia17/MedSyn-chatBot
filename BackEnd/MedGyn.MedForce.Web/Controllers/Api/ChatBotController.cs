@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MedGyn.MedForce.Facade.Interfaces;
 using MedGyn.MedForce.Facade.DTOs;
+using Medforce.Graph.Services.Interfaces;
 
 namespace MedGyn.MedForce.Web.Controllers.Api
 {
@@ -14,11 +15,13 @@ namespace MedGyn.MedForce.Web.Controllers.Api
     {
         private readonly ICustomerFacade _customerFacade;
         private readonly IChatBotFacade _chatBotFacade;
+        private readonly ISharePointListSearchService _sharePointService;
 
-        public ChatBotController(ICustomerFacade customerFacade, IChatBotFacade chatBotFacade)
+        public ChatBotController(ICustomerFacade customerFacade, IChatBotFacade chatBotFacade, ISharePointListSearchService sharePointService)
         {
             _customerFacade = customerFacade;
             _chatBotFacade = chatBotFacade;
+            _sharePointService = sharePointService;
         }
 
         /// <summary>
@@ -75,6 +78,44 @@ namespace MedGyn.MedForce.Web.Controllers.Api
             }.ToString());
 
             return File(pdf, "application/pdf");
+        }
+
+        /// <summary>
+        /// Returns the product brochure PDF, fetched from SharePoint via the backend's app credentials.
+        /// </summary>
+        [HttpGet("brochure/{productId}")]
+        public async Task<IActionResult> GetBrochure(string productId)
+        {
+            var doc = await _sharePointService.GetProductDocumentContentAsync(productId, "Product Brochures");
+            if (doc == null)
+                return NotFound();
+
+            Response.Headers.Add("Content-Disposition", new ContentDisposition
+            {
+                FileName = doc.Value.FileName,
+                Inline = false
+            }.ToString());
+
+            return File(doc.Value.Content, "application/pdf");
+        }
+
+        /// <summary>
+        /// Returns the product IFU PDF, fetched from SharePoint via the backend's app credentials.
+        /// </summary>
+        [HttpGet("ifu/{productId}")]
+        public async Task<IActionResult> GetIfu(string productId)
+        {
+            var doc = await _sharePointService.GetProductDocumentContentAsync(productId, "Product IFUs");
+            if (doc == null)
+                return NotFound();
+
+            Response.Headers.Add("Content-Disposition", new ContentDisposition
+            {
+                FileName = doc.Value.FileName,
+                Inline = false
+            }.ToString());
+
+            return File(doc.Value.Content, "application/pdf");
         }
 
     }

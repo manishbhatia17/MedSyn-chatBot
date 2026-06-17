@@ -1,8 +1,10 @@
 using Medforce.Graph.Services.Interfaces;
+using MedGyn.MedForce.Common.Configurations;
 using MedGyn.MedForce.Facade.DTOs;
 using System;
 using MedGyn.MedForce.Facade.Handlers.Interfaces;
 using MedGyn.MedForce.Service.Interfaces;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
@@ -18,17 +20,20 @@ namespace MedGyn.MedForce.Facade.Handlers
         private readonly IVendorService _vendorService;
         private readonly ICodeService _codeService;
         private readonly ISharePointListSearchService _sharePointService;
+        private readonly string _baseUrl;
 
         public GetProductByNameCustomerChatBotCommandHandler(
             IProductService productService,
             IVendorService vendorService,
             ICodeService codeService,
-            ISharePointListSearchService sharePointService)
+            ISharePointListSearchService sharePointService,
+            IOptions<AppSettings> appSettings)
         {
             _productService = productService;
             _vendorService = vendorService;
             _codeService = codeService;
             _sharePointService = sharePointService;
+            _baseUrl = appSettings.Value.Url?.TrimEnd('/');
         }
 
         public async Task<CustomerChatResponseDTO> HandleAsync(string[] parameters, CustomerChatRequestDTO request)
@@ -140,13 +145,20 @@ namespace MedGyn.MedForce.Facade.Handlers
 
             sb.AppendLine();
 
-            // Search SharePoint for brochure and IFU
+            // Search SharePoint for brochure and IFU in parallel
             try
             {
-                var brochureUrl = await _sharePointService.GetProductDocumentUrlAsync(product.ProductCustomID, "Product Brochures");
+                var brochureTask = _sharePointService.ProductDocumentExistsAsync(product.ProductCustomID, "Product Brochures");
+                var ifuTask      = _sharePointService.ProductDocumentExistsAsync(product.ProductCustomID, "Product IFUs");
+                await Task.WhenAll(brochureTask, ifuTask);
 
-                if (!string.IsNullOrWhiteSpace(brochureUrl))
-                    sb.AppendLine($"[Download Brochure]({brochureUrl})");
+                if (!string.IsNullOrWhiteSpace(_baseUrl))
+                {
+                    if (brochureTask.Result)
+                        sb.AppendLine($"[Download Brochure]({_baseUrl}/api/chatbot/brochure/{Uri.EscapeDataString(product.ProductCustomID)})");
+                    if (ifuTask.Result && request.CustomerId.HasValue)
+                        sb.AppendLine($"[Download IFU]({_baseUrl}/api/chatbot/ifu/{Uri.EscapeDataString(product.ProductCustomID)})");
+                }
             }
             catch (Exception ex)
             {

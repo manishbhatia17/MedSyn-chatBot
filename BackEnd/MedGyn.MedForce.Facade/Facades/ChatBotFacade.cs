@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Medgyn.Meforce.LLMAgent.Services;
 using MedGyn.MedForce.Facade.DTOs;
@@ -89,6 +91,9 @@ namespace MedGyn.MedForce.Facade.Facades
 
         public async Task<CustomerChatResponseDTO> ProcessMessage(CustomerChatRequestDTO request)
         {
+            if (request.ChatLogId <= 0)
+                return new CustomerChatResponseDTO { Message = "Invalid session. Please refresh the page and start a new chat." };
+
             try
             {
                 string chatLogCacheKey = $"ChatLog_{request.ChatLogId}";
@@ -123,7 +128,7 @@ namespace MedGyn.MedForce.Facade.Facades
                         if (request.FunctionHint.Equals("GetRepersentativeByCountryOrState", StringComparison.OrdinalIgnoreCase))
                             hintParams = JsonConvert.SerializeObject(new { state = customerState, country = customerCountry });
                         else if (PoNumberHints.Contains(request.FunctionHint))
-                            hintParams = JsonConvert.SerializeObject(new { po_number = request.Message });
+                            hintParams = JsonConvert.SerializeObject(new { po_number = ExtractPoNumber(request.Message) });
                         else
                             hintParams = JsonConvert.SerializeObject(new { message = request.Message });
 
@@ -161,9 +166,24 @@ namespace MedGyn.MedForce.Facade.Facades
             {
                 return new CustomerChatResponseDTO
                 {
-                    Message = $"Error: {ex.Message}"
+                    Message = "Something went wrong processing your request. Please try again or contact MedGyn support."
                 };
             }
+        }
+
+        private static string ExtractPoNumber(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message)) return message;
+            var s = message.Trim();
+            // Strip common "PO Number -", "PO:", "PO#" prefixes
+            s = Regex.Replace(s, @"(?i)^(p\.?o\.?\s*(number|#|num)?\s*[-:–]?\s*)", "").Trim();
+            // Pick the longest token that contains at least one digit (most likely the PO number)
+            var tokens = Regex.Matches(s, @"[\w-]+")
+                              .Cast<Match>()
+                              .Select(m => m.Value)
+                              .Where(t => t.Any(char.IsDigit))
+                              .ToList();
+            return tokens.Count > 0 ? tokens.OrderByDescending(t => t.Length).First() : s;
         }
 
         public async Task<byte[]> GetChatbotInvoicePdfAsync(int shipmentId, int chatLogId)

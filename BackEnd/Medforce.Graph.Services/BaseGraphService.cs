@@ -30,6 +30,8 @@ namespace GraphRepository
 			var cert = CreateCertificate();
 			if (cert != null)
 				_graphClient = new GraphServiceClient(new ClientCertificateCredential(_appSettings.Realm, _appSettings.GraphClientId, cert));
+			else if (!string.IsNullOrEmpty(_appSettings.GraphClientSecret))
+				_graphClient = new GraphServiceClient(new ClientSecretCredential(_appSettings.Realm, _appSettings.GraphClientId, _appSettings.GraphClientSecret));
 		}
 	}
 }
