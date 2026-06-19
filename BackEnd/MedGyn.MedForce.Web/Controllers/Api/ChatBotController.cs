@@ -118,5 +118,24 @@ namespace MedGyn.MedForce.Web.Controllers.Api
             return File(doc.Value.Content, "application/pdf");
         }
 
+        /// <summary>
+        /// Returns the product manual PDF, fetched from SharePoint via the backend's app credentials.
+        /// </summary>
+        [HttpGet("manual/{productId}")]
+        public async Task<IActionResult> GetManual(string productId)
+        {
+            var doc = await _sharePointService.GetProductDocumentContentAsync(productId, "Product Manuals");
+            if (doc == null)
+                return NotFound();
+
+            Response.Headers.Add("Content-Disposition", new ContentDisposition
+            {
+                FileName = doc.Value.FileName,
+                Inline = false
+            }.ToString());
+
+            return File(doc.Value.Content, "application/pdf");
+        }
+
     }
 }

@@ -123,13 +123,33 @@ namespace MedGyn.MedForce.Data.Repositories
 
 		public Product SearchProductByName(string productName)
 		{
-			var queryText = $@"SELECT * FROM Product p WHERE p.{nameof(Product.ProductName)} LIKE :productName";
-
+			var queryText = $@"SELECT * FROM Product p WHERE p.{nameof(Product.ProductName)} LIKE :productName AND p.IsDeleted = 0";
 
 			var query = _dbContext.Session.CreateSQLQuery(queryText);
 			query.SetString("productName", $"%{productName}%");
 
 			var result = query.DynamicList().FirstOrDefault();
+
+			// Fallback: require ALL significant words to match (AND logic) — handles dropped
+			// parentheses and pack-size variations without risking a wrong product match.
+			if (result == null)
+			{
+				var words = productName.Split(' ')
+					.Select(w => w.Trim())
+					.Where(w => w.Length > 3)
+					.ToList();
+
+				if (words.Count > 0)
+				{
+					var conditions = string.Join(" AND ",
+						words.Select((w, i) => $"p.{nameof(Product.ProductName)} LIKE :word{i}"));
+					var fallbackQueryText = $"SELECT * FROM Product p WHERE {conditions} AND p.IsDeleted = 0";
+					var fallbackQuery = _dbContext.Session.CreateSQLQuery(fallbackQueryText);
+					for (int i = 0; i < words.Count; i++)
+						fallbackQuery.SetString($"word{i}", $"%{words[i]}%");
+					result = fallbackQuery.DynamicList().FirstOrDefault();
+				}
+			}
 
 			if (result == null)
 				return new Product();

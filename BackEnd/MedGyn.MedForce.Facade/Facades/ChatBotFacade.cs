@@ -137,7 +137,7 @@ namespace MedGyn.MedForce.Facade.Facades
                 }
 
                 var locationContext = BuildLocationContext(customerState, customerCountry);
-                var systemPrompt = $"You are a helpful MedGyn customer support assistant. Use the available functions to answer the customer's question.{locationContext}";
+                var systemPrompt = $"You are a helpful MedGyn customer support assistant. Use the available functions to answer the customer's question. Correct any obvious misspellings in medical product names before calling functions. When searching for a product, use only the core descriptive product name and omit packaging or quantity details such as (100/Pack), 50/Box, 25/Case etc.{locationContext}";
 
                 var llmResponse = await _llmService.AgentFunction(
                     request.Message,

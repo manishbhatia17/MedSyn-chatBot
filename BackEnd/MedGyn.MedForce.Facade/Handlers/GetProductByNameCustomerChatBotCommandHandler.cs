@@ -59,7 +59,8 @@ namespace MedGyn.MedForce.Facade.Handlers
 
             if (!string.IsNullOrWhiteSpace(product.Description))
             {
-                sb.AppendLine(product.Description);
+                var description = product.Description.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ").Trim();
+                sb.AppendLine($"**About this Product:** {description}");
                 sb.AppendLine();
             }
 
@@ -145,12 +146,13 @@ namespace MedGyn.MedForce.Facade.Handlers
 
             sb.AppendLine();
 
-            // Search SharePoint for brochure and IFU in parallel
+            // Search SharePoint for brochure, IFU and manual in parallel
             try
             {
                 var brochureTask = _sharePointService.ProductDocumentExistsAsync(product.ProductCustomID, "Product Brochures");
                 var ifuTask      = _sharePointService.ProductDocumentExistsAsync(product.ProductCustomID, "Product IFUs");
-                await Task.WhenAll(brochureTask, ifuTask);
+                var manualTask   = _sharePointService.ProductDocumentExistsAsync(product.ProductCustomID, "Product Manuals");
+                await Task.WhenAll(brochureTask, ifuTask, manualTask);
 
                 if (!string.IsNullOrWhiteSpace(_baseUrl))
                 {
@@ -158,6 +160,8 @@ namespace MedGyn.MedForce.Facade.Handlers
                         sb.AppendLine($"[Download Brochure]({_baseUrl}/api/chatbot/brochure/{Uri.EscapeDataString(product.ProductCustomID)})");
                     if (ifuTask.Result && request.CustomerId.HasValue)
                         sb.AppendLine($"[Download IFU]({_baseUrl}/api/chatbot/ifu/{Uri.EscapeDataString(product.ProductCustomID)})");
+                    if (manualTask.Result)
+                        sb.AppendLine($"[Download Manual]({_baseUrl}/api/chatbot/manual/{Uri.EscapeDataString(product.ProductCustomID)})");
                 }
             }
             catch (Exception ex)
