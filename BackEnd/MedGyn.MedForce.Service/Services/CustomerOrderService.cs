@@ -969,5 +969,28 @@ namespace MedGyn.MedForce.Service.Services
                 InvoiceDate = order.InvoiceDate
             };
         }
+
+        public async Task<IList<ChatShipmentContract>> GetOrderShipmentsAsync(string poNumber, int? customerId = null)
+        {
+            var rows = await _customerOrderRepository.GetShipmentsByPOAsync(poNumber, customerId);
+            if (rows == null) return new List<ChatShipmentContract>();
+
+            var result = new List<ChatShipmentContract>();
+            foreach (var row in rows)
+            {
+                var invoiceSent = row.InvoiceSent;
+                bool isInvoiced = invoiceSent != null
+                               && !(invoiceSent is DBNull)
+                               && Convert.ToBoolean(invoiceSent);
+
+                result.Add(new ChatShipmentContract
+                {
+                    ShipmentId    = Convert.ToInt32(row.CustomerOrderShipmentID),
+                    InvoiceNumber = row.InvoiceNumber is DBNull ? null : Convert.ToString(row.InvoiceNumber),
+                    IsInvoiced    = isInvoiced
+                });
+            }
+            return result;
+        }
     }
 }

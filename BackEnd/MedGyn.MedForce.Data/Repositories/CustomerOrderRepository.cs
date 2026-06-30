@@ -2977,5 +2977,30 @@ namespace MedGyn.MedForce.Data.Repositories
 
             return result.FirstOrDefault();
         }
+
+        public async Task<IList<dynamic>> GetShipmentsByPOAsync(string poNumber, int? customerId = null)
+        {
+            var customerFilter = customerId.HasValue ? "AND co.CustomerID = :customerId" : "";
+            var queryText = $@"
+                SELECT
+                    ship.CustomerOrderShipmentID,
+                    ship.InvoiceNumber,
+                    ship.InvoiceSent,
+                    co.PONumber
+                FROM CustomerOrder co
+                INNER JOIN CustomerOrderShipment ship
+                    ON ship.CustomerOrderID = co.CustomerOrderID
+                WHERE co.PONumber = :poNumber
+                    {customerFilter}";
+
+            var query = _dbContext.Session
+                .CreateSQLQuery(queryText)
+                .SetString("poNumber", poNumber);
+
+            if (customerId.HasValue)
+                query = query.SetInt32("customerId", customerId.Value);
+
+            return await query.DynamicListAsync();
+        }
     }
 }

@@ -20,7 +20,7 @@ export const chatRules:ChatRule[] = [
                 rule: RuleMeta.REQUEST_PRODUCT_INFO.id
             },
             {
-                label: "Receive information for your rep",
+                label: "Rep contact info",
                 action: RuleMeta.REQUEST_REP_INFO.intent,
                 isOptionForExistingCustomer: false,
                 value: RuleMeta.REQUEST_REP_INFO.id,

@@ -10,5 +10,6 @@ namespace MedGyn.MedForce.Facade.DTOs
         public string Message { get; set; }
         public int? CustomerId { get; set; }
         public string FunctionHint { get; set; }
+        public string Country { get; set; }
     }
 }

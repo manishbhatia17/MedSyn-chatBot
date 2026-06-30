@@ -112,6 +112,7 @@ namespace MedGyn.MedForce.Facade.Facades
 
                 _cache.TryGetValue(chatLogStateCacheKey, out string customerState);
                 _cache.TryGetValue(chatLogCountryCacheKey, out string customerCountry);
+                request.Country = customerCountry;
 
                 if (!_cache.TryGetValue(FunctionDeclCacheKey, out string functionJson))
                 {
@@ -174,16 +175,9 @@ namespace MedGyn.MedForce.Facade.Facades
         private static string ExtractPoNumber(string message)
         {
             if (string.IsNullOrWhiteSpace(message)) return message;
-            var s = message.Trim();
-            // Strip common "PO Number -", "PO:", "PO#" prefixes
-            s = Regex.Replace(s, @"(?i)^(p\.?o\.?\s*(number|#|num)?\s*[-:–]?\s*)", "").Trim();
-            // Pick the longest token that contains at least one digit (most likely the PO number)
-            var tokens = Regex.Matches(s, @"[\w-]+")
-                              .Cast<Match>()
-                              .Select(m => m.Value)
-                              .Where(t => t.Any(char.IsDigit))
-                              .ToList();
-            return tokens.Count > 0 ? tokens.OrderByDescending(t => t.Length).First() : s;
+            // Strip common "PO Number -", "PO:", "PO#" prefixes and return the rest as-is
+            var s = Regex.Replace(message.Trim(), @"(?i)^(p\.?o\.?\s*(number|#|num)?\s*[-:–]?\s*)", "").Trim();
+            return s;
         }
 
         public async Task<byte[]> GetChatbotInvoicePdfAsync(int shipmentId, int chatLogId)
