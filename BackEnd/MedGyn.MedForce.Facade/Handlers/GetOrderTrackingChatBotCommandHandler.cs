@@ -32,7 +32,7 @@ namespace MedGyn.MedForce.Facade.Handlers
             var order = await _customerOrderService.GetCustomerOrderChatStatus(poNumber, request.CustomerId);
 
             if (order == null)
-                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Order not found." };
+                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "PO not found." };
 
             var sb = new StringBuilder();
             sb.AppendLine($"Here is the shipping information for PO **{order.PONumber}**:");

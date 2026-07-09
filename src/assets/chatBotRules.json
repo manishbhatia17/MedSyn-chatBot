@@ -17,7 +17,7 @@
                         "rule": "request_product_info"
                     },
                     {
-                        "label": "Contact information for your rep",
+                        "label": "Rep contact info",
                         "value": "REQUEST_REP_INFO",
                         "optionalData": {
                             "isOptionForNewCustomer": true

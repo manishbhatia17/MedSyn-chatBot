@@ -19,15 +19,21 @@ namespace MedGyn.MedForce.Facade.Handlers
 
         private readonly IProductService _productService;
         private readonly ISharePointListSearchService _sharePointService;
+        private readonly ICustomerService _customerService;
+        private readonly ICodeService _codeService;
         private readonly string _baseUrl;
 
         public GetProductByNameCustomerChatBotCommandHandler(
             IProductService productService,
             ISharePointListSearchService sharePointService,
+            ICustomerService customerService,
+            ICodeService codeService,
             IOptions<AppSettings> appSettings)
         {
             _productService = productService;
             _sharePointService = sharePointService;
+            _customerService = customerService;
+            _codeService = codeService;
             _baseUrl = appSettings.Value.Url?.TrimEnd('/');
         }
 
@@ -38,7 +44,10 @@ namespace MedGyn.MedForce.Facade.Handlers
             if (!dict.TryGetValue("product_name", out string productName) || string.IsNullOrWhiteSpace(productName))
                 return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Please provide a product name to search for." };
 
-            var product = _productService.SearchProductByName(productName);
+            var product = _productService.GetProductByCustomId(productName);
+
+            if (product == null || product.ProductID == 0)
+                product = _productService.SearchProductByName(productName);
 
             if (product == null || product.ProductID == 0)
                 return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = $"No product found matching \"{productName}\"." };
@@ -83,9 +92,20 @@ namespace MedGyn.MedForce.Facade.Handlers
             }
 
             sb.AppendLine();
-            bool isUS = string.Equals(request.Country, "US", StringComparison.OrdinalIgnoreCase)
-                     || string.Equals(request.Country, "USA", StringComparison.OrdinalIgnoreCase)
-                     || string.Equals(request.Country, "United States", StringComparison.OrdinalIgnoreCase);
+            bool isUS;
+            if (request.CustomerId.HasValue)
+            {
+                var customer = _customerService.GetCustomer(request.CustomerId.Value);
+                var countryCode = _codeService.GetCodeLookupByType(CodeTypeEnum.Countries)
+                    .TryGetValue(customer?.CountryCodeID ?? 0, out var code) ? code.CodeName : null;
+                isUS = string.Equals(countryCode, "USA", StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                isUS = string.Equals(request.Country, "US", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(request.Country, "USA", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(request.Country, "United States", StringComparison.OrdinalIgnoreCase);
+            }
             if (isUS)
                 sb.AppendLine("[Order Online](https://www.medgyn.com/sign-in/)");
             sb.AppendLine("[Request a Quote](https://www.medgyn.com/request-a-quote/)");

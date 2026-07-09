@@ -1,13 +1,13 @@
 [
   {
     "name": "GetProductByName",
-    "description": "Retrieve product information by product name.",
+    "description": "Retrieve product information by product name or product ID.",
     "input_schema": {
       "type": "object",
       "properties": {
         "product_name": {
           "type": "string",
-          "description": "The name of the product to look up."
+          "description": "The name or product ID of the product to look up, exactly as provided by the customer."
         }
       },
       "required": [ "product_name" ]

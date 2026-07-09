@@ -39,7 +39,7 @@ namespace MedGyn.MedForce.Facade.Handlers
             var order = await _customerOrderService.GetCustomerOrderChatStatus(poNumber, request.CustomerId);
 
             if (order == null)
-                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "Order not found." };
+                return new CustomerChatResponseDTO { FunctionName = CommandType.ToString(), Message = "PO not found." };
 
             var shipments = await _customerOrderService.GetOrderShipmentsAsync(poNumber, request.CustomerId);
             var invoicedShipments = shipments.Where(s => s.IsInvoiced).ToList();
