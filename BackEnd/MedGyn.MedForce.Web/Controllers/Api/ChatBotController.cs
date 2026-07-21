@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using MedGyn.MedForce.Facade.Interfaces;
 using MedGyn.MedForce.Facade.DTOs;
 using Medforce.Graph.Services.Interfaces;
+using MedGyn.MedForce.Web.Middleware;
 
 namespace MedGyn.MedForce.Web.Controllers.Api
 {
@@ -30,6 +31,7 @@ namespace MedGyn.MedForce.Web.Controllers.Api
         /// <param name="model">Customer chat details (name, email, state, country)</param>
         /// <returns>Verification result and log entry status</returns>
         [HttpPost, Route("logchatcustomer")]
+        [TypeFilter(typeof(ChatWidgetAccessFilter))]
         public async Task<IActionResult> LogChatCustomer([FromBody] CustomerChatLogModel model)
         {
             if (model == null || string.IsNullOrWhiteSpace(model.Email))
@@ -55,6 +57,7 @@ namespace MedGyn.MedForce.Web.Controllers.Api
         /// <param name="request">Chat Details(Message)</param>
         /// <returns>Returns text with information</returns>
         [HttpPost("chat")]
+        [TypeFilter(typeof(ChatWidgetAccessFilter))]
         public async Task<IActionResult>Chat([FromBody]CustomerChatRequestDTO request)
         {
             var response = await _chatBotFacade.ProcessMessage(request);

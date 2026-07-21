@@ -132,6 +132,7 @@ export class AppComponent implements OnInit, OnDestroy {
         customerId: this.chatForm.get('isExistingCustomer')?.value
           ? parseInt((this.chatForm.get('customerId')?.value ?? '').toString().trim(), 10)
           : undefined,
+        companyId: this.companyId,
       }
 
       this.userStateService.setUserState(chatData);
@@ -220,7 +221,7 @@ SendMessage(): void {
       const hint = this.currentFunctionHint;
       this.currentFunctionHint = null;
 
-      this.chatService.SendChatMessage({ chatLogId: this.chatLogId, message: messageText, functionHint: hint }).subscribe({
+      this.chatService.SendChatMessage({ chatLogId: this.chatLogId, message: messageText, functionHint: hint, companyId: this.companyId }).subscribe({
         next: (response) => {
           this.isLoading = false;
           this.AddMessageToChat(response.message, true);
@@ -257,7 +258,8 @@ SendMessage(): void {
       this.chatService.SendChatMessage({
         chatLogId: this.chatLogId,
         message: option.label,
-        functionHint: rule.actionPayload as string
+        functionHint: rule.actionPayload as string,
+        companyId: this.companyId
       }).subscribe({
         next: (response) => {
           this.isLoading = false;
@@ -289,7 +291,8 @@ SendMessage(): void {
       this.chatService.SendChatMessage({
         chatLogId: this.chatLogId,
         message: 'Speak to Sales Rep',
-        functionHint: rule.actionPayload as string
+        functionHint: rule.actionPayload as string,
+        companyId: this.companyId
       }).subscribe({
         next: (response) => {
           this.isLoading = false;
@@ -307,6 +310,7 @@ SendMessage(): void {
   //----------------------------------------------------
   //----------------------------------------------------
   scrollToBottom(): void {
+    if (!this.scrollContainerMessage) return;
     const element = this.scrollContainerMessage.nativeElement;
     const duration = 500; // Animation duration in milliseconds
     this.animateScroll(element, element.scrollHeight, duration).subscribe();

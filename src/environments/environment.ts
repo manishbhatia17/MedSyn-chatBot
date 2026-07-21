@@ -7,6 +7,7 @@ export const environment = {
     production: false,
     apiBaseUrl: "http://localhost:14229/api/",
     socketUrl: "http://localhost:14229/",
-    sockeytEndPointNotify: "chat/"
+    sockeytEndPointNotify: "chat/",
+    widgetToken: "04fde0cc5c961225a990c748c24eab8171f8213c42e53832"
 
 };

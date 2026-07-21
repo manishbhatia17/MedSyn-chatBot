@@ -19,7 +19,6 @@ import { LinkifyPipe } from './pipes/linkify.pipe';
     declarations: [
         AppComponent
     ],
-    bootstrap: [AppComponent],
     imports: [
         BrowserModule,
         FormsModule,

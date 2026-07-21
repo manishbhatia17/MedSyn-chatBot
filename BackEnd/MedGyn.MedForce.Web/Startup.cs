@@ -159,6 +159,7 @@ namespace MedGyn.MedForce.Web
 			//configurations
 			services.Configure<ConnectionStrings>(Configuration.GetSection("ConnectionStrings"));
 			services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+			services.Configure<ChatWidgetSettings>(Configuration.GetSection("ChatWidgetSettings"));
 			services.Configure<Medgyn.Meforce.LLMAgent.Configurations.OpenAISettings>(Configuration.GetSection("OpenAISettings"));
 			services.Configure<Medgyn.Meforce.LLMAgent.Configurations.ClaudeSettings>(Configuration.GetSection("ClaudeSettings"));
 			services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));

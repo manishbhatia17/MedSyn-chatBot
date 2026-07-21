@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
-    apiBaseUrl: "http://helpdesk.techbitsolution.com/api/",
-  socketUrl: "http://helpdesk.techbitsolution.com/",
-  sockeytEndPointNotify: "chat/"
+    apiBaseUrl: "/api/",
+  socketUrl: "/",
+  sockeytEndPointNotify: "chat/",
+  widgetToken: "04fde0cc5c961225a990c748c24eab8171f8213c42e53832"
 };

@@ -15,8 +15,9 @@ export class ChatService {
   }
 
   apiUrl = environment.apiBaseUrl;
+  private widgetHeaders = new HttpHeaders({ 'X-Widget-Token': environment.widgetToken });
 
- 
+
   SaveChatUserData(chatUserdata: UserInfoModel) {
     let url = `${this.apiUrl}Chat/RegisterChatUser`;
     return this.http.post(url, chatUserdata);
@@ -24,12 +25,12 @@ export class ChatService {
 
   LogChatCustomer(model: UserInfoModel) {
     let url = `${this.apiUrl}chatbot/logchatcustomer`;
-    return this.http.post<ChatLogResponse>(url, model);
+    return this.http.post<ChatLogResponse>(url, model, { headers: this.widgetHeaders });
   }
 
   SendChatMessage(request: CustomerChatRequest) {
     let url = `${this.apiUrl}chatbot/chat`;
-    return this.http.post<CustomerChatResponse>(url, request);
+    return this.http.post<CustomerChatResponse>(url, request, { headers: this.widgetHeaders });
   }
 
   GetChatUserList() {
@@ -66,12 +67,14 @@ export interface UserInfoModel {
   country: string;
   isExistingCustomer?: boolean;
   customerId?: number;
+  companyId?: string;
 }
 
 export interface CustomerChatRequest {
   chatLogId: number;
   message: string;
   functionHint?: string;
+  companyId?: string;
 }
 
 export interface CustomerChatResponse {
