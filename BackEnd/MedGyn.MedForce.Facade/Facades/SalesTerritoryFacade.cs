@@ -13,7 +13,7 @@ namespace MedGyn.MedForce.Facade.Facades
 {
     public class SalesTerritoryFacade : ISalesTerritoryFacade
     {
-        private const string TerritoriesFilePath = "Sales Team Members/Territories.xlsx";
+        private const string TerritoriesFilePath = "Contact Sales Team/Territories.xlsx";
         private const string CacheKey = "sales_territories";
 
         private readonly ISharePointListSearchService _sharePointService;

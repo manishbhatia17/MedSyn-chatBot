@@ -120,6 +120,8 @@ namespace MedGyn.MedForce.Facade.Facades
                     _cache.Set(FunctionDeclCacheKey, functionJson);
                 }
 
+                string pendingIntentCacheKey = $"ChatLog_{request.ChatLogId}_PendingIntent";
+
                 if (!string.IsNullOrWhiteSpace(request.FunctionHint) && AllowedFunctionHints.Contains(request.FunctionHint))
                 {
                     var hintedHandler = _handlerFactory.GetCommandHandler(request.FunctionHint);
@@ -133,7 +135,29 @@ namespace MedGyn.MedForce.Facade.Facades
                         else
                             hintParams = JsonConvert.SerializeObject(new { message = request.Message });
 
+                        _cache.Remove(pendingIntentCacheKey);
                         return await hintedHandler.HandleAsync(new[] { hintParams }, request);
+                    }
+                }
+
+                // Free-text follow-up: Claude calls are stateless (no conversation history), so if the
+                // user previously asked a PO-related question that Claude only answered conversationally
+                // (no function call yet), a bare follow-up like "PO 18991572" would otherwise lose that
+                // original intent. Resume it here instead of asking Claude cold with no context.
+                if (string.IsNullOrWhiteSpace(request.FunctionHint)
+                    && _cache.TryGetValue(pendingIntentCacheKey, out string pendingIntentMessage))
+                {
+                    var resumedPoNumber = ExtractPoNumber(request.Message);
+                    if (!string.IsNullOrWhiteSpace(resumedPoNumber) && resumedPoNumber.Any(char.IsDigit))
+                    {
+                        var resumedHint = MapMessageToPoFunctionHint(pendingIntentMessage);
+                        var resumedHandler = _handlerFactory.GetCommandHandler(resumedHint);
+                        if (resumedHandler != null)
+                        {
+                            _cache.Remove(pendingIntentCacheKey);
+                            var resumedParams = JsonConvert.SerializeObject(new { po_number = resumedPoNumber });
+                            return await resumedHandler.HandleAsync(new[] { resumedParams }, request);
+                        }
                     }
                 }
 
@@ -149,8 +173,16 @@ namespace MedGyn.MedForce.Facade.Facades
                     return new CustomerChatResponseDTO { Message = "I wasn't able to understand your request. Could you please rephrase your question?" };
 
                 if (!string.IsNullOrWhiteSpace(llmResponse.TextResponse))
-                    return new CustomerChatResponseDTO { Message = llmResponse.TextResponse };
+                {
+                    // Claude asked a clarifying question without committing to a function yet.
+                    // Remember what the user originally asked so a bare follow-up can be routed correctly.
+                    if (ContainsPoIntentKeyword(request.Message))
+                        _cache.Set(pendingIntentCacheKey, request.Message, TimeSpan.FromMinutes(10));
 
+                    return new CustomerChatResponseDTO { Message = llmResponse.TextResponse };
+                }
+
+                _cache.Remove(pendingIntentCacheKey);
                 var handler = _handlerFactory.GetCommandHandler(llmResponse.FunctionName);
 
                 if (handler == null)
@@ -165,11 +197,27 @@ namespace MedGyn.MedForce.Facade.Facades
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"ChatBotFacade.ProcessMessage error: {ex}");
                 return new CustomerChatResponseDTO
                 {
                     Message = "Something went wrong processing your request. Please try again or contact MedGyn support."
                 };
             }
+        }
+
+        private static bool ContainsPoIntentKeyword(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message)) return false;
+            return new[] { "track", "invoice", "status", "po number", "purchase order" }
+                .Any(k => message.IndexOf(k, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private static string MapMessageToPoFunctionHint(string message)
+        {
+            if (message.IndexOf("track", StringComparison.OrdinalIgnoreCase) >= 0) return "GetOrderTracking";
+            if (message.IndexOf("invoice", StringComparison.OrdinalIgnoreCase) >= 0) return "GetOrderInvoice";
+            if (message.IndexOf("status", StringComparison.OrdinalIgnoreCase) >= 0) return "GetOrderStatus";
+            return "GetCustomerPO";
         }
 
         private static string ExtractPoNumber(string message)
