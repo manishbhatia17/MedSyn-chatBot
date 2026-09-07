@@ -66,7 +66,7 @@ export interface UserInfoModel {
   state: string;
   country: string;
   isExistingCustomer?: boolean;
-  customerId?: number;
+  customerId?: string;
   companyId?: string;
 }
 

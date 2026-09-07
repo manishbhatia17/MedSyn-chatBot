@@ -195,12 +195,13 @@ form::-webkit-scrollbar-thumb:window-inactive {
   box-shadow: 0 0 0 3px var(--brand-alpha);
 }
 .chat-input .chat-checkbox {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
   font-size: 14px;
   color: var(--text);
   cursor: pointer;
+  margin: 0;
 }
 .chat-input .chat-checkbox input[type="checkbox"] {
   width: 16px;

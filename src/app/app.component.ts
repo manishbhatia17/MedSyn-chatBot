@@ -24,7 +24,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   @ViewChild('scrollContainerMessage', { static: false }) scrollContainerMessage: ElementRef;
   @Input() companyId: string;
-  IsChatBot = false;
+  IsChatBot = true;
   IsUserDataSubmited = false;
   optionsShownTime: Date | null = null;
   isExistingCustomer: boolean = false;
@@ -37,8 +37,8 @@ export class AppComponent implements OnInit, OnDestroy {
 
   chatForm = this.fb.group({
     name: ['', [Validators.required]],
-    phoneNumber: ['', [Validators.required, Validators.pattern('^\\d{10,}$')]],
-    email: ['', [Validators.required, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
+    phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9\\-\\s]{7,20}$')]],
+    email: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$')]],
     state: ['', [Validators.required]],
     country: ['', [Validators.required]],
     isExistingCustomer: [false],
@@ -130,7 +130,7 @@ export class AppComponent implements OnInit, OnDestroy {
         country: this.chatForm.get('country')?.value,
         isExistingCustomer: !!this.chatForm.get('isExistingCustomer')?.value,
         customerId: this.chatForm.get('isExistingCustomer')?.value
-          ? parseInt((this.chatForm.get('customerId')?.value ?? '').toString().trim(), 10)
+          ? (this.chatForm.get('customerId')?.value ?? '').toString().trim()
           : undefined,
         companyId: this.companyId,
       }

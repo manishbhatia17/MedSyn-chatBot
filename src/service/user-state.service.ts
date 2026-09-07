@@ -7,7 +7,7 @@ export interface UserState {
   state: string;
   country: string;
   isExistingCustomer?: boolean;
-  customerId?: number;
+  customerId?: string;
 }
 
 @Injectable({
